@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+/* 自定义设计 tokens */
+@theme {
+  --color-primary: #1DB954;
+  --color-primary-hover: #1ed760;
+  --color-surface: #121212;
+  --color-surface-light: #181818;
+  --color-surface-lighter: #282828;
+  --color-surface-card: #1e1e1e;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b3b3b3;
+  --color-text-muted: #6a6a6a;
+  --color-border: #333333;
+  --color-danger: #e74c3c;
+  --color-warning: #f39c12;
+  --color-star: #fbbf24;
+}
+
+/* 全局样式 — 放入 @layer base 以确保 Tailwind 工具类（@layer utilities）可以正常覆盖 */
+@layer base {
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* 隐藏横向滚动条 */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* 自定义滚动条 */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #121212; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* 播放器进度条样式 */
+input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; }
+input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: #333; border-radius: 2px; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: #1DB954; border-radius: 50%; margin-top: -4px; }
+input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.2); }
+
+/* 动画 */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+@keyframes glow { 0%, 100% { opacity: 0.4; filter: blur(60px); } 50% { opacity: 0.7; filter: blur(80px); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes aurora { 0% { transform: rotate(0deg) scale(1); } 33% { transform: rotate(120deg) scale(1.1); } 66% { transform: rotate(240deg) scale(0.9); } 100% { transform: rotate(360deg) scale(1); } }
+@keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes particleFloat {
+  0% { transform: translate(0, 0) scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(var(--tx, 50px), var(--ty, -100px)) scale(0); opacity: 0; }
+}
+
+@keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+.animate-slideUp { animation: slideUp 0.3s ease-out; }
+.animate-pageIn { animation: pageIn 0.35s ease-out both; }
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-glow { animation: glow 4s ease-in-out infinite; }
+.animate-aurora { animation: aurora 20s linear infinite; }
+.animate-shimmer { background-size: 200% 100%; animation: shimmer 3s linear infinite; }
+.animate-gradient { background-size: 200% 200%; animation: gradientShift 8s ease infinite; }
+
+/* 科技感文字渐变 */
+.text-gradient {
+  background: linear-gradient(135deg, #1DB954, #00d4ff, #a855f7, #1DB954);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 6s ease infinite;
+}
+
+/* 玻璃质感 */
+.glass { background: rgba(255, 255, 255, 0.03); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.06); }
+.glass-strong { background: rgba(255, 255, 255, 0.06); -webkit-backdrop-filter: blur(30px); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+/* 行截断 */
+.line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+.line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+
+/* ====== 智能居中容器 ====== */
+/* 使用 clamp() + min() 实现真正的响应式居中，任何屏幕宽度都有明显两侧留白 */
+.smart-container {
+  width: min(100% - 3rem, 72rem);  /* 最大 1152px，两侧至少 1.5rem */
+  margin-inline: auto;
+}
+.smart-container-md {
+  width: min(100% - 3rem, 56rem);  /* 最大 896px，适合文章详情 */
+  margin-inline: auto;
+}
+.smart-container-sm {
+  width: min(100% - 3rem, 48rem);  /* 最大 768px，适合帖子详情 */
+  margin-inline: auto;
+}
+/* 大屏幕上留白更多 */
+@media (min-width: 1024px) {
+  .smart-container { width: min(100% - 6rem, 72rem); }
+  .smart-container-md { width: min(100% - 6rem, 56rem); }
+  .smart-container-sm { width: min(100% - 6rem, 48rem); }
+}
+@media (min-width: 1440px) {
+  .smart-container { width: min(100% - 10rem, 72rem); }
+  .smart-container-md { width: min(100% - 10rem, 56rem); }
+  .smart-container-sm { width: min(100% - 10rem, 48rem); }
+}
+
+/* ====== 全局交互增强 ====== */
+
+/* 桌面端自定义光标 — 搭配 CursorGlow canvas 特效 */
+@media (hover: hover) and (pointer: fine) {
+  body { cursor: default; }
+  a, button, [role="button"], input[type="submit"], select, label[for] {
+    cursor: pointer;
+  }
+}
+
+/* 按钮悬停微弹效果 */
+@media (hover: hover) {
+  button:not(:disabled):active,
+  a:active,
+  [role="button"]:active {
+    transform: scale(0.97);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* 卡片悬停浮起光晕 */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+@media (hover: hover) {
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(29, 185, 84, 0.08), 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* 科技感边框呼吸发光 */
+@keyframes borderGlow {
+  0%, 100% { border-color: rgba(29, 185, 84, 0.1); box-shadow: 0 0 0 rgba(29, 185, 84, 0); }
+  50% { border-color: rgba(29, 185, 84, 0.3); box-shadow: 0 0 15px rgba(29, 185, 84, 0.08); }
+}
+.animate-border-glow { animation: borderGlow 3s ease-in-out infinite; }
+
+/* 焦点环样式 — 无障碍 + 美观 */
+:focus-visible {
+  outline: 2px solid rgba(29, 185, 84, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 选中文本样式 */
+::selection {
+  background: rgba(29, 185, 84, 0.3);
+  color: #fff;
+}
+
+/* 页面过渡动画 — 更流畅 */
+@keyframes pageSlideIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.99); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.animate-page-in { animation: pageSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+
+/* 弹跳音波动画 — 播放器指示 */
+@keyframes barBounce {
+  0%, 100% { height: 30%; }
+  50% { height: 100%; }
+}

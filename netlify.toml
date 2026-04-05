@@ -1,0 +1,25 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# 禁止 HTML 和 SW 文件被缓存，确保每次都获取最新版本
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/registerSW.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# SPA 路由重定向（React Router 需要）
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
