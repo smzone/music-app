@@ -406,10 +406,29 @@
     "chatPlaceholder": "\u53d1\u9001\u5f39\u5e55...",
     "send": "\u53d1\u9001",
     "gifts": "\u793c\u7269",
-    "chat": "\u804a\u5929",
-    "upcoming": "\u76f4\u64ad\u9884\u544a",
-    "remind": "\u63d0\u9192\u6211",
-    "reminded": "\u5df2\u8bbe\u7f6e\u63d0\u9192"
+    "chat": "互动聊天",
+    "realtime": "实时",
+    "upcomingTitle": "直播预告",
+    "remind": "开播提醒",
+    "reminded": "已设置开播提醒",
+    "system": "系统",
+    "giftMsg": "{{user}} 送出了 {{gift}}×1",
+    "sendGiftTo": "送礼物给主播",
+    "coins": "币",
+    "chatPlaceholderLogin": "登录后参与互动",
+    "gift": {
+      "rose": "玫瑰", "note": "音符", "diamond": "钻石",
+      "rocket": "火箭", "crown": "皇冠", "trophy": "奖杯"
+    },
+    "stat": {
+      "viewers": "在线观众", "likes": "累计点赞",
+      "giftIncome": "礼物收入", "duration": "直播时长"
+    },
+    "upcoming": {
+      "0": { "title": "新歌首唱会", "desc": "全新原创歌曲首次公开演唱", "tag": "首唱" },
+      "1": { "title": "音乐制作教学直播", "desc": "手把手教你用FL Studio做电子音乐", "tag": "教学" },
+      "2": { "title": "粉丝点歌夜", "desc": "你点我唱，互动音乐之夜", "tag": "互动" }
+    }
   },
   "membership": {
     "title": "会员中心",

@@ -406,10 +406,29 @@
     "chatPlaceholder": "メッセージを送信...",
     "send": "送信",
     "gifts": "ギフト",
-    "chat": "チャット",
-    "upcoming": "配信予定",
+    "chat": "ライブチャット",
+    "realtime": "リアルタイム",
+    "upcomingTitle": "配信予定",
     "remind": "リマインダー",
-    "reminded": "リマインダー設定"
+    "reminded": "リマインダー設定済み",
+    "system": "システム",
+    "giftMsg": "{{user}} が {{gift}}×1 を送りました",
+    "sendGiftTo": "配信者にギフトを送る",
+    "coins": "コイン",
+    "chatPlaceholderLogin": "ログインしてチャット",
+    "gift": {
+      "rose": "バラ", "note": "音符", "diamond": "ダイヤ",
+      "rocket": "ロケット", "crown": "王冠", "trophy": "トロフィー"
+    },
+    "stat": {
+      "viewers": "視聴者", "likes": "総いいね",
+      "giftIncome": "ギフト収入", "duration": "配信時間"
+    },
+    "upcoming": {
+      "0": { "title": "新曲初披露", "desc": "オリジナル新曲を初公開", "tag": "初披露" },
+      "1": { "title": "音楽制作チュートリアル", "desc": "FL Studioで電子音楽を作る方法", "tag": "チュートリアル" },
+      "2": { "title": "リクエストナイト", "desc": "リクエスト曲をライブで演奏", "tag": "インタラクティブ" }
+    }
   },
   "membership": {
     "title": "メンバーシップ",

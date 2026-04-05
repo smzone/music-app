@@ -21,27 +21,27 @@ const initialMessages = [
 
 // 礼物列表
 const gifts = [
-  { id: 1, emoji: '🌹', name: '玫瑰', price: 1, color: 'from-red-500/20 to-pink-500/20' },
-  { id: 2, emoji: '🎵', name: '音符', price: 5, color: 'from-blue-500/20 to-cyan-500/20' },
-  { id: 3, emoji: '💎', name: '钻石', price: 10, color: 'from-cyan-500/20 to-blue-500/20' },
-  { id: 4, emoji: '🚀', name: '火箭', price: 50, color: 'from-orange-500/20 to-red-500/20' },
-  { id: 5, emoji: '👑', name: '皇冠', price: 100, color: 'from-yellow-500/20 to-orange-500/20' },
-  { id: 6, emoji: '🏆', name: '奖杯', price: 200, color: 'from-yellow-400/20 to-amber-500/20' },
+  { id: 1, emoji: '🌹', nameKey: 'live.gift.rose', price: 1, color: 'from-red-500/20 to-pink-500/20' },
+  { id: 2, emoji: '🎵', nameKey: 'live.gift.note', price: 5, color: 'from-blue-500/20 to-cyan-500/20' },
+  { id: 3, emoji: '💎', nameKey: 'live.gift.diamond', price: 10, color: 'from-cyan-500/20 to-blue-500/20' },
+  { id: 4, emoji: '🚀', nameKey: 'live.gift.rocket', price: 50, color: 'from-orange-500/20 to-red-500/20' },
+  { id: 5, emoji: '👑', nameKey: 'live.gift.crown', price: 100, color: 'from-yellow-500/20 to-orange-500/20' },
+  { id: 6, emoji: '🏆', nameKey: 'live.gift.trophy', price: 200, color: 'from-yellow-400/20 to-amber-500/20' },
 ];
 
 // 直播预告
 const upcomingStreams = [
-  { id: 1, title: '新歌首唱会', date: '03/28 周五', time: '20:00', desc: '全新原创歌曲首次公开演唱', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=250&fit=crop', tag: '首唱' },
-  { id: 2, title: '音乐制作教学直播', date: '03/30 周日', time: '15:00', desc: '手把手教你用FL Studio做电子音乐', image: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=250&fit=crop', tag: '教学' },
-  { id: 3, title: '粉丝点歌夜', date: '04/01 周二', time: '21:00', desc: '你点我唱，互动音乐之夜', image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=250&fit=crop', tag: '互动' },
+  { id: 1, titleKey: 'live.upcoming.0.title', date: '03/28', time: '20:00', descKey: 'live.upcoming.0.desc', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=250&fit=crop', tagKey: 'live.upcoming.0.tag' },
+  { id: 2, titleKey: 'live.upcoming.1.title', date: '03/30', time: '15:00', descKey: 'live.upcoming.1.desc', image: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=250&fit=crop', tagKey: 'live.upcoming.1.tag' },
+  { id: 3, titleKey: 'live.upcoming.2.title', date: '04/01', time: '21:00', descKey: 'live.upcoming.2.desc', image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=250&fit=crop', tagKey: 'live.upcoming.2.tag' },
 ];
 
 // 直播数据统计
 const liveStats = [
-  { label: '在线观众', value: '1,234', icon: Eye, color: 'text-blue-400' },
-  { label: '累计点赞', value: '8.6k', icon: ThumbsUp, color: 'text-red-400' },
-  { label: '礼物收入', value: '¥2,345', icon: Gift, color: 'text-yellow-400' },
-  { label: '直播时长', value: '2h 15m', icon: Clock, color: 'text-green-400' },
+  { labelKey: 'live.stat.viewers', value: '1,234', icon: Eye, color: 'text-blue-400' },
+  { labelKey: 'live.stat.likes', value: '8.6k', icon: ThumbsUp, color: 'text-red-400' },
+  { labelKey: 'live.stat.giftIncome', value: '¥2,345', icon: Gift, color: 'text-yellow-400' },
+  { labelKey: 'live.stat.duration', value: '2h 15m', icon: Clock, color: 'text-green-400' },
 ];
 
 export default function LivePage() {
@@ -66,7 +66,7 @@ export default function LivePage() {
     const newMsg = {
       id: Date.now(), user: user.username, avatar: user.avatar || '😊',
       content: inputMsg.trim(), type: 'message',
-      time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+      time: new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }),
     };
     setMessages((prev) => [...prev, newMsg]);
     setInputMsg('');
@@ -75,14 +75,14 @@ export default function LivePage() {
   const handleGift = (gift) => {
     if (!user) { toast.error(t('live.loginFirst')); return; }
     const giftMsg = {
-      id: Date.now(), user: '系统', avatar: '🎁',
-      content: `${user.username} 送出了 ${gift.emoji}×1`,
+      id: Date.now(), user: t('live.system'), avatar: '🎁',
+      content: t('live.giftMsg', { user: user.username, gift: gift.emoji }),
       type: 'gift',
-      time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+      time: new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }),
     };
     setMessages((prev) => [...prev, giftMsg]);
     setShowGifts(false);
-    toast.success(t('live.sendGift', { name: gift.name }));
+    toast.success(t('live.sendGift', { name: t(gift.nameKey) }));
   };
 
   return (
@@ -157,7 +157,7 @@ export default function LivePage() {
                 <div key={i} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-center">
                   <Icon size={16} className={`mx-auto mb-1.5 ${s.color}`} />
                   <p className="text-sm font-bold text-white">{s.value}</p>
-                  <p className="text-[10px] text-text-muted mt-0.5">{s.label}</p>
+                  <p className="text-[10px] text-text-muted mt-0.5">{t(s.labelKey)}</p>
                 </div>
               );
             })}
@@ -166,7 +166,7 @@ export default function LivePage() {
           {/* 直播预告 */}
           <div className="mt-8">
             <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <CalendarDays size={18} className="text-primary" /> 直播预告
+              <CalendarDays size={18} className="text-primary" /> {t('live.upcomingTitle')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {upcomingStreams.map((stream) => (
@@ -174,9 +174,9 @@ export default function LivePage() {
                   <div className="aspect-video overflow-hidden relative">
                     <img src={stream.image} alt={stream.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <span className="absolute top-2 left-2 px-2 py-0.5 bg-primary text-black text-[10px] font-bold rounded-md">{stream.tag}</span>
+                    <span className="absolute top-2 left-2 px-2 py-0.5 bg-primary text-black text-[10px] font-bold rounded-md">{t(stream.tagKey)}</span>
                     <div className="absolute bottom-2 left-2 right-2">
-                      <p className="text-white font-bold text-sm">{stream.title}</p>
+                      <p className="text-white font-bold text-sm">{t(stream.titleKey)}</p>
                     </div>
                   </div>
                   <div className="p-4">
@@ -184,10 +184,10 @@ export default function LivePage() {
                       <span className="text-primary font-bold">{stream.date}</span>
                       <span className="text-text-muted">{stream.time}</span>
                     </div>
-                    <p className="text-xs text-text-muted line-clamp-2">{stream.desc}</p>
-                    <button onClick={() => toast.success('已设置开播提醒')}
+                    <p className="text-xs text-text-muted line-clamp-2">{t(stream.descKey)}</p>
+                    <button onClick={() => toast.success(t('live.reminded'))}
                       className="mt-3 flex items-center gap-1 text-xs text-primary hover:underline font-medium">
-                      <Bell size={11} /> 开播提醒
+                      <Bell size={11} /> {t('live.remind')}
                     </button>
                   </div>
                 </div>
@@ -200,10 +200,10 @@ export default function LivePage() {
         <div className="lg:w-[340px] shrink-0 flex flex-col rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden h-[650px] lg:h-auto">
           <div className="px-4 py-3.5 border-b border-white/[0.06] flex items-center justify-between">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <MessageSquare size={14} className="text-primary" /> 互动聊天
+              <MessageSquare size={14} className="text-primary" /> {t('live.chat')}
             </h3>
             <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1 text-[10px] text-text-muted"><Zap size={10} className="text-green-400" /> 实时</span>
+              <span className="flex items-center gap-1 text-[10px] text-text-muted"><Zap size={10} className="text-green-400" /> {t('live.realtime')}</span>
               <span className="text-[10px] text-text-muted bg-white/[0.05] px-2 py-0.5 rounded">{messages.length}</span>
             </div>
           </div>
@@ -234,14 +234,14 @@ export default function LivePage() {
           {/* 礼物面板 */}
           {showGifts && (
             <div className="px-3 py-3 border-t border-white/[0.06] bg-white/[0.02]">
-              <p className="text-xs text-text-muted mb-2 font-medium">送礼物给主播</p>
+              <p className="text-xs text-text-muted mb-2 font-medium">{t('live.sendGiftTo')}</p>
               <div className="grid grid-cols-3 gap-2">
                 {gifts.map((gift) => (
                   <button key={gift.id} onClick={() => handleGift(gift)}
                     className={`flex flex-col items-center gap-1 p-2.5 rounded-xl bg-gradient-to-br ${gift.color} border border-white/[0.05] hover:border-primary/30 transition-all hover:scale-105`}>
                     <span className="text-2xl">{gift.emoji}</span>
-                    <span className="text-[10px] text-white font-medium">{gift.name}</span>
-                    <span className="text-[10px] text-primary font-bold">{gift.price}币</span>
+                    <span className="text-[10px] text-white font-medium">{t(gift.nameKey)}</span>
+                    <span className="text-[10px] text-primary font-bold">{gift.price} {t('live.coins')}</span>
                   </button>
                 ))}
               </div>
@@ -256,7 +256,7 @@ export default function LivePage() {
             </button>
             <input type="text" value={inputMsg} onChange={(e) => setInputMsg(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder={user ? '说点什么...' : '登录后参与互动'}
+              placeholder={user ? t('live.chatPlaceholder') : t('live.chatPlaceholderLogin')}
               disabled={!user}
               className="flex-1 bg-white/[0.05] text-white px-3.5 py-2.5 rounded-xl outline-none text-sm placeholder:text-text-muted disabled:opacity-40 border border-white/[0.06] focus:border-primary transition-colors" />
             <button onClick={handleSend} disabled={!user || !inputMsg.trim()}

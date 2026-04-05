@@ -406,10 +406,29 @@
     "chatPlaceholder": "Send a message...",
     "send": "Send",
     "gifts": "Gifts",
-    "chat": "Chat",
-    "upcoming": "Upcoming Streams",
+    "chat": "Live Chat",
+    "realtime": "Live",
+    "upcomingTitle": "Upcoming Streams",
     "remind": "Remind Me",
-    "reminded": "Reminder set"
+    "reminded": "Reminder set",
+    "system": "System",
+    "giftMsg": "{{user}} sent {{gift}}×1",
+    "sendGiftTo": "Send a gift to the host",
+    "coins": "coins",
+    "chatPlaceholderLogin": "Log in to chat",
+    "gift": {
+      "rose": "Rose", "note": "Note", "diamond": "Diamond",
+      "rocket": "Rocket", "crown": "Crown", "trophy": "Trophy"
+    },
+    "stat": {
+      "viewers": "Viewers", "likes": "Total Likes",
+      "giftIncome": "Gift Income", "duration": "Duration"
+    },
+    "upcoming": {
+      "0": { "title": "New Song Premiere", "desc": "Brand new original song live debut", "tag": "Premiere" },
+      "1": { "title": "Music Production Tutorial", "desc": "Learn to make electronic music with FL Studio", "tag": "Tutorial" },
+      "2": { "title": "Fan Request Night", "desc": "You request, we play — interactive music night", "tag": "Interactive" }
+    }
   },
   "membership": {
     "title": "Membership",

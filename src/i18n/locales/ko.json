@@ -406,10 +406,29 @@
     "chatPlaceholder": "\uba54\uc2dc\uc9c0 \ubcf4\ub0b4\uae30...",
     "send": "\ubcf4\ub0b4\uae30",
     "gifts": "\uc120\ubb3c",
-    "chat": "\ucc44\ud305",
-    "upcoming": "\ubc29\uc1a1 \uc608\uc815",
-    "remind": "\uc54c\ub9bc \uc124\uc815",
-    "reminded": "\uc54c\ub9bc \uc124\uc815 \uc644\ub8cc"
+    "chat": "라이브 채팅",
+    "realtime": "실시간",
+    "upcomingTitle": "방송 예정",
+    "remind": "알림 설정",
+    "reminded": "알림 설정 완료",
+    "system": "시스템",
+    "giftMsg": "{{user}} 님이 {{gift}}×1 을 보냈습니다",
+    "sendGiftTo": "호스트에게 선물 보내기",
+    "coins": "코인",
+    "chatPlaceholderLogin": "로그인 후 채팅 가능",
+    "gift": {
+      "rose": "장미", "note": "음표", "diamond": "다이아",
+      "rocket": "로켓", "crown": "왕관", "trophy": "트로피"
+    },
+    "stat": {
+      "viewers": "시청자", "likes": "총 좋아요",
+      "giftIncome": "선물 수익", "duration": "방송 시간"
+    },
+    "upcoming": {
+      "0": { "title": "신곡 첫 공개", "desc": "오리지널 신곡 최초 공개 라이브", "tag": "첫 공개" },
+      "1": { "title": "음악 제작 튜토리얼", "desc": "FL Studio로 전자 음악 만들기", "tag": "튜토리얼" },
+      "2": { "title": "팬 리퀘스트 나이트", "desc": "여러분의 신청곡을 라이브로 연주", "tag": "인터랙티브" }
+    }
   },
   "membership": {
     "title": "멤버십",
