@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Users, Search, Shield, ShieldCheck, ShieldX, Ban, CheckCircle, Mail, TrendingUp } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Users, Search, Shield, ShieldCheck, ShieldX, Ban, CheckCircle, Mail, TrendingUp, Download, History, ChevronLeft, ChevronRight, CheckSquare, Square, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // 模拟用户数据
@@ -28,15 +28,30 @@ const statusLabels = {
   banned: { text: '封禁', color: 'bg-red-500/15 text-red-400', icon: Ban },
 };
 
-function formatDate(dateStr) {
+// 格式化相对时间
+function formatRelativeTime(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '刚刚';
+  if (m < 60) return `${m}分钟前`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}小时前`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d}天前`;
   return new Date(dateStr).toLocaleDateString('zh-CN');
 }
+
+const PAGE_SIZE = 6;
 
 export default function UsersManagePage() {
   const [users, setUsers] = useState(mockUsers);
   const [searchQ, setSearchQ] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [showLog, setShowLog] = useState(false);
+  const [opLog, setOpLog] = useState([]);
+  const [page, setPage] = useState(1);
 
   const filtered = users.filter((u) => {
     const matchSearch = !searchQ || u.username.toLowerCase().includes(searchQ.toLowerCase()) || u.email.toLowerCase().includes(searchQ.toLowerCase());
@@ -45,14 +60,69 @@ export default function UsersManagePage() {
     return matchSearch && matchRole && matchStatus;
   });
 
+  // 分页逻辑
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paged = useMemo(() => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [filtered, page]);
+
+  // 页码越界修正
+  if (page > totalPages && totalPages > 0) setPage(totalPages);
+
+  // 添加操作日志
+  const addLog = (action, target) => {
+    setOpLog(prev => [{ id: Date.now(), time: new Date().toISOString(), action, target }, ...prev].slice(0, 50));
+  };
+
   const setRole = (id, role) => {
-    setUsers(users.map((u) => u.id === id ? { ...u, role } : u));
+    const u = users.find(x => x.id === id);
+    setUsers(users.map((x) => x.id === id ? { ...x, role } : x));
+    addLog(`角色→${roleLabels[role].text}`, u?.username);
     toast.success('角色已更新');
   };
 
   const setStatus = (id, status) => {
-    setUsers(users.map((u) => u.id === id ? { ...u, status } : u));
+    const u = users.find(x => x.id === id);
+    setUsers(users.map((x) => x.id === id ? { ...x, status } : x));
+    addLog(`状态→${statusLabels[status].text}`, u?.username);
     toast.success('状态已更新');
+  };
+
+  // 批量操作
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === paged.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(paged.map(u => u.id)));
+    }
+  };
+
+  const batchSetStatus = (status) => {
+    if (selectedIds.size === 0) return;
+    const names = users.filter(u => selectedIds.has(u.id)).map(u => u.username).join(', ');
+    setUsers(users.map(u => selectedIds.has(u.id) ? { ...u, status } : u));
+    addLog(`批量${statusLabels[status].text}(${selectedIds.size}人)`, names);
+    setSelectedIds(new Set());
+    toast.success(`已批量${statusLabels[status].text} ${selectedIds.size} 个用户`);
+  };
+
+  // CSV 导出
+  const exportCSV = () => {
+    const header = '用户名,邮箱,角色,状态,帖子,获赞,注册时间\n';
+    const rows = filtered.map(u => `${u.username},${u.email},${roleLabels[u.role].text},${statusLabels[u.status].text},${u.posts},${u.likes},${u.joinDate}`).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `users_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    URL.revokeObjectURL(url);
+    addLog('导出用户CSV', `${filtered.length}条`);
+    toast.success(`已导出 ${filtered.length} 条用户数据`);
   };
 
   const stats = [
@@ -66,7 +136,42 @@ export default function UsersManagePage() {
     <div className="animate-fadeIn">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-white">用户管理</h1>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowLog(!showLog)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${showLog ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-surface-light text-text-muted hover:text-white border border-surface-lighter'}`}>
+            <History size={14} /> 操作日志 {opLog.length > 0 && <span className="px-1.5 py-0.5 bg-primary/20 text-primary rounded-full text-[10px]">{opLog.length}</span>}
+          </button>
+          <button onClick={exportCSV}
+            className="flex items-center gap-1.5 px-3 py-2 bg-surface-light text-text-muted hover:text-white border border-surface-lighter rounded-xl text-xs font-medium transition-all hover:border-primary/30">
+            <Download size={14} /> 导出CSV
+          </button>
+        </div>
       </div>
+
+      {/* 操作日志面板 */}
+      {showLog && (
+        <div className="mb-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 animate-fadeIn">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2"><History size={14} className="text-primary" /> 最近操作记录</h3>
+            {opLog.length > 0 && (
+              <button onClick={() => { setOpLog([]); toast.success('日志已清空'); }} className="text-[11px] text-text-muted hover:text-red-400 transition-colors">清空</button>
+            )}
+          </div>
+          {opLog.length === 0 ? (
+            <p className="text-xs text-text-muted py-4 text-center">暂无操作记录</p>
+          ) : (
+            <div className="space-y-1.5 max-h-48 overflow-y-auto">
+              {opLog.map(log => (
+                <div key={log.id} className="flex items-center gap-3 text-xs py-1.5 px-2 rounded-lg hover:bg-white/[0.03]">
+                  <span className="text-text-muted shrink-0 flex items-center gap-1"><Clock size={10} /> {formatRelativeTime(log.time)}</span>
+                  <span className="text-primary font-medium">{log.action}</span>
+                  <span className="text-text-secondary truncate">{log.target}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 统计 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -88,17 +193,17 @@ export default function UsersManagePage() {
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input type="text" value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder="搜索用户名或邮箱..."
+          <input type="text" value={searchQ} onChange={(e) => { setSearchQ(e.target.value); setPage(1); }} placeholder="搜索用户名或邮箱..."
             className="w-full bg-surface-light text-white pl-9 pr-4 py-2.5 rounded-xl outline-none border border-surface-lighter focus:border-primary text-sm placeholder:text-text-muted" />
         </div>
-        <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)}
+        <select value={filterRole} onChange={(e) => { setFilterRole(e.target.value); setPage(1); }}
           className="bg-surface-light text-white px-4 py-2.5 rounded-xl outline-none border border-surface-lighter text-sm">
           <option value="all">全部角色</option>
           <option value="admin">管理员</option>
           <option value="moderator">版主</option>
           <option value="user">普通用户</option>
         </select>
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
+        <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
           className="bg-surface-light text-white px-4 py-2.5 rounded-xl outline-none border border-surface-lighter text-sm">
           <option value="all">全部状态</option>
           <option value="active">正常</option>
@@ -107,28 +212,60 @@ export default function UsersManagePage() {
         </select>
       </div>
 
+      {/* 批量操作栏 */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-3 mb-3 px-4 py-2.5 rounded-xl bg-primary/5 border border-primary/20 animate-fadeIn">
+          <span className="text-xs text-primary font-semibold">已选 {selectedIds.size} 人</span>
+          <div className="flex items-center gap-1.5 ml-auto">
+            <button onClick={() => batchSetStatus('muted')} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors">
+              <ShieldX size={12} /> 批量禁言
+            </button>
+            <button onClick={() => batchSetStatus('banned')} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">
+              <Ban size={12} /> 批量封禁
+            </button>
+            <button onClick={() => batchSetStatus('active')} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors">
+              <CheckCircle size={12} /> 批量解封
+            </button>
+            <button onClick={() => setSelectedIds(new Set())} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-text-muted hover:text-white transition-colors">
+              取消
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 用户列表 */}
       <div className="bg-surface-light rounded-2xl border border-surface-lighter overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-surface-lighter text-text-muted text-left">
+                <th className="px-3 py-3 font-medium w-10">
+                  <button onClick={toggleSelectAll} className="text-text-muted hover:text-primary transition-colors">
+                    {selectedIds.size === paged.length && paged.length > 0 ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium">用户</th>
                 <th className="px-4 py-3 font-medium w-20">角色</th>
                 <th className="px-4 py-3 font-medium w-20">状态</th>
                 <th className="px-4 py-3 font-medium w-16 text-center">帖子</th>
                 <th className="px-4 py-3 font-medium w-16 text-center">获赞</th>
-                <th className="px-4 py-3 font-medium w-24">注册时间</th>
+                <th className="px-4 py-3 font-medium w-24">最后活跃</th>
                 <th className="px-4 py-3 font-medium w-36 text-right">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-lighter">
-              {filtered.map((user) => {
+              {paged.map((user) => {
                 const role = roleLabels[user.role];
                 const status = statusLabels[user.status];
                 const StatusIcon = status.icon;
+                const isSelected = selectedIds.has(user.id);
                 return (
-                  <tr key={user.id} className="hover:bg-surface-lighter/30 transition-colors">
+                  <tr key={user.id} className={`transition-colors ${isSelected ? 'bg-primary/[0.03]' : 'hover:bg-surface-lighter/30'}`}>
+                    <td className="px-3 py-3">
+                      <button onClick={() => toggleSelect(user.id)} className="text-text-muted hover:text-primary transition-colors">
+                        {isSelected ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
+                      </button>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
                         <span className="text-xl">{user.avatar}</span>
@@ -148,7 +285,7 @@ export default function UsersManagePage() {
                     </td>
                     <td className="px-4 py-3 text-xs text-text-muted text-center">{user.posts}</td>
                     <td className="px-4 py-3 text-xs text-text-muted text-center">{user.likes}</td>
-                    <td className="px-4 py-3 text-xs text-text-muted">{formatDate(user.joinDate)}</td>
+                    <td className="px-4 py-3 text-xs text-text-muted" title={user.lastActive}>{formatRelativeTime(user.lastActive)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
                         {user.role !== 'moderator' && user.role !== 'admin' && (
@@ -194,8 +331,31 @@ export default function UsersManagePage() {
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 && (
+        {paged.length === 0 && (
           <div className="py-12 text-center text-text-muted text-sm">暂无匹配的用户</div>
+        )}
+
+        {/* 分页 */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-surface-lighter">
+            <span className="text-xs text-text-muted">共 {filtered.length} 条，第 {page}/{totalPages} 页</span>
+            <div className="flex items-center gap-1">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-white hover:bg-white/[0.04] disabled:opacity-30 transition-colors">
+                <ChevronLeft size={16} />
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                <button key={p} onClick={() => setPage(p)}
+                  className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${p === page ? 'bg-primary/15 text-primary' : 'text-text-muted hover:text-white hover:bg-white/[0.04]'}`}>
+                  {p}
+                </button>
+              ))}
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-white hover:bg-white/[0.04] disabled:opacity-30 transition-colors">
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>
