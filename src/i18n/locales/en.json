@@ -499,9 +499,6 @@
   },
   "videos": {
     "title": "Videos",
-    "all": "All",
-    "tutorial": "Tutorial",
-    "wan": "k",
     "follow": "Follow",
     "favorite": "Save",
     "favorited": "Saved",
@@ -516,7 +513,28 @@
     "videoCount": "{{count}} videos",
     "badge": "Video Hub",
     "heading": "Videos",
-    "desc": "Original music videos, tutorials, and behind-the-scenes"
+    "desc": "Original music videos, tutorials, and behind-the-scenes",
+    "trending": "Trending",
+    "noVideos": "No videos in this category",
+    "author": "Music Creator",
+    "wan": "{{count}}k",
+    "cat": {
+      "all": "All", "mv": "MV", "tutorial": "Tutorial", "vlog": "Vlog"
+    },
+    "vid": {
+      "1": "Original Song \"Stars in the Night Sky\" Full MV",
+      "2": "How to Produce Electronic Music with Logic Pro",
+      "3": "Exploring Beijing's Coolest Indie Record Stores",
+      "4": "Making Lo-Fi Beats with a Synthesizer",
+      "5": "\"City Walk\" Original Music Short Film",
+      "6": "My Music Studio Tour 2025",
+      "7": "Mixing Tips: Making Vocals Sound Richer",
+      "8": "Behind the Scenes of New Song Creation",
+      "9": "Learn This Chord Progression in One Minute",
+      "10": "Late Night Studio Jam Session",
+      "11": "Unboxing: New Modular Synthesizer",
+      "12": "Cover Challenge: Classics on One Guitar"
+    }
   },
   "forumPost": {
     "detailTitle": "Post Detail",

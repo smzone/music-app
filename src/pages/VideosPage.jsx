@@ -7,31 +7,36 @@ import { useTranslation } from 'react-i18next';
 
 // 模拟视频数据 — 抖音风格竖版封面（9:16比例）
 const videosData = [
-  { id: 1, title: '原创歌曲《夜空中的星》完整MV', thumbnail: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=600&fit=crop', duration: '4:32', views: 12500, likes: 890, comments: 67, category: 'MV', author: '音乐创作者', avatar: '🎵', isPremium: false },
-  { id: 2, title: '如何用Logic Pro制作电子音乐', thumbnail: 'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=400&h=600&fit=crop', duration: '18:45', views: 89000, likes: 6540, comments: 1200, category: '教程', author: '音乐创作者', avatar: '🎵', isPremium: true },
-  { id: 3, title: '探店：北京最酷的独立唱片店', thumbnail: 'https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=400&h=600&fit=crop', duration: '12:08', views: 67000, likes: 4320, comments: 580, category: 'Vlog', author: '音乐创作者', avatar: '🎵', isPremium: false },
-  { id: 4, title: '合成器制作 Lo-Fi 节拍教学', thumbnail: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=600&fit=crop', duration: '22:15', views: 152000, likes: 12300, comments: 1980, category: '教程', author: '音乐创作者', avatar: '🎵', isPremium: true },
-  { id: 5, title: '「城市漫步」原创音乐短片', thumbnail: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=600&fit=crop', duration: '3:48', views: 98000, likes: 7650, comments: 450, category: 'MV', author: '音乐创作者', avatar: '🎵', isPremium: false },
-  { id: 6, title: '我的音乐工作室 Tour 2025', thumbnail: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=600&fit=crop', duration: '8:22', views: 113000, likes: 9870, comments: 890, category: 'Vlog', author: '音乐创作者', avatar: '🎵', isPremium: false },
-  { id: 7, title: '混音技巧：让人声更有质感', thumbnail: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=600&fit=crop', duration: '15:30', views: 76000, likes: 5430, comments: 760, category: '教程', author: '音乐创作者', avatar: '🎵', isPremium: true },
-  { id: 8, title: '新歌创作幕后花絮', thumbnail: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=600&fit=crop', duration: '6:45', views: 54000, likes: 3210, comments: 340, category: 'Vlog', author: '音乐创作者', avatar: '🎵', isPremium: false },
-  { id: 9, title: '一分钟学会这个和弦进行', thumbnail: 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=400&h=600&fit=crop', duration: '1:02', views: 230000, likes: 18900, comments: 2340, category: '教程', author: '音乐创作者', avatar: '🎵', isPremium: false },
-  { id: 10, title: '深夜录音室即兴弹唱', thumbnail: 'https://images.unsplash.com/photo-1460667262436-cf19894f4774?w=400&h=600&fit=crop', duration: '5:18', views: 87000, likes: 6780, comments: 560, category: 'MV', author: '音乐创作者', avatar: '🎵', isPremium: false },
-  { id: 11, title: '设备开箱：新到的模块合成器', thumbnail: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=600&fit=crop', duration: '9:42', views: 45000, likes: 3890, comments: 420, category: 'Vlog', author: '音乐创作者', avatar: '🎵', isPremium: false },
-  { id: 12, title: '翻唱挑战：用一把吉他演绎经典', thumbnail: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=400&h=600&fit=crop', duration: '3:25', views: 178000, likes: 15600, comments: 1870, category: 'MV', author: '音乐创作者', avatar: '🎵', isPremium: false },
+  { id: 1, titleKey: 'videos.vid.1', thumbnail: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=600&fit=crop', duration: '4:32', views: 12500, likes: 890, comments: 67, category: 'mv', authorKey: 'videos.author', avatar: '🎵', isPremium: false },
+  { id: 2, titleKey: 'videos.vid.2', thumbnail: 'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=400&h=600&fit=crop', duration: '18:45', views: 89000, likes: 6540, comments: 1200, category: 'tutorial', authorKey: 'videos.author', avatar: '🎵', isPremium: true },
+  { id: 3, titleKey: 'videos.vid.3', thumbnail: 'https://images.unsplash.com/photo-1483412033650-1015ddeb83d1?w=400&h=600&fit=crop', duration: '12:08', views: 67000, likes: 4320, comments: 580, category: 'vlog', authorKey: 'videos.author', avatar: '🎵', isPremium: false },
+  { id: 4, titleKey: 'videos.vid.4', thumbnail: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=600&fit=crop', duration: '22:15', views: 152000, likes: 12300, comments: 1980, category: 'tutorial', authorKey: 'videos.author', avatar: '🎵', isPremium: true },
+  { id: 5, titleKey: 'videos.vid.5', thumbnail: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=600&fit=crop', duration: '3:48', views: 98000, likes: 7650, comments: 450, category: 'mv', authorKey: 'videos.author', avatar: '🎵', isPremium: false },
+  { id: 6, titleKey: 'videos.vid.6', thumbnail: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=600&fit=crop', duration: '8:22', views: 113000, likes: 9870, comments: 890, category: 'vlog', authorKey: 'videos.author', avatar: '🎵', isPremium: false },
+  { id: 7, titleKey: 'videos.vid.7', thumbnail: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=600&fit=crop', duration: '15:30', views: 76000, likes: 5430, comments: 760, category: 'tutorial', authorKey: 'videos.author', avatar: '🎵', isPremium: true },
+  { id: 8, titleKey: 'videos.vid.8', thumbnail: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=600&fit=crop', duration: '6:45', views: 54000, likes: 3210, comments: 340, category: 'vlog', authorKey: 'videos.author', avatar: '🎵', isPremium: false },
+  { id: 9, titleKey: 'videos.vid.9', thumbnail: 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=400&h=600&fit=crop', duration: '1:02', views: 230000, likes: 18900, comments: 2340, category: 'tutorial', authorKey: 'videos.author', avatar: '🎵', isPremium: false },
+  { id: 10, titleKey: 'videos.vid.10', thumbnail: 'https://images.unsplash.com/photo-1460667262436-cf19894f4774?w=400&h=600&fit=crop', duration: '5:18', views: 87000, likes: 6780, comments: 560, category: 'mv', authorKey: 'videos.author', avatar: '🎵', isPremium: false },
+  { id: 11, titleKey: 'videos.vid.11', thumbnail: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=600&fit=crop', duration: '9:42', views: 45000, likes: 3890, comments: 420, category: 'vlog', authorKey: 'videos.author', avatar: '🎵', isPremium: false },
+  { id: 12, titleKey: 'videos.vid.12', thumbnail: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=400&h=600&fit=crop', duration: '3:25', views: 178000, likes: 15600, comments: 1870, category: 'mv', authorKey: 'videos.author', avatar: '🎵', isPremium: false },
 ];
 
 const categories = [
-  { id: '全部', icon: '📺', emoji: true },
-  { id: 'MV', icon: '🎬', emoji: true },
-  { id: '教程', icon: '📚', emoji: true },
-  { id: 'Vlog', icon: '📷', emoji: true },
+  { id: 'all', nameKey: 'videos.cat.all', icon: '📺' },
+  { id: 'mv', nameKey: 'videos.cat.mv', icon: '🎬' },
+  { id: 'tutorial', nameKey: 'videos.cat.tutorial', icon: '📚' },
+  { id: 'vlog', nameKey: 'videos.cat.vlog', icon: '📷' },
 ];
 
 // 格式化播放量
-function formatCount(n) {
-  if (n >= 10000) return (n / 10000).toFixed(1) + '万';
-  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+function formatCount(n, t) {
+  if (t) {
+    if (n >= 10000) return t('videos.wan', { count: (n / 10000).toFixed(1) });
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  } else {
+    if (n >= 10000) return (n / 10000).toFixed(1) + 'w';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  }
   return String(n);
 }
 
@@ -150,12 +155,12 @@ function VideoPlayerModal({ video, videos, onClose, onLike, onSwitch, t }) {
           <div className="absolute bottom-0 left-0 right-16 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xl">{video.avatar}</span>
-              <span className="text-sm font-bold text-white">@{video.author}</span>
+              <span className="text-sm font-bold text-white">@{t(video.authorKey)}</span>
               <button className="ml-2 px-3 py-0.5 border border-primary text-primary text-xs rounded-full font-medium hover:bg-primary hover:text-black transition-all">{t('videos.follow')}</button>
             </div>
-            <p className="text-sm text-white/90 line-clamp-2 mb-2">{video.title}</p>
+            <p className="text-sm text-white/90 line-clamp-2 mb-2">{t(video.titleKey)}</p>
             <div className="flex items-center gap-2 text-xs text-white/50">
-              <span className="px-2 py-0.5 bg-white/10 rounded">{video.category}</span>
+              <span className="px-2 py-0.5 bg-white/10 rounded">{t(`videos.cat.${video.category}`)}</span>
               <span>{video.duration}</span>
               <span className="ml-auto">{currentIndex + 1}/{videos.length}</span>
             </div>
@@ -167,13 +172,13 @@ function VideoPlayerModal({ video, videos, onClose, onLike, onSwitch, t }) {
               <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${liked ? 'bg-red-500/20' : 'bg-black/30 backdrop-blur-sm'}`}>
                 <Heart size={22} className={liked ? 'fill-red-500 text-red-500' : 'text-white'} />
               </div>
-              <span className="text-xs text-white font-medium">{formatCount(video.likes + (liked ? 1 : 0))}</span>
+              <span className="text-xs text-white font-medium">{formatCount(video.likes + (liked ? 1 : 0), t)}</span>
             </button>
             <button className="flex flex-col items-center gap-1">
               <div className="w-11 h-11 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center">
                 <MessageSquare size={22} className="text-white" />
               </div>
-              <span className="text-xs text-white font-medium">{formatCount(video.comments)}</span>
+              <span className="text-xs text-white font-medium">{formatCount(video.comments, t)}</span>
             </button>
             <button onClick={() => toast.success(t('videos.favorited'))} className="flex flex-col items-center gap-1">
               <div className="w-11 h-11 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center">
@@ -209,11 +214,11 @@ function VideoPlayerModal({ video, videos, onClose, onLike, onSwitch, t }) {
 export default function VideosPage() {
   const { t } = useTranslation();
   useDocumentTitle(t('videos.title'));
-  const [activeCategory, setActiveCategory] = useState('全部');
+  const [activeCategory, setActiveCategory] = useState('all');
   const [playingVideo, setPlayingVideo] = useState(null);
   const [likedVideos, setLikedVideos] = useState(new Set());
 
-  const filtered = videosData.filter((v) => activeCategory === '全部' || v.category === activeCategory);
+  const filtered = videosData.filter((v) => activeCategory === 'all' || v.category === activeCategory);
   const totalViews = videosData.reduce((s, v) => s + v.views, 0);
   const totalLikes = videosData.reduce((s, v) => s + v.likes, 0);
 
@@ -258,15 +263,15 @@ export default function VideosPage() {
 
         {/* 底部信息叠加 */}
         <div className="absolute bottom-0 left-0 right-0 p-3">
-          <p className="text-[13px] font-bold text-white line-clamp-2 leading-snug mb-2.5">{video.title}</p>
+          <p className="text-[13px] font-bold text-white line-clamp-2 leading-snug mb-2.5">{t(video.titleKey)}</p>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <div className="w-5 h-5 rounded-full bg-primary/30 flex items-center justify-center text-[10px]">{video.avatar}</div>
-              <span className="text-[11px] text-white/70 font-medium">{video.author}</span>
+              <span className="text-[11px] text-white/70 font-medium">{t(video.authorKey)}</span>
             </div>
             <div className="flex items-center gap-3 text-[11px] text-white/50">
-              <span className="flex items-center gap-0.5"><Eye size={10} /> {formatCount(video.views)}</span>
-              <span className="flex items-center gap-0.5"><Heart size={10} className={likedVideos.has(video.id) ? 'fill-red-400 text-red-400' : ''} /> {formatCount(video.likes)}</span>
+              <span className="flex items-center gap-0.5"><Eye size={10} /> {formatCount(video.views, t)}</span>
+              <span className="flex items-center gap-0.5"><Heart size={10} className={likedVideos.has(video.id) ? 'fill-red-400 text-red-400' : ''} /> {formatCount(video.likes, t)}</span>
             </div>
           </div>
         </div>
@@ -288,8 +293,8 @@ export default function VideosPage() {
           <p className="text-text-secondary text-sm max-w-md">{t('videos.desc')}</p>
           <div className="flex items-center gap-5 mt-5 text-sm text-text-muted">
             <span className="flex items-center gap-1"><Film size={14} /> {t('videos.videoCount', { count: videosData.length })}</span>
-            <span className="flex items-center gap-1"><Eye size={14} /> {formatCount(totalViews)} {t('videos.totalViews')}</span>
-            <span className="flex items-center gap-1"><Heart size={14} /> {formatCount(totalLikes)} {t('videos.totalLikes')}</span>
+            <span className="flex items-center gap-1"><Eye size={14} /> {formatCount(totalViews, t)} {t('videos.totalViews')}</span>
+            <span className="flex items-center gap-1"><Heart size={14} /> {formatCount(totalLikes, t)} {t('videos.totalLikes')}</span>
           </div>
         </div>
       </div>
@@ -299,16 +304,16 @@ export default function VideosPage() {
         {categories.map((c) => (
           <button key={c.id} onClick={() => setActiveCategory(c.id)}
             className={`flex items-center gap-1.5 px-5 py-2.5 rounded-2xl text-sm font-medium whitespace-nowrap transition-all ${activeCategory === c.id ? 'bg-primary/15 text-primary border border-primary/30 shadow-[0_0_15px_rgba(29,185,84,0.1)]' : 'bg-white/[0.03] text-text-secondary hover:text-white border border-white/[0.06] hover:border-white/[0.12]'}`}>
-            <span>{c.icon}</span> {c.id}
+            <span>{c.icon}</span> {t(c.nameKey)}
           </button>
         ))}
         <span className="text-xs text-text-muted ml-auto shrink-0 bg-white/[0.04] px-2.5 py-1 rounded-lg">{t('videos.videoCount', { count: filtered.length })}</span>
       </div>
 
       {/* ===== 热门推荐 — 大卡片 ===== */}
-      {activeCategory === '全部' && (
+      {activeCategory === 'all' && (
         <div className="mb-8">
-          <h2 className="text-base font-bold text-white mb-3 flex items-center gap-2"><TrendingUp size={16} className="text-primary" /> {t('videos.all')}</h2>
+          <h2 className="text-base font-bold text-white mb-3 flex items-center gap-2"><TrendingUp size={16} className="text-primary" /> {t('videos.trending')}</h2>
           <div className="grid grid-cols-2 gap-3">
             {videosData.sort((a, b) => b.views - a.views).slice(0, 2).map((video) => (
               <div key={video.id} className="group cursor-pointer relative aspect-[16/10] rounded-2xl overflow-hidden border border-white/[0.06] hover:border-primary/20 transition-all duration-500" onClick={() => setPlayingVideo(video)}>
@@ -322,12 +327,12 @@ export default function VideosPage() {
                   <div className="w-14 h-14 bg-primary/90 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(29,185,84,0.3)]"><Play size={24} className="text-black ml-0.5" /></div>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <p className="text-sm font-bold text-white line-clamp-1 mb-1.5">{video.title}</p>
+                  <p className="text-sm font-bold text-white line-clamp-1 mb-1.5">{t(video.titleKey)}</p>
                   <div className="flex items-center gap-3 text-[11px] text-white/60">
-                    <span className="flex items-center gap-0.5"><Eye size={10} /> {formatCount(video.views)}</span>
-                    <span className="flex items-center gap-0.5"><Heart size={10} /> {formatCount(video.likes)}</span>
-                    <span className="flex items-center gap-0.5"><MessageSquare size={10} /> {formatCount(video.comments)}</span>
-                    <span className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">{video.category}</span>
+                    <span className="flex items-center gap-0.5"><Eye size={10} /> {formatCount(video.views, t)}</span>
+                    <span className="flex items-center gap-0.5"><Heart size={10} /> {formatCount(video.likes, t)}</span>
+                    <span className="flex items-center gap-0.5"><MessageSquare size={10} /> {formatCount(video.comments, t)}</span>
+                    <span className="px-1.5 py-0.5 bg-white/10 rounded text-[10px]">{t(`videos.cat.${video.category}`)}</span>
                   </div>
                 </div>
               </div>
@@ -338,7 +343,7 @@ export default function VideosPage() {
 
       {/* ===== 双列瀑布流 ===== */}
       <h2 className="text-base font-bold text-white mb-3 flex items-center gap-2">
-        <Sparkles size={16} className="text-primary" /> {activeCategory === '全部' ? t('videos.all') : activeCategory}
+        <Sparkles size={16} className="text-primary" /> {t(categories.find(c => c.id === activeCategory)?.nameKey || 'videos.cat.all')}
       </h2>
       <div className="flex gap-3">
         {/* 左列 */}
@@ -358,7 +363,7 @@ export default function VideosPage() {
       {filtered.length === 0 && (
         <div className="py-20 text-center text-text-muted">
           <Film size={40} className="mx-auto mb-3 opacity-20" />
-          <p>该分类暂无视频</p>
+          <p>{t('videos.noVideos')}</p>
         </div>
       )}
 
