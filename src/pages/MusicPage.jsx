@@ -1,5 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Play, Heart, Star, Search, ListMusic, Shuffle, Clock, Disc3, TrendingUp, Headphones, BarChart3, Music } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import SongContextMenu from '../components/Song/SongContextMenu';
 import usePlayerStore from '../store/usePlayerStore';
 import useSongStore from '../store/useSongStore';
 import { songsData, genreKeys, formatDuration, getAverageRating } from '../data/songs';
@@ -7,8 +9,8 @@ import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
 
-// 歌曲行组件 — 增强视觉效果
-function SongRow({ song, index }) {
+// 歌曲行组件 — 增强视觉效果 + 右键菜单
+function SongRow({ song, index, onContextMenu }) {
   const { t } = useTranslation();
   const { playSong, playlist, currentIndex, isPlaying, togglePlay } = usePlayerStore();
   const { toggleFavorite, isFavorite } = useSongStore();
@@ -21,7 +23,8 @@ function SongRow({ song, index }) {
   };
 
   return (
-    <div className={`group grid grid-cols-[36px_1fr_1fr_72px_72px_36px] gap-4 px-4 py-3 rounded-xl items-center transition-all duration-200 ${isCurrentSong ? 'bg-primary/10 shadow-[inset_0_0_20px_rgba(29,185,84,0.05)]' : 'hover:bg-white/[0.03]'}`}>
+    <div onContextMenu={(e) => onContextMenu(e, song)}
+      className={`group grid grid-cols-[36px_1fr_1fr_72px_72px_36px] gap-4 px-4 py-3 rounded-xl items-center transition-all duration-200 ${isCurrentSong ? 'bg-primary/10 shadow-[inset_0_0_20px_rgba(29,185,84,0.05)]' : 'hover:bg-white/[0.03]'}`}>
       <div className="text-center">
         {isCurrentSong && isPlaying ? (
           <button onClick={handlePlay} className="mx-auto">
@@ -66,10 +69,54 @@ function SongRow({ song, index }) {
 
 export default function MusicPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   useDocumentTitle(t('music.title'));
   const [activeGenre, setActiveGenre] = useState('all');
   const [searchQ, setSearchQ] = useState('');
-  const { setPlaylist } = usePlayerStore();
+  const [ctxMenu, setCtxMenu] = useState(null); // { x, y, song }
+  const { setPlaylist, playSong } = usePlayerStore();
+  const { toggleFavorite, isFavorite } = useSongStore();
+
+  // 右键菜单
+  const handleContextMenu = useCallback((e, song) => {
+    e.preventDefault();
+    setCtxMenu({ x: e.clientX, y: e.clientY, song });
+  }, []);
+
+  const closeCtxMenu = useCallback(() => setCtxMenu(null), []);
+
+  const ctxActions = ctxMenu ? {
+    play: () => playSong(ctxMenu.song),
+    playNext: () => {
+      const store = usePlayerStore.getState();
+      const newList = [...store.playlist];
+      const insertIdx = store.currentIndex + 1;
+      newList.splice(insertIdx, 0, ctxMenu.song);
+      usePlayerStore.setState({ playlist: newList });
+      toast.success(t('music.ctx.addedNext'));
+    },
+    addToQueue: () => {
+      const store = usePlayerStore.getState();
+      usePlayerStore.setState({ playlist: [...store.playlist, ctxMenu.song] });
+      toast.success(t('music.ctx.addedToQueue'));
+    },
+    toggleFav: () => {
+      toggleFavorite(ctxMenu.song.id);
+      toast.success(isFavorite(ctxMenu.song.id) ? t('music.unfavorited') : t('music.favorited'));
+    },
+    isFav: isFavorite(ctxMenu.song.id),
+    share: () => {
+      navigator.clipboard.writeText(`${window.location.origin}/songs/${ctxMenu.song.id}`);
+      toast.success(t('player.copiedLink'));
+    },
+    download: () => toast(t('music.ctx.downloadTip'), { icon: '📥' }),
+    startRadio: () => {
+      const sameSongs = songsData.filter(s => s.genre === ctxMenu.song.genre).sort(() => Math.random() - 0.5);
+      setPlaylist(sameSongs, 0);
+      toast.success(t('music.ctx.radioStarted'));
+    },
+    detail: () => navigate(`/songs/${ctxMenu.song.id}`),
+  } : {};
 
   const filtered = songsData.filter((s) => {
     const matchGenre = activeGenre === 'all' || s.genre === activeGenre;
@@ -183,7 +230,7 @@ export default function MusicPage() {
               <span><Clock size={12} className="inline" /></span>
               <span></span>
             </div>
-            {filtered.map((song, i) => <SongRow key={song.id} song={song} index={i} />)}
+            {filtered.map((song, i) => <SongRow key={song.id} song={song} index={i} onContextMenu={handleContextMenu} />)}
             {filtered.length === 0 && (
               <div className="py-20 text-center text-text-muted">
                 <Music size={36} className="mx-auto mb-3 opacity-30" />
@@ -274,6 +321,14 @@ export default function MusicPage() {
           </div>
         </div>
       </div>
+
+      {/* 右键上下文菜单 */}
+      {ctxMenu && (
+        <SongContextMenu
+          x={ctxMenu.x} y={ctxMenu.y} song={ctxMenu.song}
+          onClose={closeCtxMenu} actions={ctxActions}
+        />
+      )}
     </div>
   );
 }
