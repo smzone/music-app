@@ -4,22 +4,24 @@ import {
   LayoutDashboard, Music, User, ListMusic, Settings, LogOut, Menu, X, GripVertical, MessageSquare, Users, ExternalLink, Shield
 } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
+import { useTranslation } from 'react-i18next';
 
 const adminNav = [
-  { to: '/admin', icon: LayoutDashboard, label: '仪表盘', end: true },
-  { to: '/admin/songs', icon: Music, label: '歌曲管理' },
-  { to: '/admin/forum', icon: MessageSquare, label: '论坛管理' },
-  { to: '/admin/users', icon: Users, label: '用户管理' },
-  { to: '/admin/profile', icon: User, label: '个人简介' },
-  { to: '/admin/sections', icon: GripVertical, label: '页面排序' },
-  { to: '/admin/playlists', icon: ListMusic, label: '播放列表' },
-  { to: '/admin/settings', icon: Settings, label: '系统设置' },
+  { to: '/admin', icon: LayoutDashboard, labelKey: 'admin.nav.dashboard', end: true },
+  { to: '/admin/songs', icon: Music, labelKey: 'admin.nav.songs' },
+  { to: '/admin/forum', icon: MessageSquare, labelKey: 'admin.nav.forum' },
+  { to: '/admin/users', icon: Users, labelKey: 'admin.nav.users' },
+  { to: '/admin/profile', icon: User, labelKey: 'admin.nav.profile' },
+  { to: '/admin/sections', icon: GripVertical, labelKey: 'admin.nav.sections' },
+  { to: '/admin/playlists', icon: ListMusic, labelKey: 'admin.nav.playlists' },
+  { to: '/admin/settings', icon: Settings, labelKey: 'admin.nav.settings' },
 ];
 
 export default function AdminLayout() {
   const [sideOpen, setSideOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     logout();
@@ -38,7 +40,7 @@ export default function AdminLayout() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center">
               <Shield size={14} className="text-black" />
             </div>
-            <h1 className="text-base font-bold text-white tracking-tight">管理后台</h1>
+            <h1 className="text-base font-bold text-white tracking-tight">{t('admin.title')}</h1>
           </Link>
           <button onClick={() => setSideOpen(false)} className="lg:hidden text-text-muted hover:text-white">
             <X size={18} />
@@ -60,7 +62,7 @@ export default function AdminLayout() {
                 `}
               >
                 <Icon size={17} />
-                <span>{item.label}</span>
+                <span>{t(item.labelKey)}</span>
               </NavLink>
             );
           })}
@@ -70,12 +72,12 @@ export default function AdminLayout() {
           <div className="flex items-center gap-3 mb-3 p-2 rounded-xl bg-white/[0.03]">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary/30 to-emerald-600/30 flex items-center justify-center text-base border border-white/[0.08]">{user?.avatar || '🎵'}</div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white truncate">{user?.username || '管理员'}</p>
-              <p className="text-[11px] text-primary font-medium">管理员</p>
+              <p className="text-sm font-semibold text-white truncate">{user?.username || t('admin.admin')}</p>
+              <p className="text-[11px] text-primary font-medium">{t('admin.admin')}</p>
             </div>
           </div>
           <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 py-2 text-sm text-text-muted hover:text-red-400 hover:bg-red-500/[0.05] transition-all rounded-lg">
-            <LogOut size={15} /> 退出登录
+            <LogOut size={15} /> {t('admin.logout')}
           </button>
         </div>
       </aside>
@@ -86,10 +88,10 @@ export default function AdminLayout() {
           <button onClick={() => setSideOpen(true)} className="lg:hidden text-text-muted hover:text-white p-1.5 rounded-lg hover:bg-white/[0.04] transition-colors">
             <Menu size={20} />
           </button>
-          <h2 className="text-base font-bold text-white">后台管理</h2>
+          <h2 className="text-base font-bold text-white">{t('admin.header')}</h2>
           <div className="flex-1" />
           <a href="/" target="_blank" className="flex items-center gap-1.5 text-sm text-text-muted hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-white/[0.04]">
-            <ExternalLink size={13} /> 查看前台
+            <ExternalLink size={13} /> {t('admin.viewSite')}
           </a>
         </header>
         <div className="flex-1 overflow-y-auto p-5 lg:p-8">

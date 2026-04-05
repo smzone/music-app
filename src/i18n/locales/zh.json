@@ -579,8 +579,73 @@
     "loginFirst": "\u8bf7\u5148\u767b\u5f55",
     "follow": "\u5173\u6ce8"
   },
+  "settings": {
+    "title": "系统设置",
+    "desc": "管理网站基础配置和安全选项",
+    "defaultName": "音乐创作者",
+    "defaultDesc": "个人音乐宣传网站",
+    "dbTitle": "数据库状态",
+    "dbConnected": "Supabase 已连接",
+    "dbLocal": "使用本地模拟数据",
+    "dbGuideTitle": "如何接入 Supabase",
+    "dbStep1": "在 supabase.com 创建项目",
+    "dbStep2": "复制 .env.example 为 .env",
+    "dbStep3": "填入 Supabase URL 和 Anon Key",
+    "dbStep4": "在 SQL Editor 中执行 supabase-schema.sql",
+    "dbStep5": "重启开发服务器",
+    "siteTitle": "网站信息",
+    "siteName": "网站名称",
+    "siteDescription": "网站描述",
+    "securityTitle": "安全设置",
+    "changePassword": "管理员密码修改",
+    "newPwdPlaceholder": "输入新密码",
+    "confirmPassword": "确认新密码",
+    "confirmPwdPlaceholder": "再次输入新密码",
+    "saved": "设置已保存",
+    "saveAll": "保存所有设置"
+  },
+  "profile": {
+    "title": "个人简介编辑",
+    "desc": "编辑你的公开信息和首页展示内容",
+    "save": "保存",
+    "saved": "个人资料已保存",
+    "basicInfo": "基本信息",
+    "avatarUrl": "头像 URL",
+    "uploadAvatar": "上传头像（接入Supabase后可用）",
+    "artistName": "艺名",
+    "titleLabel": "头衔",
+    "titlePlaceholder": "如：独立音乐人",
+    "contactEmail": "联系邮箱",
+    "genres": "擅长风格（逗号分隔）",
+    "heroSection": "首页 Hero 区域",
+    "heroSlogan": "Slogan / 副标题",
+    "aboutMe": "关于我",
+    "aboutImageUrl": "关于我配图 URL",
+    "bio1": "自我介绍（第一段）",
+    "bio2": "自我介绍（第二段）",
+    "socialMedia": "社交媒体",
+    "weibo": "微博",
+    "netease": "网易云音乐"
+  },
+  "admin": {
+    "title": "管理后台",
+    "header": "后台管理",
+    "admin": "管理员",
+    "logout": "退出登录",
+    "viewSite": "查看前台",
+    "nav": {
+      "dashboard": "仪表盘",
+      "songs": "歌曲管理",
+      "forum": "论坛管理",
+      "users": "用户管理",
+      "profile": "个人简介",
+      "sections": "页面排序",
+      "playlists": "播放列表",
+      "settings": "系统设置"
+    }
+  },
   "common": {
-    "admin": "\u7ba1\u7406\u5458",
-    "user": "\u666e\u901a\u7528\u6237"
+    "admin": "管理员",
+    "user": "普通用户"
   }
 }

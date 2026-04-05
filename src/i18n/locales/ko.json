@@ -579,8 +579,73 @@
     "loginFirst": "\ub85c\uadf8\uc778\ud574\uc8fc\uc138\uc694",
     "follow": "\ud314\ub85c\uc6b0"
   },
+  "settings": {
+    "title": "설정",
+    "desc": "사이트 설정 및 보안 옵션 관리",
+    "defaultName": "뮤직 크리에이터",
+    "defaultDesc": "개인 음악 사이트",
+    "dbTitle": "데이터베이스 상태",
+    "dbConnected": "Supabase 연결됨",
+    "dbLocal": "로컬 모의 데이터 사용 중",
+    "dbGuideTitle": "Supabase 연결 방법",
+    "dbStep1": "supabase.com에서 프로젝트 생성",
+    "dbStep2": ".env.example을 .env로 복사",
+    "dbStep3": "Supabase URL과 Anon Key 입력",
+    "dbStep4": "SQL Editor에서 supabase-schema.sql 실행",
+    "dbStep5": "개발 서버 재시작",
+    "siteTitle": "사이트 정보",
+    "siteName": "사이트 이름",
+    "siteDescription": "사이트 설명",
+    "securityTitle": "보안",
+    "changePassword": "관리자 비밀번호 변경",
+    "newPwdPlaceholder": "새 비밀번호 입력",
+    "confirmPassword": "새 비밀번호 확인",
+    "confirmPwdPlaceholder": "다시 입력",
+    "saved": "설정이 저장되었습니다",
+    "saveAll": "모두 저장"
+  },
+  "profile": {
+    "title": "프로필 편집",
+    "desc": "공개 정보와 홈페이지 콘텐츠 편집",
+    "save": "저장",
+    "saved": "프로필이 저장되었습니다",
+    "basicInfo": "기본 정보",
+    "avatarUrl": "아바타 URL",
+    "uploadAvatar": "아바타 업로드 (Supabase 연결 후 사용 가능)",
+    "artistName": "아티스트 이름",
+    "titleLabel": "직함",
+    "titlePlaceholder": "예: 인디 뮤지션",
+    "contactEmail": "연락처 이메일",
+    "genres": "장르 (쉼표 구분)",
+    "heroSection": "홈페이지 Hero",
+    "heroSlogan": "슬로건 / 부제",
+    "aboutMe": "자기소개",
+    "aboutImageUrl": "소개 이미지 URL",
+    "bio1": "자기소개 (첫 번째 단락)",
+    "bio2": "자기소개 (두 번째 단락)",
+    "socialMedia": "소셜 미디어",
+    "weibo": "Weibo",
+    "netease": "NetEase Music"
+  },
+  "admin": {
+    "title": "관리자 패널",
+    "header": "관리",
+    "admin": "관리자",
+    "logout": "로그아웃",
+    "viewSite": "사이트 보기",
+    "nav": {
+      "dashboard": "대시보드",
+      "songs": "음악 관리",
+      "forum": "포럼 관리",
+      "users": "사용자 관리",
+      "profile": "프로필",
+      "sections": "페이지 순서",
+      "playlists": "플레이리스트",
+      "settings": "설정"
+    }
+  },
   "common": {
-    "admin": "\uad00\ub9ac\uc790",
-    "user": "\uc77c\ubc18 \uc0ac\uc6a9\uc790"
+    "admin": "관리자",
+    "user": "일반 사용자"
   }
 }

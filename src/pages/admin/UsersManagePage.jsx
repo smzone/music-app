@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Users, Search, Shield, ShieldCheck, ShieldX, Ban, CheckCircle, Mail, TrendingUp, Download, History, ChevronLeft, ChevronRight, CheckSquare, Square, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -65,7 +65,9 @@ export default function UsersManagePage() {
   const paged = useMemo(() => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [filtered, page]);
 
   // 页码越界修正
-  if (page > totalPages && totalPages > 0) setPage(totalPages);
+  useEffect(() => {
+    if (page > totalPages && totalPages > 0) setPage(totalPages);
+  }, [page, totalPages]);
 
   // 添加操作日志
   const addLog = (action, target) => {
