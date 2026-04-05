@@ -176,9 +176,9 @@ export default function ForumPage() {
             <h1 className="text-3xl lg:text-4xl font-black text-white mb-2 tracking-tight">{t('forum.heading')}</h1>
             <p className="text-text-secondary text-sm max-w-md">{t('forum.desc')}</p>
             <div className="flex items-center gap-4 mt-4 text-sm text-text-muted">
-              <span className="flex items-center gap-1"><MessageSquare size={14} /> {posts.length} 帖子</span>
-              <span className="flex items-center gap-1"><Eye size={14} /> {posts.reduce((s, p) => s + p.views, 0).toLocaleString()} 浏览</span>
-              <span className="flex items-center gap-1"><ThumbsUp size={14} /> {posts.reduce((s, p) => s + p.likes, 0).toLocaleString()} 赞</span>
+              <span className="flex items-center gap-1"><MessageSquare size={14} /> {t('forum.statPosts', { count: posts.length })}</span>
+              <span className="flex items-center gap-1"><Eye size={14} /> {t('forum.statViews', { count: posts.reduce((s, p) => s + p.views, 0).toLocaleString() })}</span>
+              <span className="flex items-center gap-1"><ThumbsUp size={14} /> {t('forum.statLikes', { count: posts.reduce((s, p) => s + p.likes, 0).toLocaleString() })}</span>
             </div>
           </div>
           <button onClick={() => { if (!user) { toast.error(t('live.loginFirst')); return; } setShowNewPost(true); }}
@@ -194,7 +194,7 @@ export default function ForumPage() {
           <div className="lg:sticky lg:top-20 space-y-4">
             {/* 分类列表 */}
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3">
-              <h3 className="text-[10px] font-semibold text-text-muted uppercase tracking-widest px-3 mb-2">板块分类</h3>
+              <h3 className="text-[10px] font-semibold text-text-muted uppercase tracking-widest px-3 mb-2">{t('forum.categoryTitle')}</h3>
               {forumCategories.map((c) => (
                 <button key={c.id} onClick={() => setActiveCategory(c.id)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${activeCategory === c.id ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-secondary hover:text-white hover:bg-white/[0.04] border border-transparent'}`}>
@@ -207,7 +207,7 @@ export default function ForumPage() {
 
             {/* 热帖排行 */}
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-1.5"><TrendingUp size={14} className="text-red-400" /> 热帖排行</h3>
+              <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-1.5"><TrendingUp size={14} className="text-red-400" /> {t('forum.hotRanking')}</h3>
               <div className="space-y-3">
                 {posts.sort((a, b) => b.likes - a.likes).slice(0, 5).map((p, i) => (
                   <div key={p.id} onClick={() => navigate(`/forum/${p.id}`)}
@@ -215,7 +215,7 @@ export default function ForumPage() {
                     <span className={`text-xs font-black w-5 pt-0.5 ${i === 0 ? 'text-red-400' : i === 1 ? 'text-orange-400' : i === 2 ? 'text-yellow-400' : 'text-text-muted'}`}>{i + 1}</span>
                     <div className="min-w-0">
                       <p className="text-xs text-text-secondary line-clamp-2 group-hover:text-primary transition-colors leading-snug">{p.title}</p>
-                      <span className="text-[10px] text-text-muted">{formatNum(p.likes)} 赞</span>
+                      <span className="text-[10px] text-text-muted">{t('forum.likesCount', { count: formatNum(p.likes) })}</span>
                     </div>
                   </div>
                 ))}
@@ -224,7 +224,7 @@ export default function ForumPage() {
 
             {/* 标签云 */}
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <h3 className="text-sm font-bold text-white mb-3">热门标签</h3>
+              <h3 className="text-sm font-bold text-white mb-3">{t('forum.hotTags')}</h3>
               <div className="flex flex-wrap gap-1.5">
                 {postTags.map((tag) => (
                   <span key={tag.id} className={`px-2.5 py-1 rounded-lg text-[11px] font-medium ${tag.color} hover:scale-105 transition-transform cursor-pointer`}>{tag.name}</span>
@@ -240,7 +240,7 @@ export default function ForumPage() {
           <div className="flex items-center gap-3 mb-5">
             <div className="relative flex-1">
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
-              <input type="text" value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder="搜索帖子标题或内容..."
+              <input type="text" value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder={t('forum.searchPlaceholder')}
                 className="w-full bg-white/[0.04] text-white pl-10 pr-4 py-2.5 rounded-full outline-none border border-white/[0.06] focus:border-primary text-sm placeholder:text-text-muted transition-colors" />
             </div>
             <div className="flex items-center gap-1 bg-white/[0.03] rounded-xl p-1 border border-white/[0.06]">
@@ -261,7 +261,7 @@ export default function ForumPage() {
                 <span className="text-sm font-semibold text-white">{forumCategories.find((c) => c.id === activeCategory)?.name}</span>
                 <span className="text-xs text-text-muted">— {forumCategories.find((c) => c.id === activeCategory)?.desc}</span>
               </div>
-              <span className="text-xs text-text-muted bg-white/[0.05] px-2 py-0.5 rounded">{activeCount} 帖子</span>
+              <span className="text-xs text-text-muted bg-white/[0.05] px-2 py-0.5 rounded">{t('forum.statPosts', { count: activeCount })}</span>
             </div>
           )}
 
@@ -282,9 +282,9 @@ export default function ForumPage() {
                     <div className="flex-1 min-w-0">
                       {/* 标记行 */}
                       <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
-                        {post.isPinned && <span className="flex items-center gap-0.5 text-[10px] text-yellow-400 font-bold bg-yellow-500/10 px-2 py-0.5 rounded-md"><Pin size={9} /> 置顶</span>}
-                        {post.isHot && <span className="flex items-center gap-0.5 text-[10px] text-red-400 font-bold bg-red-500/10 px-2 py-0.5 rounded-md"><Flame size={9} /> 热门</span>}
-                        {post.isEssence && <span className="flex items-center gap-0.5 text-[10px] text-yellow-300 font-bold bg-yellow-500/10 px-2 py-0.5 rounded-md"><Star size={9} /> 精华</span>}
+                        {post.isPinned && <span className="flex items-center gap-0.5 text-[10px] text-yellow-400 font-bold bg-yellow-500/10 px-2 py-0.5 rounded-md"><Pin size={9} /> {t('forum.pinned')}</span>}
+                        {post.isHot && <span className="flex items-center gap-0.5 text-[10px] text-red-400 font-bold bg-red-500/10 px-2 py-0.5 rounded-md"><Flame size={9} /> {t('forum.hot')}</span>}
+                        {post.isEssence && <span className="flex items-center gap-0.5 text-[10px] text-yellow-300 font-bold bg-yellow-500/10 px-2 py-0.5 rounded-md"><Star size={9} /> {t('forum.essence')}</span>}
                         {catInfo && <span className="text-[10px] text-text-muted bg-white/[0.05] px-2 py-0.5 rounded-md">{catInfo.icon} {catInfo.name}</span>}
                         {post.tags?.map((tagId) => {
                           const tag = postTags.find((t) => t.id === tagId);
@@ -336,7 +336,7 @@ export default function ForumPage() {
           {filtered.length === 0 && (
             <div className="py-20 text-center text-text-muted">
               <MessageSquare size={40} className="mx-auto mb-3 opacity-20" />
-              <p>暂无帖子</p>
+              <p>{t('forum.noPosts')}</p>
             </div>
           )}
         </div>

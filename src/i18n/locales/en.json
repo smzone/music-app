@@ -316,7 +316,19 @@
     "anonymous": "Anonymous",
     "postsCount": "{{count}} posts",
     "sort": "Sort",
-    "search": "Search posts..."
+    "search": "Search posts...",
+    "statPosts": "{{count}} posts",
+    "statViews": "{{count}} views",
+    "statLikes": "{{count}} likes",
+    "categoryTitle": "Categories",
+    "hotRanking": "Top Posts",
+    "likesCount": "{{count}} likes",
+    "hotTags": "Trending Tags",
+    "searchPlaceholder": "Search posts by title or content...",
+    "pinned": "Pinned",
+    "hot": "Hot",
+    "essence": "Featured",
+    "noPosts": "No posts yet"
   },
   "shop": {
     "title": "Shop",

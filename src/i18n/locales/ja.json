@@ -316,7 +316,19 @@
     "anonymous": "匿名",
     "postsCount": "{{count}}件の投稿",
     "sort": "並び替え",
-    "search": "投稿を検索..."
+    "search": "投稿を検索...",
+    "statPosts": "{{count}} 投稿",
+    "statViews": "{{count}} 閲覧",
+    "statLikes": "{{count}} いいね",
+    "categoryTitle": "カテゴリー",
+    "hotRanking": "人気投稿",
+    "likesCount": "{{count}} いいね",
+    "hotTags": "トレンドタグ",
+    "searchPlaceholder": "タイトルまたは内容で投稿を検索...",
+    "pinned": "ピン留め",
+    "hot": "人気",
+    "essence": "おすすめ",
+    "noPosts": "投稿がありません"
   },
   "shop": {
     "title": "ショップ",
