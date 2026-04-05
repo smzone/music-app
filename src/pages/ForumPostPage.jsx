@@ -23,8 +23,8 @@ function ReplyItem({ reply, depth = 0, onReplyTo, t }) {
           {/* 作者信息 */}
           <div className="flex items-center gap-2 mb-1.5">
             <span className="text-sm font-semibold text-white">{reply.author}</span>
-            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${lvl.color}`}>{lvl.text}</span>
-            <span className="text-xs text-text-muted">{formatTime(reply.date)}</span>
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${lvl.color}`}>{lvl.textKey ? t(lvl.textKey) : lvl.text}</span>
+            <span className="text-xs text-text-muted">{formatTime(reply.date, t)}</span>
           </div>
           {/* 回复内容 */}
           <p className="text-[14px] text-text-secondary leading-relaxed whitespace-pre-line">{reply.content}</p>
@@ -126,7 +126,7 @@ export default function ForumPostPage() {
           <ArrowLeft size={15} /> {t('forumPost.forum')}
         </button>
         <span className="text-white/10">/</span>
-        {catInfo && <span className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/[0.03]">{catInfo.icon} {catInfo.name}</span>}
+        {catInfo && <span className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/[0.03]">{catInfo.icon} {t(catInfo.nameKey)}</span>}
       </div>
 
       {/* 帖子主体 */}
@@ -138,10 +138,10 @@ export default function ForumPostPage() {
             {post.isPinned && <span className="flex items-center gap-0.5 text-xs text-yellow-400 font-bold bg-yellow-500/10 px-2.5 py-1 rounded-full"><Pin size={11} /> {t('forumPost.pinned')}</span>}
             {post.isHot && <span className="flex items-center gap-0.5 text-xs text-red-400 font-bold bg-red-500/10 px-2.5 py-1 rounded-full"><Flame size={11} /> {t('forumPost.hot')}</span>}
             {post.isEssence && <span className="flex items-center gap-0.5 text-xs text-yellow-300 font-bold bg-yellow-500/10 px-2.5 py-1 rounded-full"><Star size={11} /> {t('forumPost.essence')}</span>}
-            {catInfo && <span className="text-xs bg-surface-lighter px-2.5 py-1 rounded-full text-text-muted">{catInfo.icon} {catInfo.name}</span>}
+            {catInfo && <span className="text-xs bg-surface-lighter px-2.5 py-1 rounded-full text-text-muted">{catInfo.icon} {t(catInfo.nameKey)}</span>}
             {post.tags?.map((tagId) => {
-              const tag = postTags.find((t) => t.id === tagId);
-              return tag ? <span key={tagId} className={`text-xs px-2.5 py-1 rounded-full font-medium ${tag.color}`}>{tag.name}</span> : null;
+              const tagItem = postTags.find((tg) => tg.id === tagId);
+              return tagItem ? <span key={tagId} className={`text-xs px-2.5 py-1 rounded-full font-medium ${tagItem.color}`}>{t(tagItem.nameKey)}</span> : null;
             })}
           </div>
 
@@ -154,11 +154,11 @@ export default function ForumPostPage() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-white">{post.author}</span>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lvl.color}`}>{lvl.text}</span>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lvl.color}`}>{lvl.textKey ? t(lvl.textKey) : lvl.text}</span>
               </div>
               <div className="flex items-center gap-3 text-xs text-text-muted mt-0.5">
-                <span className="flex items-center gap-1"><Clock size={11} /> {formatTime(post.date)}</span>
-                <span className="flex items-center gap-1"><Eye size={11} /> {formatNum(post.views)} {t('forumPost.views')}</span>
+                <span className="flex items-center gap-1"><Clock size={11} /> {formatTime(post.date, t)}</span>
+                <span className="flex items-center gap-1"><Eye size={11} /> {formatNum(post.views, t)} {t('forumPost.views')}</span>
               </div>
             </div>
           </div>
@@ -198,14 +198,14 @@ export default function ForumPostPage() {
           <div className="flex items-center gap-2.5 flex-wrap mt-8 pt-6 border-t border-white/[0.04]">
             <button onClick={() => setLiked(!liked)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${liked ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-white hover:border-white/[0.1]'}`}>
-              <Heart size={15} className={liked ? 'fill-red-400' : ''} /> {formatNum(post.likes + (liked ? 1 : 0))}
+              <Heart size={15} className={liked ? 'fill-red-400' : ''} /> {formatNum(post.likes + (liked ? 1 : 0), t)}
             </button>
             <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-white hover:border-white/[0.1] transition-all">
               <MessageSquare size={15} /> {t('forumPost.repliesCount', { count: post.replies?.length || 0 })}
             </button>
             <button onClick={() => { setBookmarked(!bookmarked); toast.success(bookmarked ? t('forumPost.unfavorited') : t('forumPost.favorited')); }}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${bookmarked ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : 'bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-white hover:border-white/[0.1]'}`}>
-              <Bookmark size={15} className={bookmarked ? 'fill-yellow-400' : ''} /> {formatNum(post.bookmarks + (bookmarked ? 1 : 0))}
+              <Bookmark size={15} className={bookmarked ? 'fill-yellow-400' : ''} /> {formatNum(post.bookmarks + (bookmarked ? 1 : 0), t)}
             </button>
             <div className="flex-1" />
             <button onClick={handleShare}
