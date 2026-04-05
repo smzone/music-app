@@ -23,6 +23,7 @@ const MembershipPage = lazy(() => import('./pages/MembershipPage'));
 const TaskHallPage = lazy(() => import('./pages/TaskHallPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 
 // 管理后台 — 按需加载
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -35,6 +36,13 @@ const SectionsPage = lazy(() => import('./pages/admin/SectionsPage'));
 const PlaylistsPage = lazy(() => import('./pages/admin/PlaylistsPage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+// 路由守卫：需要登录
+function AuthGuard({ children }) {
+  const { user } = useAuthStore();
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+}
 
 // 路由守卫：需要管理员权限
 function AdminGuard({ children }) {
@@ -71,6 +79,7 @@ function App() {
             <Route path="/live" element={<LivePage />} />
             <Route path="/membership" element={<MembershipPage />} />
             <Route path="/tasks" element={<TaskHallPage />} />
+            <Route path="/profile" element={<AuthGuard><UserProfilePage /></AuthGuard>} />
           </Route>
 
           {/* 独立页面（无顶部导航） */}
