@@ -315,8 +315,6 @@
     "postSuccess": "帖子发表成功\uff01",
     "anonymous": "匿名",
     "postsCount": "{{count}} 篇帖子",
-    "sort": "排序",
-    "search": "搜索帖子...",
     "statPosts": "{{count}} 帖子",
     "statViews": "{{count}} 浏览",
     "statLikes": "{{count}} 赞",
@@ -328,7 +326,32 @@
     "pinned": "置顶",
     "hot": "热门",
     "essence": "精华",
-    "noPosts": "暂无帖子"
+    "noPosts": "暂无帖子",
+    "cat": {
+      "all": "全部", "allDesc": "所有板块的帖子",
+      "music": "音乐交流", "musicDesc": "分享与讨论音乐作品",
+      "production": "制作技术", "productionDesc": "编曲/混音/母带处理",
+      "gear": "设备分享", "gearDesc": "乐器/硬件/软件推荐",
+      "video": "视频创作", "videoDesc": "MV/短视频/直播技术",
+      "collab": "寻求合作", "collabDesc": "找人合作/组队/招募",
+      "showcase": "作品展示", "showcaseDesc": "展示你的音乐/视频作品",
+      "offtopic": "闲聊灌水", "offtopicDesc": "日常聊天/交友"
+    },
+    "tag": {
+      "help": "求助", "share": "分享", "discuss": "讨论",
+      "tutorial": "教程", "review": "测评", "resource": "资源", "news": "新闻"
+    },
+    "sort": {
+      "latest": "最新发布", "hot": "最多热度", "views": "最多浏览", "comments": "最多回复"
+    },
+    "time": {
+      "justNow": "刚刚",
+      "minutesAgo": "{{count}} 分钟前",
+      "hoursAgo": "{{count}} 小时前",
+      "daysAgo": "{{count}} 天前"
+    },
+    "num": { "wan": "{{count}}万", "k": "{{count}}k" },
+    "level": { "admin": "管理员" }
   },
   "shop": {
     "title": "商品商店",

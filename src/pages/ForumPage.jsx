@@ -54,7 +54,7 @@ function NewPostModal({ onClose, onSubmit, t }) {
               <label className="text-sm text-text-secondary block mb-1.5">{t('forum.category')}</label>
               <select value={category} onChange={(e) => setCategory(e.target.value)}
                 className="w-full bg-surface-lighter text-white px-4 py-2.5 rounded-xl outline-none border border-transparent focus:border-primary text-[15px]">
-                {forumCategories.filter((c) => c.id !== 'all').map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+                {forumCategories.filter((c) => c.id !== 'all').map((c) => <option key={c.id} value={c.id}>{c.icon} {t(c.nameKey)}</option>)}
               </select>
             </div>
           </div>
@@ -199,7 +199,7 @@ export default function ForumPage() {
                 <button key={c.id} onClick={() => setActiveCategory(c.id)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${activeCategory === c.id ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-secondary hover:text-white hover:bg-white/[0.04] border border-transparent'}`}>
                   <span className="text-base">{c.icon}</span>
-                  <span className="flex-1">{c.name}</span>
+                  <span className="flex-1">{t(c.nameKey)}</span>
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${activeCategory === c.id ? 'bg-primary/20 text-primary' : 'bg-white/[0.05] text-text-muted'}`}>{c.count}</span>
                 </button>
               ))}
@@ -227,7 +227,7 @@ export default function ForumPage() {
               <h3 className="text-sm font-bold text-white mb-3">{t('forum.hotTags')}</h3>
               <div className="flex flex-wrap gap-1.5">
                 {postTags.map((tag) => (
-                  <span key={tag.id} className={`px-2.5 py-1 rounded-lg text-[11px] font-medium ${tag.color} hover:scale-105 transition-transform cursor-pointer`}>{tag.name}</span>
+                  <span key={tag.id} className={`px-2.5 py-1 rounded-lg text-[11px] font-medium ${tag.color} hover:scale-105 transition-transform cursor-pointer`}>{t(tag.nameKey)}</span>
                 ))}
               </div>
             </div>
@@ -247,7 +247,7 @@ export default function ForumPage() {
               {sortOptions.map((s) => (
                 <button key={s.id} onClick={() => setSortBy(s.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${sortBy === s.id ? 'bg-primary/15 text-primary' : 'text-text-muted hover:text-white'}`}>
-                  {s.name}
+                  {t(s.nameKey)}
                 </button>
               ))}
             </div>
@@ -258,8 +258,8 @@ export default function ForumPage() {
             <div className="rounded-xl px-4 py-3 mb-4 flex items-center justify-between border border-white/[0.06] bg-white/[0.02]">
               <div className="flex items-center gap-2">
                 <span className="text-lg">{forumCategories.find((c) => c.id === activeCategory)?.icon}</span>
-                <span className="text-sm font-semibold text-white">{forumCategories.find((c) => c.id === activeCategory)?.name}</span>
-                <span className="text-xs text-text-muted">— {forumCategories.find((c) => c.id === activeCategory)?.desc}</span>
+                <span className="text-sm font-semibold text-white">{t(forumCategories.find((c) => c.id === activeCategory)?.nameKey)}</span>
+                <span className="text-xs text-text-muted">— {t(forumCategories.find((c) => c.id === activeCategory)?.descKey)}</span>
               </div>
               <span className="text-xs text-text-muted bg-white/[0.05] px-2 py-0.5 rounded">{t('forum.statPosts', { count: activeCount })}</span>
             </div>
@@ -285,10 +285,10 @@ export default function ForumPage() {
                         {post.isPinned && <span className="flex items-center gap-0.5 text-[10px] text-yellow-400 font-bold bg-yellow-500/10 px-2 py-0.5 rounded-md"><Pin size={9} /> {t('forum.pinned')}</span>}
                         {post.isHot && <span className="flex items-center gap-0.5 text-[10px] text-red-400 font-bold bg-red-500/10 px-2 py-0.5 rounded-md"><Flame size={9} /> {t('forum.hot')}</span>}
                         {post.isEssence && <span className="flex items-center gap-0.5 text-[10px] text-yellow-300 font-bold bg-yellow-500/10 px-2 py-0.5 rounded-md"><Star size={9} /> {t('forum.essence')}</span>}
-                        {catInfo && <span className="text-[10px] text-text-muted bg-white/[0.05] px-2 py-0.5 rounded-md">{catInfo.icon} {catInfo.name}</span>}
+                        {catInfo && <span className="text-[10px] text-text-muted bg-white/[0.05] px-2 py-0.5 rounded-md">{catInfo.icon} {t(catInfo.nameKey)}</span>}
                         {post.tags?.map((tagId) => {
-                          const tag = postTags.find((t) => t.id === tagId);
-                          return tag ? <span key={tagId} className={`text-[10px] px-2 py-0.5 rounded-md font-medium ${tag.color}`}>{tag.name}</span> : null;
+                          const tagItem = postTags.find((tg) => tg.id === tagId);
+                          return tagItem ? <span key={tagId} className={`text-[10px] px-2 py-0.5 rounded-md font-medium ${tagItem.color}`}>{t(tagItem.nameKey)}</span> : null;
                         })}
                       </div>
                       {/* 标题 */}
@@ -317,13 +317,13 @@ export default function ForumPage() {
                       <div className="flex items-center gap-4 mt-3 text-xs text-text-muted">
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium text-text-secondary">{post.author}</span>
-                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${lvl.color}`}>{lvl.text}</span>
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${lvl.color}`}>{lvl.textKey ? t(lvl.textKey) : lvl.text}</span>
                         </div>
-                        <span className="flex items-center gap-1"><Clock size={11} /> {formatTime(post.date)}</span>
-                        <span className="flex items-center gap-1"><ThumbsUp size={11} /> {formatNum(post.likes)}</span>
-                        <span className="flex items-center gap-1"><Eye size={11} /> {formatNum(post.views)}</span>
+                        <span className="flex items-center gap-1"><Clock size={11} /> {formatTime(post.date, t)}</span>
+                        <span className="flex items-center gap-1"><ThumbsUp size={11} /> {formatNum(post.likes, t)}</span>
+                        <span className="flex items-center gap-1"><Eye size={11} /> {formatNum(post.views, t)}</span>
                         <span className="flex items-center gap-1"><MessageSquare size={11} /> {post.comments}</span>
-                        <span className="flex items-center gap-1 ml-auto"><Bookmark size={11} /> {formatNum(post.bookmarks)}</span>
+                        <span className="flex items-center gap-1 ml-auto"><Bookmark size={11} /> {formatNum(post.bookmarks, t)}</span>
                         <ChevronRight size={14} className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </div>

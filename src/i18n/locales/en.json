@@ -315,8 +315,6 @@
     "postSuccess": "Post published!",
     "anonymous": "Anonymous",
     "postsCount": "{{count}} posts",
-    "sort": "Sort",
-    "search": "Search posts...",
     "statPosts": "{{count}} posts",
     "statViews": "{{count}} views",
     "statLikes": "{{count}} likes",
@@ -328,7 +326,32 @@
     "pinned": "Pinned",
     "hot": "Hot",
     "essence": "Featured",
-    "noPosts": "No posts yet"
+    "noPosts": "No posts yet",
+    "cat": {
+      "all": "All", "allDesc": "Posts from all categories",
+      "music": "Music", "musicDesc": "Share & discuss music",
+      "production": "Production", "productionDesc": "Arrangement/Mixing/Mastering",
+      "gear": "Gear", "gearDesc": "Instruments/Hardware/Software",
+      "video": "Video", "videoDesc": "MV/Short videos/Streaming",
+      "collab": "Collaboration", "collabDesc": "Find partners/Teams/Recruit",
+      "showcase": "Showcase", "showcaseDesc": "Show your music/video works",
+      "offtopic": "Off Topic", "offtopicDesc": "Casual chat/Social"
+    },
+    "tag": {
+      "help": "Help", "share": "Share", "discuss": "Discuss",
+      "tutorial": "Tutorial", "review": "Review", "resource": "Resource", "news": "News"
+    },
+    "sort": {
+      "latest": "Latest", "hot": "Hottest", "views": "Most Viewed", "comments": "Most Replied"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{{count}} min ago",
+      "hoursAgo": "{{count}} hr ago",
+      "daysAgo": "{{count}} days ago"
+    },
+    "num": { "wan": "{{count}}w", "k": "{{count}}k" },
+    "level": { "admin": "Admin" }
   },
   "shop": {
     "title": "Shop",

@@ -1,24 +1,24 @@
 // 论坛分类体系
 export const forumCategories = [
-  { id: 'all', name: '全部', icon: '📋', desc: '所有板块的帖子', count: 187, color: 'from-gray-500/20 to-gray-700/20' },
-  { id: 'music', name: '音乐交流', icon: '🎵', desc: '分享与讨论音乐作品', count: 45, color: 'from-green-500/20 to-green-700/20' },
-  { id: 'production', name: '制作技术', icon: '🎛️', desc: '编曲/混音/母带处理', count: 32, color: 'from-blue-500/20 to-blue-700/20' },
-  { id: 'gear', name: '设备分享', icon: '🎧', desc: '乐器/硬件/软件推荐', count: 28, color: 'from-orange-500/20 to-orange-700/20' },
-  { id: 'video', name: '视频创作', icon: '🎬', desc: 'MV/短视频/直播技术', count: 23, color: 'from-red-500/20 to-red-700/20' },
-  { id: 'collab', name: '寻求合作', icon: '🤝', desc: '找人合作/组队/招募', count: 15, color: 'from-purple-500/20 to-purple-700/20' },
-  { id: 'showcase', name: '作品展示', icon: '🌟', desc: '展示你的音乐/视频作品', count: 19, color: 'from-yellow-500/20 to-yellow-700/20' },
-  { id: 'offtopic', name: '闲聊灌水', icon: '💬', desc: '日常聊天/交友', count: 67, color: 'from-pink-500/20 to-pink-700/20' },
+  { id: 'all', nameKey: 'forum.cat.all', descKey: 'forum.cat.allDesc', icon: '📋', count: 187, color: 'from-gray-500/20 to-gray-700/20' },
+  { id: 'music', nameKey: 'forum.cat.music', descKey: 'forum.cat.musicDesc', icon: '🎵', count: 45, color: 'from-green-500/20 to-green-700/20' },
+  { id: 'production', nameKey: 'forum.cat.production', descKey: 'forum.cat.productionDesc', icon: '🎛️', count: 32, color: 'from-blue-500/20 to-blue-700/20' },
+  { id: 'gear', nameKey: 'forum.cat.gear', descKey: 'forum.cat.gearDesc', icon: '🎧', count: 28, color: 'from-orange-500/20 to-orange-700/20' },
+  { id: 'video', nameKey: 'forum.cat.video', descKey: 'forum.cat.videoDesc', icon: '🎬', count: 23, color: 'from-red-500/20 to-red-700/20' },
+  { id: 'collab', nameKey: 'forum.cat.collab', descKey: 'forum.cat.collabDesc', icon: '🤝', count: 15, color: 'from-purple-500/20 to-purple-700/20' },
+  { id: 'showcase', nameKey: 'forum.cat.showcase', descKey: 'forum.cat.showcaseDesc', icon: '🌟', count: 19, color: 'from-yellow-500/20 to-yellow-700/20' },
+  { id: 'offtopic', nameKey: 'forum.cat.offtopic', descKey: 'forum.cat.offtopicDesc', icon: '💬', count: 67, color: 'from-pink-500/20 to-pink-700/20' },
 ];
 
 // 帖子标签
 export const postTags = [
-  { id: 'help', name: '求助', color: 'bg-blue-500/20 text-blue-400' },
-  { id: 'share', name: '分享', color: 'bg-green-500/20 text-green-400' },
-  { id: 'discuss', name: '讨论', color: 'bg-purple-500/20 text-purple-400' },
-  { id: 'tutorial', name: '教程', color: 'bg-orange-500/20 text-orange-400' },
-  { id: 'review', name: '测评', color: 'bg-yellow-500/20 text-yellow-400' },
-  { id: 'resource', name: '资源', color: 'bg-cyan-500/20 text-cyan-400' },
-  { id: 'news', name: '新闻', color: 'bg-red-500/20 text-red-400' },
+  { id: 'help', nameKey: 'forum.tag.help', color: 'bg-blue-500/20 text-blue-400' },
+  { id: 'share', nameKey: 'forum.tag.share', color: 'bg-green-500/20 text-green-400' },
+  { id: 'discuss', nameKey: 'forum.tag.discuss', color: 'bg-purple-500/20 text-purple-400' },
+  { id: 'tutorial', nameKey: 'forum.tag.tutorial', color: 'bg-orange-500/20 text-orange-400' },
+  { id: 'review', nameKey: 'forum.tag.review', color: 'bg-yellow-500/20 text-yellow-400' },
+  { id: 'resource', nameKey: 'forum.tag.resource', color: 'bg-cyan-500/20 text-cyan-400' },
+  { id: 'news', nameKey: 'forum.tag.news', color: 'bg-red-500/20 text-red-400' },
 ];
 
 // 模拟论坛帖子数据 — 带富媒体
@@ -156,35 +156,47 @@ export const initialPosts = [
 
 // 排序选项
 export const sortOptions = [
-  { id: 'latest', name: '最新发布' },
-  { id: 'hot', name: '最多热度' },
-  { id: 'views', name: '最多浏览' },
-  { id: 'comments', name: '最多回复' },
+  { id: 'latest', nameKey: 'forum.sort.latest' },
+  { id: 'hot', nameKey: 'forum.sort.hot' },
+  { id: 'views', nameKey: 'forum.sort.views' },
+  { id: 'comments', nameKey: 'forum.sort.comments' },
 ];
 
 // 格式化时间
-export function formatTime(dateStr) {
+export function formatTime(dateStr, t) {
   const date = new Date(dateStr);
   const now = new Date();
   const diff = (now - date) / 1000;
-  if (diff < 60) return '刚刚';
-  if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
-  if (diff < 604800) return `${Math.floor(diff / 86400)} 天前`;
-  return date.toLocaleDateString('zh-CN');
+  if (t) {
+    if (diff < 60) return t('forum.time.justNow');
+    if (diff < 3600) return t('forum.time.minutesAgo', { count: Math.floor(diff / 60) });
+    if (diff < 86400) return t('forum.time.hoursAgo', { count: Math.floor(diff / 3600) });
+    if (diff < 604800) return t('forum.time.daysAgo', { count: Math.floor(diff / 86400) });
+  } else {
+    if (diff < 60) return '刚刚';
+    if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} 天前`;
+  }
+  return date.toLocaleDateString();
 }
 
 // 格式化数字
-export function formatNum(n) {
-  if (n >= 10000) return (n / 10000).toFixed(1) + '万';
-  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+export function formatNum(n, t) {
+  if (t) {
+    if (n >= 10000) return t('forum.num.wan', { count: (n / 10000).toFixed(1) });
+    if (n >= 1000) return t('forum.num.k', { count: (n / 1000).toFixed(1) });
+  } else {
+    if (n >= 10000) return (n / 10000).toFixed(1) + '万';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  }
   return String(n);
 }
 
 // 获取等级样式
 export function getLevelStyle(level) {
   const styles = {
-    admin: { text: '管理员', color: 'bg-red-500/20 text-red-400' },
+    admin: { textKey: 'forum.level.admin', text: '管理员', color: 'bg-red-500/20 text-red-400' },
     lv1: { text: 'Lv.1', color: 'bg-gray-500/20 text-gray-400' },
     lv2: { text: 'Lv.2', color: 'bg-gray-500/20 text-gray-300' },
     lv3: { text: 'Lv.3', color: 'bg-blue-500/20 text-blue-400' },

@@ -315,8 +315,6 @@
     "postSuccess": "投稿しました！",
     "anonymous": "匿名",
     "postsCount": "{{count}}件の投稿",
-    "sort": "並び替え",
-    "search": "投稿を検索...",
     "statPosts": "{{count}} 投稿",
     "statViews": "{{count}} 閲覧",
     "statLikes": "{{count}} いいね",
@@ -328,7 +326,32 @@
     "pinned": "ピン留め",
     "hot": "人気",
     "essence": "おすすめ",
-    "noPosts": "投稿がありません"
+    "noPosts": "投稿がありません",
+    "cat": {
+      "all": "すべて", "allDesc": "すべてのカテゴリの投稿",
+      "music": "音楽交流", "musicDesc": "音楽作品の共有と議論",
+      "production": "制作技術", "productionDesc": "編曲/ミキシング/マスタリング",
+      "gear": "機材共有", "gearDesc": "楽器/ハードウェア/ソフトウェア",
+      "video": "映像制作", "videoDesc": "MV/ショート動画/配信技術",
+      "collab": "コラボ募集", "collabDesc": "パートナー/チーム/メンバー募集",
+      "showcase": "作品展示", "showcaseDesc": "音楽/映像作品を披露",
+      "offtopic": "雑談", "offtopicDesc": "日常会話/交流"
+    },
+    "tag": {
+      "help": "質問", "share": "共有", "discuss": "議論",
+      "tutorial": "チュートリアル", "review": "レビュー", "resource": "リソース", "news": "ニュース"
+    },
+    "sort": {
+      "latest": "最新", "hot": "人気順", "views": "閲覧順", "comments": "コメント順"
+    },
+    "time": {
+      "justNow": "たった今",
+      "minutesAgo": "{{count}}分前",
+      "hoursAgo": "{{count}}時間前",
+      "daysAgo": "{{count}}日前"
+    },
+    "num": { "wan": "{{count}}万", "k": "{{count}}k" },
+    "level": { "admin": "管理者" }
   },
   "shop": {
     "title": "ショップ",

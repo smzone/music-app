@@ -315,8 +315,6 @@
     "postSuccess": "\uac8c\uc2dc\ub418\uc5c8\uc2b5\ub2c8\ub2e4!",
     "anonymous": "\uc775\uba85",
     "postsCount": "{{count}}개의 글",
-    "sort": "정렬",
-    "search": "글 검색...",
     "statPosts": "{{count}} 게시글",
     "statViews": "{{count}} 조회",
     "statLikes": "{{count}} 좋아요",
@@ -328,7 +326,32 @@
     "pinned": "고정",
     "hot": "인기",
     "essence": "추천",
-    "noPosts": "게시글이 없습니다"
+    "noPosts": "게시글이 없습니다",
+    "cat": {
+      "all": "전체", "allDesc": "모든 카테고리의 글",
+      "music": "음악 교류", "musicDesc": "음악 작품 공유 및 토론",
+      "production": "제작 기술", "productionDesc": "편곡/믹싱/마스터링",
+      "gear": "장비 공유", "gearDesc": "악기/하드웨어/소프트웨어",
+      "video": "영상 제작", "videoDesc": "MV/숏폼/스트리밍 기술",
+      "collab": "협업 모집", "collabDesc": "파트너/팀/멤버 모집",
+      "showcase": "작품 전시", "showcaseDesc": "음악/영상 작품 공개",
+      "offtopic": "자유 게시판", "offtopicDesc": "일상 대화/교류"
+    },
+    "tag": {
+      "help": "질문", "share": "공유", "discuss": "토론",
+      "tutorial": "튜토리얼", "review": "리뷰", "resource": "자료", "news": "뉴스"
+    },
+    "sort": {
+      "latest": "최신", "hot": "인기순", "views": "조회순", "comments": "댓글순"
+    },
+    "time": {
+      "justNow": "방금",
+      "minutesAgo": "{{count}}분 전",
+      "hoursAgo": "{{count}}시간 전",
+      "daysAgo": "{{count}}일 전"
+    },
+    "num": { "wan": "{{count}}만", "k": "{{count}}k" },
+    "level": { "admin": "관리자" }
   },
   "shop": {
     "title": "\uc0f5",
