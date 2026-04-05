@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { MessageSquare, Search, Pin, Flame, Star, Trash2, Filter } from 'lucide-react';
 import { initialPosts, forumCategories, formatTime, formatNum } from '../../data/forum';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 export default function ForumManagePage() {
+  const { t } = useTranslation();
   const [posts, setPosts] = useState(initialPosts);
   const [searchQ, setSearchQ] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -18,36 +20,36 @@ export default function ForumManagePage() {
 
   const togglePin = (id) => {
     setPosts(posts.map((p) => p.id === id ? { ...p, isPinned: !p.isPinned } : p));
-    toast.success('置顶状态已更新');
+    toast.success(t('forumMgr.pinUpdated'));
   };
 
   const toggleHot = (id) => {
     setPosts(posts.map((p) => p.id === id ? { ...p, isHot: !p.isHot } : p));
-    toast.success('热门状态已更新');
+    toast.success(t('forumMgr.hotUpdated'));
   };
 
   const toggleEssence = (id) => {
     setPosts(posts.map((p) => p.id === id ? { ...p, isEssence: !p.isEssence } : p));
-    toast.success('精华状态已更新');
+    toast.success(t('forumMgr.essenceUpdated'));
   };
 
   const deletePost = (id) => {
     setPosts(posts.filter((p) => p.id !== id));
-    toast.success('帖子已删除');
+    toast.success(t('forumMgr.postDeleted'));
   };
 
   // 统计数据
   const stats = [
-    { label: '总帖子', value: posts.length, icon: MessageSquare, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: '置顶帖', value: posts.filter((p) => p.isPinned).length, icon: Pin, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
-    { label: '热门帖', value: posts.filter((p) => p.isHot).length, icon: Flame, color: 'text-red-400', bg: 'bg-red-400/10' },
-    { label: '精华帖', value: posts.filter((p) => p.isEssence).length, icon: Star, color: 'text-yellow-300', bg: 'bg-yellow-300/10' },
+    { label: t('forumMgr.totalPosts'), value: posts.length, icon: MessageSquare, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: t('forumMgr.pinnedPosts'), value: posts.filter((p) => p.isPinned).length, icon: Pin, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
+    { label: t('forumMgr.hotPosts'), value: posts.filter((p) => p.isHot).length, icon: Flame, color: 'text-red-400', bg: 'bg-red-400/10' },
+    { label: t('forumMgr.essencePosts'), value: posts.filter((p) => p.isEssence).length, icon: Star, color: 'text-yellow-300', bg: 'bg-yellow-300/10' },
   ];
 
   return (
     <div className="animate-fadeIn">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">论坛管理</h1>
+        <h1 className="text-2xl font-bold text-white">{t('forumMgr.title')}</h1>
       </div>
 
       {/* 统计卡片 */}
@@ -70,16 +72,16 @@ export default function ForumManagePage() {
       <div className="flex items-center gap-3 mb-4">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input type="text" value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder="搜索帖子标题或作者..."
+          <input type="text" value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder={t('forumMgr.searchPH')}
             className="w-full bg-surface-light text-white pl-9 pr-4 py-2.5 rounded-xl outline-none border border-surface-lighter focus:border-primary text-sm placeholder:text-text-muted" />
         </div>
         <div className="flex items-center gap-1 bg-surface-light rounded-xl p-1 border border-surface-lighter">
           <Filter size={14} className="text-text-muted ml-2" />
           {[
-            { id: 'all', label: '全部' },
-            { id: 'pinned', label: '置顶' },
-            { id: 'hot', label: '热门' },
-            { id: 'essence', label: '精华' },
+            { id: 'all', label: t('forumMgr.filterAll') },
+            { id: 'pinned', label: t('forumMgr.filterPinned') },
+            { id: 'hot', label: t('forumMgr.filterHot') },
+            { id: 'essence', label: t('forumMgr.filterEssence') },
           ].map((f) => (
             <button key={f.id} onClick={() => setFilterStatus(f.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filterStatus === f.id ? 'bg-primary/15 text-primary' : 'text-text-muted hover:text-white'}`}>
@@ -95,13 +97,13 @@ export default function ForumManagePage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-surface-lighter text-text-muted text-left">
-                <th className="px-4 py-3 font-medium">帖子</th>
-                <th className="px-4 py-3 font-medium w-20">板块</th>
-                <th className="px-4 py-3 font-medium w-16 text-center">浏览</th>
-                <th className="px-4 py-3 font-medium w-16 text-center">点赞</th>
-                <th className="px-4 py-3 font-medium w-16 text-center">回复</th>
-                <th className="px-4 py-3 font-medium w-24">状态</th>
-                <th className="px-4 py-3 font-medium w-32 text-right">操作</th>
+                <th className="px-4 py-3 font-medium">{t('forumMgr.colPost')}</th>
+                <th className="px-4 py-3 font-medium w-20">{t('forumMgr.colCategory')}</th>
+                <th className="px-4 py-3 font-medium w-16 text-center">{t('forumMgr.colViews')}</th>
+                <th className="px-4 py-3 font-medium w-16 text-center">{t('forumMgr.colLikes')}</th>
+                <th className="px-4 py-3 font-medium w-16 text-center">{t('forumMgr.colReplies')}</th>
+                <th className="px-4 py-3 font-medium w-24">{t('forumMgr.colStatus')}</th>
+                <th className="px-4 py-3 font-medium w-32 text-right">{t('forumMgr.colActions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-lighter">
@@ -124,27 +126,27 @@ export default function ForumManagePage() {
                     <td className="px-4 py-3 text-xs text-text-muted text-center">{post.comments}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
-                        {post.isPinned && <span className="text-[10px] bg-yellow-500/15 text-yellow-400 px-1.5 py-0.5 rounded font-bold">顶</span>}
-                        {post.isHot && <span className="text-[10px] bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded font-bold">热</span>}
-                        {post.isEssence && <span className="text-[10px] bg-yellow-300/15 text-yellow-300 px-1.5 py-0.5 rounded font-bold">精</span>}
-                        {!post.isPinned && !post.isHot && !post.isEssence && <span className="text-[10px] text-text-muted">普通</span>}
+                        {post.isPinned && <span className="text-[10px] bg-yellow-500/15 text-yellow-400 px-1.5 py-0.5 rounded font-bold">{t('forumMgr.tagPin')}</span>}
+                        {post.isHot && <span className="text-[10px] bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded font-bold">{t('forumMgr.tagHot')}</span>}
+                        {post.isEssence && <span className="text-[10px] bg-yellow-300/15 text-yellow-300 px-1.5 py-0.5 rounded font-bold">{t('forumMgr.tagEssence')}</span>}
+                        {!post.isPinned && !post.isHot && !post.isEssence && <span className="text-[10px] text-text-muted">{t('forumMgr.tagNormal')}</span>}
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
-                        <button onClick={() => togglePin(post.id)} title="置顶"
+                        <button onClick={() => togglePin(post.id)} title={t('forumMgr.filterPinned')}
                           className={`p-1.5 rounded-lg transition-colors ${post.isPinned ? 'bg-yellow-500/15 text-yellow-400' : 'text-text-muted hover:text-yellow-400 hover:bg-yellow-500/10'}`}>
                           <Pin size={14} />
                         </button>
-                        <button onClick={() => toggleHot(post.id)} title="热门"
+                        <button onClick={() => toggleHot(post.id)} title={t('forumMgr.filterHot')}
                           className={`p-1.5 rounded-lg transition-colors ${post.isHot ? 'bg-red-500/15 text-red-400' : 'text-text-muted hover:text-red-400 hover:bg-red-500/10'}`}>
                           <Flame size={14} />
                         </button>
-                        <button onClick={() => toggleEssence(post.id)} title="精华"
+                        <button onClick={() => toggleEssence(post.id)} title={t('forumMgr.filterEssence')}
                           className={`p-1.5 rounded-lg transition-colors ${post.isEssence ? 'bg-yellow-300/15 text-yellow-300' : 'text-text-muted hover:text-yellow-300 hover:bg-yellow-300/10'}`}>
                           <Star size={14} />
                         </button>
-                        <button onClick={() => deletePost(post.id)} title="删除"
+                        <button onClick={() => deletePost(post.id)} title={t('forumMgr.delete')}
                           className="p-1.5 rounded-lg text-text-muted hover:text-danger hover:bg-danger/10 transition-colors">
                           <Trash2 size={14} />
                         </button>
@@ -157,7 +159,7 @@ export default function ForumManagePage() {
           </table>
         </div>
         {filtered.length === 0 && (
-          <div className="py-12 text-center text-text-muted text-sm">暂无匹配的帖子</div>
+          <div className="py-12 text-center text-text-muted text-sm">{t('forumMgr.noPosts')}</div>
         )}
       </div>
     </div>
