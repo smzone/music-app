@@ -7,56 +7,56 @@ import { useTranslation } from 'react-i18next';
 
 const plans = [
   {
-    id: 'free', name: '免费用户', price: 0, period: '', desc: '基础功能体验',
+    id: 'free', nameKey: 'membership.plan.free.name', price: 0, descKey: 'membership.plan.free.desc',
     gradient: 'from-gray-800/50 to-gray-900/50', borderColor: 'border-white/[0.06]', btnClass: 'bg-white/[0.06] text-text-secondary hover:bg-white/[0.1]',
-    badge: '', badgeColor: '',
-    features: [
-      { text: '浏览所有公开内容', included: true }, { text: '在线播放普通音质', included: true },
-      { text: '论坛浏览和评论', included: true }, { text: '观看免费视频', included: true },
-      { text: '高品质/无损音乐', included: false }, { text: 'VIP 专属视频', included: false },
-      { text: '商城专属折扣', included: false }, { text: '直播专属礼物', included: false },
-      { text: '去除广告', included: false },
+    badgeKey: '', badgeColor: '',
+    featureKeys: [
+      { key: 'membership.feat.browsePublic', included: true }, { key: 'membership.feat.normalQuality', included: true },
+      { key: 'membership.feat.forumRead', included: true }, { key: 'membership.feat.freeVideos', included: true },
+      { key: 'membership.feat.lossless', included: false }, { key: 'membership.feat.vipVideos', included: false },
+      { key: 'membership.feat.shopDiscount', included: false }, { key: 'membership.feat.liveGifts', included: false },
+      { key: 'membership.feat.noAds', included: false },
     ],
   },
   {
-    id: 'vip', name: 'VIP 会员', price: 19.9, period: '/月', desc: '畅享高品质内容',
+    id: 'vip', nameKey: 'membership.plan.vip.name', price: 19.9, descKey: 'membership.plan.vip.desc',
     gradient: 'from-primary/10 via-emerald-900/10 to-primary/5', borderColor: 'border-primary/40', btnClass: 'bg-primary hover:bg-primary-hover text-black',
-    badge: '热门', badgeColor: 'bg-primary text-black',
-    features: [
-      { text: '浏览所有公开内容', included: true }, { text: '高品质/无损音乐播放', included: true },
-      { text: '论坛发帖 + 置顶特权', included: true }, { text: '观看全部视频（含VIP）', included: true },
-      { text: 'VIP 专属视频', included: true }, { text: '商城 9 折优惠', included: true },
-      { text: '直播专属礼物', included: true }, { text: '去除广告', included: true },
-      { text: '专属客服通道', included: false },
+    badgeKey: 'membership.plan.vip.badge', badgeColor: 'bg-primary text-black',
+    featureKeys: [
+      { key: 'membership.feat.browsePublic', included: true }, { key: 'membership.feat.losslessPlay', included: true },
+      { key: 'membership.feat.forumPost', included: true }, { key: 'membership.feat.allVideos', included: true },
+      { key: 'membership.feat.vipVideos', included: true }, { key: 'membership.feat.shop90', included: true },
+      { key: 'membership.feat.liveGifts', included: true }, { key: 'membership.feat.noAds', included: true },
+      { key: 'membership.feat.vipSupport', included: false },
     ],
   },
   {
-    id: 'svip', name: '超级VIP', price: 49.9, period: '/月', desc: '全部权益 + 专属服务',
+    id: 'svip', nameKey: 'membership.plan.svip.name', price: 49.9, descKey: 'membership.plan.svip.desc',
     gradient: 'from-yellow-500/10 via-amber-900/10 to-orange-500/5', borderColor: 'border-yellow-500/40', btnClass: 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black',
-    badge: '尊享', badgeColor: 'bg-gradient-to-r from-yellow-500 to-orange-500 text-black',
-    features: [
-      { text: '包含 VIP 全部权益', included: true }, { text: '无损音质 + 独家曲目', included: true },
-      { text: '论坛专属标识 + 精华权限', included: true }, { text: '视频提前看 + 4K画质', included: true },
-      { text: '商城 8 折 + 专属商品', included: true }, { text: '直播连麦特权', included: true },
-      { text: '线下活动优先参与', included: true }, { text: '去除所有广告', included: true },
-      { text: '1对1 专属客服', included: true },
+    badgeKey: 'membership.plan.svip.badge', badgeColor: 'bg-gradient-to-r from-yellow-500 to-orange-500 text-black',
+    featureKeys: [
+      { key: 'membership.feat.allVip', included: true }, { key: 'membership.feat.exclusiveTracks', included: true },
+      { key: 'membership.feat.forumBadge', included: true }, { key: 'membership.feat.earlyAccess4k', included: true },
+      { key: 'membership.feat.shop80', included: true }, { key: 'membership.feat.liveCollab', included: true },
+      { key: 'membership.feat.offlineEvents', included: true }, { key: 'membership.feat.noAllAds', included: true },
+      { key: 'membership.feat.dedicatedSupport', included: true },
     ],
   },
 ];
 
-const benefits = [
-  { icon: Headphones, title: '无损音乐', desc: '享受 FLAC 无损音质，聆听每一个细节', color: 'text-green-400', bg: 'bg-green-500/10' },
-  { icon: Video, title: 'VIP 视频', desc: '解锁全部教程、幕后花絮等独家内容', color: 'text-red-400', bg: 'bg-red-500/10' },
-  { icon: MessageSquare, title: '论坛特权', desc: '专属标识、置顶帖子、精华权限', color: 'text-blue-400', bg: 'bg-blue-500/10' },
-  { icon: ShoppingBag, title: '商城折扣', desc: '专属优惠价格，优先购买限量商品', color: 'text-orange-400', bg: 'bg-orange-500/10' },
-  { icon: Zap, title: '直播互动', desc: '专属礼物、连麦特权、优先互动', color: 'text-purple-400', bg: 'bg-purple-500/10' },
-  { icon: Shield, title: '无广告', desc: '纯净体验，无任何广告干扰', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+const benefitItems = [
+  { icon: Headphones, titleKey: 'membership.benefit.lossless', descKey: 'membership.benefit.losslessDesc', color: 'text-green-400', bg: 'bg-green-500/10' },
+  { icon: Video, titleKey: 'membership.benefit.vipVideo', descKey: 'membership.benefit.vipVideoDesc', color: 'text-red-400', bg: 'bg-red-500/10' },
+  { icon: MessageSquare, titleKey: 'membership.benefit.forum', descKey: 'membership.benefit.forumDesc', color: 'text-blue-400', bg: 'bg-blue-500/10' },
+  { icon: ShoppingBag, titleKey: 'membership.benefit.shop', descKey: 'membership.benefit.shopDesc', color: 'text-orange-400', bg: 'bg-orange-500/10' },
+  { icon: Zap, titleKey: 'membership.benefit.live', descKey: 'membership.benefit.liveDesc', color: 'text-purple-400', bg: 'bg-purple-500/10' },
+  { icon: Shield, titleKey: 'membership.benefit.noAds', descKey: 'membership.benefit.noAdsDesc', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
 ];
 
-const stats = [
-  { value: '10,000+', label: '会员用户', icon: Users },
-  { value: '4.9', label: '用户评分', icon: Star },
-  { value: '99.9%', label: '续费率', icon: Sparkles },
+const statsItems = [
+  { value: '10,000+', labelKey: 'membership.stat.members', icon: Users },
+  { value: '4.9', labelKey: 'membership.stat.rating', icon: Star },
+  { value: '99.9%', labelKey: 'membership.stat.renewal', icon: Sparkles },
 ];
 
 export default function MembershipPage() {
@@ -69,7 +69,7 @@ export default function MembershipPage() {
   const handleSubscribe = (plan) => {
     if (!user) { toast.error(t('membership.loginFirst')); return; }
     if (plan.id === 'free') { toast(t('membership.alreadyFree')); return; }
-    toast.success(t('membership.comingSoon', { name: plan.name }));
+    toast.success(t('membership.comingSoon', { name: t(plan.nameKey) }));
   };
 
   return (
@@ -86,13 +86,13 @@ export default function MembershipPage() {
 
           {/* 数据统计 */}
           <div className="flex items-center justify-center gap-8 mt-8">
-            {stats.map((s, i) => {
+            {statsItems.map((s, i) => {
               const Icon = s.icon;
               return (
                 <div key={i} className="flex items-center gap-2">
                   <Icon size={16} className="text-yellow-400" />
                   <span className="text-white font-bold">{s.value}</span>
-                  <span className="text-text-muted text-sm">{s.label}</span>
+                  <span className="text-text-muted text-sm">{t(s.labelKey)}</span>
                 </div>
               );
             })}
@@ -126,18 +126,18 @@ export default function MembershipPage() {
               {/* 发光效果 */}
               {isPopular && <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-primary/20 to-transparent blur-sm -z-10" />}
 
-              {plan.badge && (
+              {plan.badgeKey && (
                 <span className={`absolute -top-3 right-6 px-4 py-1 text-xs font-bold rounded-full ${plan.badgeColor} shadow-lg`}>
-                  {plan.badge}
+                  {t(plan.badgeKey)}
                 </span>
               )}
 
-              <h3 className="text-xl font-bold text-white mb-1">{plan.name}</h3>
-              <p className="text-sm text-text-muted mb-5">{plan.desc}</p>
+              <h3 className="text-xl font-bold text-white mb-1">{t(plan.nameKey)}</h3>
+              <p className="text-sm text-text-muted mb-5">{t(plan.descKey)}</p>
 
               <div className="mb-6">
                 {plan.price === 0 ? (
-                  <span className="text-4xl font-black text-white">免费</span>
+                  <span className="text-4xl font-black text-white">{t('membership.free')}</span>
                 ) : (
                   <div className="flex items-baseline gap-1">
                     <span className="text-base text-text-muted">¥</span>
@@ -146,17 +146,17 @@ export default function MembershipPage() {
                   </div>
                 )}
                 {billingCycle === 'yearly' && plan.price > 0 && (
-                  <p className="text-xs text-text-muted mt-1.5">约 ¥{(plan.price * 0.8).toFixed(1)}/月，比月付节省 ¥{(plan.price * 12 * 0.2).toFixed(0)}</p>
+                  <p className="text-xs text-text-muted mt-1.5">{t('membership.yearlySaving', { monthly: (plan.price * 0.8).toFixed(1), save: (plan.price * 12 * 0.2).toFixed(0) })}</p>
                 )}
               </div>
 
               <button onClick={() => handleSubscribe(plan)}
                 className={`w-full py-3.5 rounded-full font-bold text-[15px] transition-all mb-7 ${plan.btnClass} ${isPopular ? 'shadow-[0_0_25px_rgba(29,185,84,0.2)]' : ''}`}>
-                {plan.id === 'free' ? '当前方案' : '立即订阅'}
+                {plan.id === 'free' ? t('membership.currentPlan') : t('membership.subscribe')}
               </button>
 
               <div className="space-y-3">
-                {plan.features.map((f, i) => (
+                {plan.featureKeys.map((f, i) => (
                   <div key={i} className="flex items-center gap-2.5 text-sm">
                     {f.included ? (
                       <div className="w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
@@ -165,7 +165,7 @@ export default function MembershipPage() {
                     ) : (
                       <div className="w-5 h-5 rounded-full bg-white/[0.04] shrink-0" />
                     )}
-                    <span className={f.included ? 'text-text-secondary' : 'text-text-muted/50'}>{f.text}</span>
+                    <span className={f.included ? 'text-text-secondary' : 'text-text-muted/50'}>{t(f.key)}</span>
                   </div>
                 ))}
               </div>
@@ -177,19 +177,19 @@ export default function MembershipPage() {
       {/* ===== 权益详情 ===== */}
       <div className="mb-20">
         <div className="text-center mb-10">
-          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-medium mb-3">权益一览</span>
-          <h2 className="text-3xl font-black text-white">会员专属权益</h2>
+          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-medium mb-3">{t('membership.benefitsTag')}</span>
+          <h2 className="text-3xl font-black text-white">{t('membership.benefitsTitle')}</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-          {benefits.map((b, i) => {
+          {benefitItems.map((b, i) => {
             const Icon = b.icon;
             return (
               <div key={i} className="group rounded-2xl p-6 border border-white/[0.06] bg-white/[0.02] hover:border-primary/20 transition-all duration-500 hover:-translate-y-1">
                 <div className={`w-12 h-12 rounded-2xl ${b.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <Icon size={22} className={b.color} />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">{b.title}</h3>
-                <p className="text-sm text-text-muted leading-relaxed">{b.desc}</p>
+                <h3 className="text-base font-bold text-white mb-2">{t(b.titleKey)}</h3>
+                <p className="text-sm text-text-muted leading-relaxed">{t(b.descKey)}</p>
               </div>
             );
           })}
@@ -199,26 +199,20 @@ export default function MembershipPage() {
       {/* ===== FAQ ===== */}
       <div className="smart-container-sm">
         <div className="text-center mb-8">
-          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-medium mb-3">帮助</span>
-          <h2 className="text-3xl font-black text-white">常见问题</h2>
+          <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-medium mb-3">{t('membership.faqTag')}</span>
+          <h2 className="text-3xl font-black text-white">{t('membership.faqTitle')}</h2>
         </div>
         <div className="space-y-3">
-          {[
-            { q: '如何开通会员？', a: '选择合适的套餐，点击"立即订阅"，支持微信/支付宝/银行卡支付。' },
-            { q: '会员可以随时取消吗？', a: '可以。取消后当前周期内仍可享受会员权益，到期后自动降为免费用户。' },
-            { q: '年付有什么优惠？', a: '年付相比月付可节省20%，是性价比最高的选择。' },
-            { q: '支持哪些支付方式？', a: '支持微信支付、支付宝、银行卡等主流支付方式。' },
-            { q: 'VIP 和超级VIP 有什么区别？', a: '超级VIP 包含 VIP 的全部权益，额外提供无损音质独家曲目、视频提前看4K画质、商城8折专属商品、直播连麦特权、线下活动优先参与和1对1专属客服。' },
-          ].map((item, i) => (
+          {[0, 1, 2, 3, 4].map((i) => (
             <button key={i} onClick={() => setOpenFaq(openFaq === i ? null : i)}
               className="w-full rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] transition-all text-left overflow-hidden">
               <div className="flex items-center justify-between p-5">
-                <h3 className="text-[15px] font-semibold text-white">{item.q}</h3>
+                <h3 className="text-[15px] font-semibold text-white">{t(`membership.faq.${i}.q`)}</h3>
                 <ChevronDown size={16} className={`text-text-muted shrink-0 transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
               </div>
               {openFaq === i && (
                 <div className="px-5 pb-5 -mt-1">
-                  <p className="text-sm text-text-muted leading-relaxed">{item.a}</p>
+                  <p className="text-sm text-text-muted leading-relaxed">{t(`membership.faq.${i}.a`)}</p>
                 </div>
               )}
             </button>
