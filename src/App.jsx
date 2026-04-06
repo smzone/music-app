@@ -26,6 +26,7 @@ const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 const ReleasesPage = lazy(() => import('./pages/ReleasesPage'));
 const ReleaseDetailPage = lazy(() => import('./pages/ReleaseDetailPage'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 
 // 管理后台 — 按需加载
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -86,6 +87,7 @@ function App() {
             <Route path="/profile" element={<AuthGuard><UserProfilePage /></AuthGuard>} />
             <Route path="/releases" element={<ReleasesPage />} />
             <Route path="/releases/:id" element={<ReleaseDetailPage />} />
+            <Route path="/notifications" element={<AuthGuard><NotificationsPage /></AuthGuard>} />
           </Route>
 
           {/* 独立页面（无顶部导航） */}

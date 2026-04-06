@@ -5,7 +5,6 @@ import usePlayerStore from '../store/usePlayerStore';
 import useSongStore from '../store/useSongStore';
 import useAuthStore from '../store/useAuthStore';
 import { getAverageRating, formatDuration } from '../data/songs';
-import { songsData } from '../data/songs';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
@@ -213,8 +212,9 @@ function FeaturedSongCard({ song, index }) {
 // 歌曲展示区
 function MusicSection() {
   const { t } = useTranslation();
+  const songs = useSongStore((s) => s.songs);
   const [showAll, setShowAll] = useState(false);
-  const displaySongs = showAll ? songsData : songsData.slice(0, 6);
+  const displaySongs = showAll ? songs : songs.slice(0, 6);
 
   return (
     <section id="music" className="py-24 px-6 bg-[#0a0a0f]">
@@ -231,13 +231,13 @@ function MusicSection() {
           ))}
         </div>
 
-        {songsData.length > 6 && (
+        {songs.length > 6 && (
           <div className="text-center mt-12">
             <button
               onClick={() => setShowAll(!showAll)}
               className="px-8 py-3.5 border border-primary/50 text-primary font-bold rounded-full hover:bg-primary hover:text-black transition-all text-[15px] hover:shadow-[0_0_30px_rgba(29,185,84,0.15)]"
             >
-              {showAll ? t('landing.collapse') : t('landing.viewAllSongs', { count: songsData.length })}
+              {showAll ? t('landing.collapse') : t('landing.viewAllSongs', { count: songs.length })}
             </button>
           </div>
         )}

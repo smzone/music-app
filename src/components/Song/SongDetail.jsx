@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Play, Heart, Share2 } from 'lucide-react';
 import useSongStore from '../../store/useSongStore';
 import usePlayerStore from '../../store/usePlayerStore';
@@ -11,10 +11,18 @@ import { useTranslation } from 'react-i18next';
 
 export default function SongDetail() {
   const { t } = useTranslation();
-  const { detailSong, closeDetail, toggleFavorite, isFavorite, rateSong, userRatings } = useSongStore();
+  const { detailSong, closeDetail, toggleFavorite, isFavorite, rateSong, userRatings, loadComments, subscribeToComments, unsubscribeComments } = useSongStore();
   const { playSong } = usePlayerStore();
   const { user, openAuth } = useAuthStore();
   const [activeTab, setActiveTab] = useState('comments');
+
+  // 打开详情时加载评论 + 订阅 Realtime
+  useEffect(() => {
+    if (!detailSong) return;
+    loadComments(detailSong.id);
+    subscribeToComments(detailSong.id);
+    return () => unsubscribeComments();
+  }, [detailSong, loadComments, subscribeToComments, unsubscribeComments]);
 
   if (!detailSong) return null;
 

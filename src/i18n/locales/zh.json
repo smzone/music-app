@@ -14,7 +14,18 @@
     "profile": "个人主页",
     "skipNav": "跳过导航，直达内容",
     "tasks": "悬赏",
-    "releases": "发布"
+    "releases": "发布",
+    "notifications": "通知"
+  },
+  "notifications": {
+    "title": "消息通知",
+    "unread": "条未读",
+    "markAllRead": "全部已读",
+    "empty": "暂无通知",
+    "loadMore": "加载更多",
+    "loginRequired": "请先登录查看通知",
+    "system": "系统",
+    "defaultMsg": "给你发了一条消息"
   },
   "home": {
     "title": "首页",

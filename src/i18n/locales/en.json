@@ -14,7 +14,18 @@
     "profile": "Profile",
     "skipNav": "Skip to content",
     "tasks": "Tasks",
-    "releases": "Releases"
+    "releases": "Releases",
+    "notifications": "Notifications"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unread": "unread",
+    "markAllRead": "Mark all read",
+    "empty": "No notifications",
+    "loadMore": "Load more",
+    "loginRequired": "Please log in to view notifications",
+    "system": "System",
+    "defaultMsg": "sent you a message"
   },
   "home": {
     "title": "Home",

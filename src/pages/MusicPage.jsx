@@ -1,11 +1,11 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Play, Heart, Star, Search, ListMusic, Shuffle, Clock, Disc3, TrendingUp, Headphones, BarChart3, Music } from 'lucide-react';
+import { Play, Heart, Star, Search, ListMusic, Shuffle, Clock, Disc3, TrendingUp, Headphones, BarChart3, Music, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import SongContextMenu from '../components/Song/SongContextMenu';
 import usePlayerStore from '../store/usePlayerStore';
 import useSongStore from '../store/useSongStore';
 import useAuthStore from '../store/useAuthStore';
-import { songsData, genreKeys, formatDuration, getAverageRating } from '../data/songs';
+import { genreKeys, formatDuration, getAverageRating } from '../data/songs';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
@@ -77,7 +77,7 @@ export default function MusicPage() {
   const [searchQ, setSearchQ] = useState('');
   const [ctxMenu, setCtxMenu] = useState(null); // { x, y, song }
   const { setPlaylist, playSong } = usePlayerStore();
-  const { toggleFavorite, isFavorite } = useSongStore();
+  const { songs, songsLoading, toggleFavorite, isFavorite } = useSongStore();
   const authUser = useAuthStore((s) => s.user);
 
   // 右键菜单
@@ -114,31 +114,31 @@ export default function MusicPage() {
     },
     download: () => toast(t('music.ctx.downloadTip'), { icon: '📥' }),
     startRadio: () => {
-      const sameSongs = songsData.filter(s => s.genre === ctxMenu.song.genre).sort(() => Math.random() - 0.5);
+      const sameSongs = songs.filter(s => s.genre === ctxMenu.song.genre).sort(() => Math.random() - 0.5);
       setPlaylist(sameSongs, 0);
       toast.success(t('music.ctx.radioStarted'));
     },
     detail: () => navigate(`/songs/${ctxMenu.song.id}`),
   } : {};
 
-  const filtered = songsData.filter((s) => {
+  const filtered = useMemo(() => songs.filter((s) => {
     const matchGenre = activeGenre === 'all' || s.genre === activeGenre;
     const matchSearch = !searchQ || s.title.toLowerCase().includes(searchQ.toLowerCase()) || s.artist.toLowerCase().includes(searchQ.toLowerCase());
     return matchGenre && matchSearch;
-  });
+  }), [songs, activeGenre, searchQ]);
 
   // 热门歌曲（按评分排序前5）
   const hotSongs = useMemo(() =>
-    [...songsData].sort((a, b) => getAverageRating(b.ratings) - getAverageRating(a.ratings)).slice(0, 5),
-  []);
+    [...songs].sort((a, b) => getAverageRating(b.ratings || []) - getAverageRating(a.ratings || [])).slice(0, 5),
+  [songs]);
 
   // 统计数据
   const totalDuration = useMemo(() => {
-    const total = songsData.reduce((sum, s) => sum + s.duration, 0);
+    const total = songs.reduce((sum, s) => sum + (s.duration || 0), 0);
     const h = Math.floor(total / 3600);
     const m = Math.floor((total % 3600) / 60);
     return `${h}${t('music.hour')}${m}${t('music.minute')}`;
-  }, [t]);
+  }, [songs, t]);
 
   const handlePlayAll = () => {
     if (filtered.length === 0) return;
@@ -170,7 +170,7 @@ export default function MusicPage() {
               <Disc3 size={11} className="inline mr-1" /> {t('music.badge')}
             </span>
             <h1 className="text-4xl lg:text-5xl font-black text-white mb-3 tracking-tight">{t('music.heroTitle')}</h1>
-            <p className="text-text-secondary mb-5 text-base">{t('music.heroDesc', { count: songsData.length, duration: totalDuration })}</p>
+            <p className="text-text-secondary mb-5 text-base">{t('music.heroDesc', { count: songs.length, duration: totalDuration })}</p>
             <div className="flex items-center gap-3">
               <button onClick={handlePlayAll}
                 className="flex items-center gap-2 px-7 py-3.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-full transition-all hover:shadow-[0_0_30px_rgba(29,185,84,0.3)] text-[15px]">
@@ -185,7 +185,7 @@ export default function MusicPage() {
           {/* 右侧统计数据 */}
           <div className="hidden lg:flex items-center gap-6 text-center pb-2">
             <div>
-              <p className="text-2xl font-black text-white">{songsData.length}</p>
+              <p className="text-2xl font-black text-white">{songs.length}</p>
               <p className="text-xs text-text-muted mt-1">{t('music.songs')}</p>
             </div>
             <div className="w-px h-8 bg-white/10" />
@@ -233,12 +233,20 @@ export default function MusicPage() {
               <span><Clock size={12} className="inline" /></span>
               <span></span>
             </div>
-            {filtered.map((song, i) => <SongRow key={song.id} song={song} index={i} onContextMenu={handleContextMenu} />)}
-            {filtered.length === 0 && (
-              <div className="py-20 text-center text-text-muted">
-                <Music size={36} className="mx-auto mb-3 opacity-30" />
-                <p className="text-sm">{t('music.noResults')}</p>
+            {songsLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 size={28} className="animate-spin text-primary" />
               </div>
+            ) : (
+              <>
+                {filtered.map((song, i) => <SongRow key={song.id} song={song} index={i} onContextMenu={handleContextMenu} />)}
+                {filtered.length === 0 && (
+                  <div className="py-20 text-center text-text-muted">
+                    <Music size={36} className="mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">{t('music.noResults')}</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -306,8 +314,8 @@ export default function MusicPage() {
             </h3>
             <div className="space-y-3">
               {genreKeys.filter((g) => g !== 'all').map((g) => {
-                const count = songsData.filter((s) => s.genre === g).length;
-                const pct = Math.round((count / songsData.length) * 100);
+                const count = songs.filter((s) => s.genre === g).length;
+                const pct = songs.length > 0 ? Math.round((count / songs.length) * 100) : 0;
                 return (
                   <div key={g}>
                     <div className="flex items-center justify-between mb-1">

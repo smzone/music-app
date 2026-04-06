@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2 } from 'lucide-react';
+import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell } from 'lucide-react';
 import useAuthStore, { hasRole, ROLES } from '../../store/useAuthStore';
+import useNotificationStore from '../../store/useNotificationStore';
 import MusicPlayer from '../Player/MusicPlayer';
 import usePlayerStore from '../../store/usePlayerStore';
 import ScrollProgress from './ScrollProgress';
@@ -29,6 +30,7 @@ export default function MainLayout() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const { showPlayer } = usePlayerStore();
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
   const location = useLocation();
 
   // 路由变化时关闭菜单
@@ -81,6 +83,17 @@ export default function MainLayout() {
 
           {/* 右侧操作区 */}
           <div className="flex items-center gap-2.5">
+            {/* 通知铃铛 */}
+            {user && (
+              <Link to="/notifications" className="relative p-2 rounded-xl hover:bg-white/[0.05] transition-colors" aria-label={t('nav.notifications')}>
+                <Bell size={18} className="text-text-muted hover:text-white transition-colors" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-[0_0_8px_rgba(239,68,68,0.4)]">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
             {user ? (
               <div className="relative">
                 <button onClick={() => setUserMenuOpen(!userMenuOpen)}

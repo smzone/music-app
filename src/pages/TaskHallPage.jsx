@@ -1,11 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Target, DollarSign, Clock, Users, Search, Plus, X, Filter, TrendingUp,
   CheckCircle2, AlertCircle, Timer, ChevronDown, Eye, MessageSquare, Zap,
   Music, Mic, Video, Palette, Code, PenTool, Award, ArrowUpRight, Bookmark,
-  Flame
+  Flame, Loader2
 } from 'lucide-react';
 import useAuthStore, { PERMISSIONS, hasPermission } from '../store/useAuthStore';
+import useTaskStore from '../store/useTaskStore';
+import { isSupabaseConfigured } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
@@ -248,9 +250,19 @@ export default function TaskHallPage() {
   const [searchQ, setSearchQ] = useState('');
   const [sortBy, setSortBy] = useState('latest');
   const [showNewTask, setShowNewTask] = useState(false);
-  const [tasks, setTasks] = useState(tasksData);
+  const [localTasks, setLocalTasks] = useState(tasksData);
   const [savedTasks, setSavedTasks] = useState(new Set());
   const { user } = useAuthStore();
+
+  // Supabase 模式下从 store 读数据
+  const useRemote = isSupabaseConfigured;
+  const { tasks: remoteTasks, tasksLoading, loadTasks, createTask: storeCreateTask, applyTask } = useTaskStore();
+
+  useEffect(() => {
+    if (useRemote) loadTasks({ category: activeCategory, search: searchQ });
+  }, [useRemote, activeCategory, searchQ, loadTasks]);
+
+  const tasks = useRemote ? remoteTasks : localTasks;
 
   // 筛选 + 排序
   const filtered = useMemo(() => {
@@ -276,14 +288,29 @@ export default function TaskHallPage() {
   const openCount = tasks.filter(t => t.status === 'open').length;
 
   // 发布新任务
-  const handleNewTask = (data) => {
-    const newTask = {
-      id: Date.now(), ...data, budget: data.budgetMin, budgetMax: data.budgetMax, currency: '¥',
-      poster: user?.username || t('taskHall.anonymous'), posterAvatar: user?.avatar || '😊', posterLevel: 'normal',
-      status: 'open', applicants: 0, views: 0, comments: 0,
-      createdAt: new Date().toISOString(), isPinned: false, isHot: false,
-    };
-    setTasks([newTask, ...tasks]);
+  const handleNewTask = async (data) => {
+    if (useRemote) {
+      const taskData = {
+        title: data.title,
+        description: data.desc,
+        category: data.category,
+        budget_min: data.budgetMin,
+        budget_max: data.budgetMax,
+        deadline: data.deadline || null,
+        skills: data.skills,
+        urgency: data.urgency,
+      };
+      const { error } = await storeCreateTask(taskData, user);
+      if (error) { toast.error(t('taskHall.publishFailed')); return; }
+    } else {
+      const newTask = {
+        id: Date.now(), ...data, budget: data.budgetMin, budgetMax: data.budgetMax, currency: '¥',
+        poster: user?.username || t('taskHall.anonymous'), posterAvatar: user?.avatar || '😊', posterLevel: 'normal',
+        status: 'open', applicants: 0, views: 0, comments: 0,
+        createdAt: new Date().toISOString(), isPinned: false, isHot: false,
+      };
+      setLocalTasks([newTask, ...localTasks]);
+    }
     toast.success(t('taskHall.publishSuccess'));
   };
 
@@ -384,8 +411,13 @@ export default function TaskHallPage() {
           </div>
 
           {/* 任务卡片列表 */}
+          {tasksLoading && (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 size={28} className="animate-spin text-amber-400" />
+            </div>
+          )}
           <div className="space-y-4">
-            {filtered.map(task => {
+            {!tasksLoading && filtered.map(task => {
               const stCfg = statusConfig[task.status];
               const StIcon = stCfg.icon;
               const days = daysLeft(task.deadline);
@@ -456,7 +488,7 @@ export default function TaskHallPage() {
                       </button>
                       {/* 查看详情/投标 */}
                       {task.status === 'open' && (
-                        <button onClick={() => { if (!user) { toast.error(t('taskHall.loginFirst')); return; } if (!hasPermission(user.role, PERMISSIONS.COMMENT)) { toast.error(t('permission.noPermission')); return; } toast.success(t('taskHall.applied')); }}
+                        <button onClick={async () => { if (!user) { toast.error(t('taskHall.loginFirst')); return; } if (!hasPermission(user.role, PERMISSIONS.COMMENT)) { toast.error(t('permission.noPermission')); return; } if (useRemote) { const { error } = await applyTask(task.id, user.id); if (error) { toast.error(t('taskHall.applyFailed')); return; } } toast.success(t('taskHall.applied')); }}
                           className="flex items-center gap-1 px-3.5 py-1.5 bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 rounded-lg text-xs font-bold transition-colors">
                           {t('taskHall.applyNow')} <ArrowUpRight size={12} />
                         </button>

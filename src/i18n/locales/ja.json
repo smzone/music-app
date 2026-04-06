@@ -14,7 +14,18 @@
     "profile": "マイページ",
     "skipNav": "コンテンツへスキップ",
     "tasks": "タスク",
-    "releases": "リリース"
+    "releases": "リリース",
+    "notifications": "通知"
+  },
+  "notifications": {
+    "title": "通知",
+    "unread": "件未読",
+    "markAllRead": "すべて既読にする",
+    "empty": "通知はありません",
+    "loadMore": "もっと読み込む",
+    "loginRequired": "通知を表示するにはログインしてください",
+    "system": "システム",
+    "defaultMsg": "からメッセージが届きました"
   },
   "home": {
     "title": "ホーム",
