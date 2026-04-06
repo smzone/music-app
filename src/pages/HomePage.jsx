@@ -185,7 +185,7 @@ export default function HomePage() {
           <h2 className="text-3xl md:text-5xl font-black text-white mb-4">{t('home.exploreWorld')}</h2>
           <p className="text-text-secondary max-w-lg mx-auto text-base">{t('home.exploreWorldDesc')}</p>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
           {sectionKeys.map((s) => {
             const Icon = s.icon;
             return (
