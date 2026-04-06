@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { isSupabaseConfigured } from '../lib/supabase';
-import { signIn, signUp, signOut, onAuthStateChange } from '../lib/supabaseService';
+import {
+  signIn, signUp, signOut, onAuthStateChange,
+  fetchProfile as fetchProfileApi, updateProfile as updateProfileApi,
+} from '../lib/supabaseService';
 
 // ========== 权限定义 ==========
 // 角色: admin(管理员) > moderator(版主) > vip(VIP会员) > user(普通用户) > guest(游客)
@@ -109,14 +112,18 @@ const useAuthStore = create(
         if (isSupabaseConfigured) {
           set({ loading: true });
           const { data, error } = await signIn(username, password);
-          set({ loading: false });
-          if (error) return false;
+          if (error) { set({ loading: false }); return false; }
+          // 从 profiles 表拉取真实角色和资料
+          const profile = await fetchProfileApi(data.user.id);
           set({
+            loading: false,
             user: createUserObj({
               id: data.user.id,
-              username: data.user.user_metadata?.username || username,
+              username: profile?.username || data.user.user_metadata?.username || username,
               email: data.user.email,
-              role: ROLES.USER,
+              avatar: profile?.avatar_url || '🎵',
+              role: profile?.role || ROLES.USER,
+              bio: profile?.bio || '',
             }),
             showAuthModal: false,
           });
@@ -151,14 +158,16 @@ const useAuthStore = create(
       register: async (username, password, extra = {}) => {
         if (isSupabaseConfigured) {
           set({ loading: true });
-          const { data, error } = await signUp(username, password, username);
-          set({ loading: false });
-          if (error) return false;
+          // Supabase Auth 用 email 注册，username 存入 metadata
+          const email = extra.email || `${username}@myspace.music`;
+          const { data, error } = await signUp(email, password, username);
+          if (error) { set({ loading: false }); return false; }
           set({
+            loading: false,
             user: createUserObj({
               id: data.user?.id,
               username,
-              email: extra.email || '',
+              email,
               avatar: extra.avatar || '🎵',
               role: ROLES.USER,
             }),
@@ -182,11 +191,22 @@ const useAuthStore = create(
         return false;
       },
 
-      // 更新用户资料
-      updateProfile: (updates) => {
+      // 更新用户资料（本地 + Supabase 同步）
+      updateProfile: async (updates) => {
         const { user } = get();
         if (!user) return;
+        // 先更新本地状态
         set({ user: { ...user, ...updates, lastActive: new Date().toISOString() } });
+        // Supabase 模式下同步到远端 profiles 表
+        if (isSupabaseConfigured) {
+          const remoteUpdates = {};
+          if (updates.username) remoteUpdates.username = updates.username;
+          if (updates.avatar) remoteUpdates.avatar_url = updates.avatar;
+          if (updates.bio !== undefined) remoteUpdates.bio = updates.bio;
+          if (Object.keys(remoteUpdates).length > 0) {
+            await updateProfileApi(user.id, remoteUpdates);
+          }
+        }
       },
 
       // 检查当前用户是否有权限
@@ -212,16 +232,21 @@ const useAuthStore = create(
       // 初始化认证监听（Supabase 模式下使用）
       initAuth: () => {
         if (!isSupabaseConfigured) return;
-        onAuthStateChange((event, session) => {
+        onAuthStateChange(async (event, session) => {
           if (session?.user) {
+            // 从 profiles 表拉取角色和资料
+            const profile = await fetchProfileApi(session.user.id);
             set({
               user: createUserObj({
                 id: session.user.id,
-                username: session.user.user_metadata?.username || session.user.email,
+                username: profile?.username || session.user.user_metadata?.username || session.user.email,
                 email: session.user.email,
+                avatar: profile?.avatar_url || '🎵',
+                role: profile?.role || ROLES.USER,
+                bio: profile?.bio || '',
               }),
             });
-          } else {
+          } else if (event === 'SIGNED_OUT') {
             set({ user: null });
           }
         });

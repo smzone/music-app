@@ -167,3 +167,379 @@ export async function removeSongFromPlaylist(playlistId, songId) {
   if (!isSupabaseConfigured) return;
   await supabase.from('playlist_songs').delete().eq('playlist_id', playlistId).eq('song_id', songId);
 }
+
+// ============ 用户资料相关 ============
+
+// 获取用户资料（含关注数/粉丝数）
+export async function fetchProfile(userId) {
+  if (!isSupabaseConfigured) return null;
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+  if (error) { console.error('获取资料失败:', error); return null; }
+  return data;
+}
+
+// 更新用户资料
+export async function updateProfile(userId, updates) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', userId)
+    .select()
+    .single();
+  return { data, error };
+}
+
+// 获取用户列表（管理后台用）
+export async function fetchAllProfiles({ page = 1, pageSize = 20, search = '', role = '' } = {}) {
+  if (!isSupabaseConfigured) return { data: [], count: 0 };
+  let query = supabase
+    .from('profiles')
+    .select('*', { count: 'exact' });
+  if (search) query = query.or(`username.ilike.%${search}%,bio.ilike.%${search}%`);
+  if (role) query = query.eq('role', role);
+  const { data, count, error } = await query
+    .order('created_at', { ascending: false })
+    .range((page - 1) * pageSize, page * pageSize - 1);
+  if (error) { console.error('获取用户列表失败:', error); return { data: [], count: 0 }; }
+  return { data: data || [], count: count || 0 };
+}
+
+// 更新用户角色（管理员操作）
+export async function updateUserRole(userId, role) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  return updateProfile(userId, { role });
+}
+
+// 更新用户状态（管理员操作）
+export async function updateUserStatus(userId, status) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  return updateProfile(userId, { status });
+}
+
+// ============ 论坛帖子相关 ============
+
+// 获取帖子列表（支持分页/分类/排序/搜索）
+export async function fetchForumPosts({
+  page = 1, pageSize = 20, category = 'all', sort = 'latest', search = ''
+} = {}) {
+  if (!isSupabaseConfigured) return { data: [], count: 0 };
+  let query = supabase
+    .from('forum_posts')
+    .select('*, profiles:author_id(username, avatar_url, role)', { count: 'exact' })
+    .eq('status', 'active');
+
+  if (category && category !== 'all') query = query.eq('category', category);
+  if (search) query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`);
+
+  // 置顶帖优先
+  switch (sort) {
+    case 'hot':    query = query.order('is_pinned', { ascending: false }).order('like_count', { ascending: false }); break;
+    case 'views':  query = query.order('is_pinned', { ascending: false }).order('view_count', { ascending: false }); break;
+    case 'comments': query = query.order('is_pinned', { ascending: false }).order('reply_count', { ascending: false }); break;
+    default:       query = query.order('is_pinned', { ascending: false }).order('created_at', { ascending: false }); break;
+  }
+
+  const { data, count, error } = await query.range((page - 1) * pageSize, page * pageSize - 1);
+  if (error) { console.error('获取帖子失败:', error); return { data: [], count: 0 }; }
+  return { data: data || [], count: count || 0 };
+}
+
+// 获取单个帖子详情（含浏览+1）
+export async function fetchForumPost(postId) {
+  if (!isSupabaseConfigured) return null;
+  // 浏览数+1
+  await supabase.rpc('increment_post_views', { post_id: postId });
+  const { data, error } = await supabase
+    .from('forum_posts')
+    .select('*, profiles:author_id(username, avatar_url, role)')
+    .eq('id', postId)
+    .single();
+  if (error) { console.error('获取帖子详情失败:', error); return null; }
+  return data;
+}
+
+// 创建帖子
+export async function createForumPost(postData) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { data, error } = await supabase
+    .from('forum_posts')
+    .insert(postData)
+    .select('*, profiles:author_id(username, avatar_url, role)')
+    .single();
+  return { data, error };
+}
+
+// 更新帖子（编辑/置顶/精华/热门等）
+export async function updateForumPost(postId, updates) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { data, error } = await supabase
+    .from('forum_posts')
+    .update(updates)
+    .eq('id', postId)
+    .select()
+    .single();
+  return { data, error };
+}
+
+// 删除帖子（软删除）
+export async function deleteForumPost(postId) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  return updateForumPost(postId, { status: 'deleted' });
+}
+
+// ============ 论坛回复相关 ============
+
+// 获取帖子的回复列表
+export async function fetchForumReplies(postId) {
+  if (!isSupabaseConfigured) return [];
+  const { data, error } = await supabase
+    .from('forum_replies')
+    .select('*, profiles:author_id(username, avatar_url, role)')
+    .eq('post_id', postId)
+    .order('created_at', { ascending: true });
+  if (error) { console.error('获取回复失败:', error); return []; }
+  return data || [];
+}
+
+// 发表回复
+export async function createForumReply({ post_id, author_id, content, parent_id = null }) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { data, error } = await supabase
+    .from('forum_replies')
+    .insert({ post_id, author_id, content, parent_id })
+    .select('*, profiles:author_id(username, avatar_url, role)')
+    .single();
+  return { data, error };
+}
+
+// 删除回复
+export async function deleteForumReply(replyId) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { error } = await supabase.from('forum_replies').delete().eq('id', replyId);
+  return { error };
+}
+
+// ============ 论坛点赞相关 ============
+
+// 帖子点赞/取消点赞
+export async function togglePostLike(userId, postId) {
+  if (!isSupabaseConfigured) return { liked: false };
+  const { data: existing } = await supabase
+    .from('forum_likes')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('post_id', postId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase.from('forum_likes').delete().eq('id', existing.id);
+    await supabase.from('forum_posts').update({ like_count: supabase.rpc ? undefined : 0 }).eq('id', postId);
+    // 简化：直接用 SQL 自减
+    await supabase.rpc('decrement_post_likes', { p_id: postId }).catch(() => {});
+    return { liked: false };
+  } else {
+    await supabase.from('forum_likes').insert({ user_id: userId, post_id: postId });
+    await supabase.rpc('increment_post_likes', { p_id: postId }).catch(() => {});
+    return { liked: true };
+  }
+}
+
+// 检查是否已点赞帖子
+export async function checkPostLiked(userId, postId) {
+  if (!isSupabaseConfigured) return false;
+  const { data } = await supabase
+    .from('forum_likes')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('post_id', postId)
+    .maybeSingle();
+  return !!data;
+}
+
+// ============ 关注相关 ============
+
+// 关注用户
+export async function followUser(followerId, followingId) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { error } = await supabase
+    .from('follows')
+    .insert({ follower_id: followerId, following_id: followingId });
+  return { error };
+}
+
+// 取消关注
+export async function unfollowUser(followerId, followingId) {
+  if (!isSupabaseConfigured) return;
+  await supabase.from('follows').delete()
+    .eq('follower_id', followerId)
+    .eq('following_id', followingId);
+}
+
+// 检查是否已关注
+export async function checkFollowing(followerId, followingId) {
+  if (!isSupabaseConfigured) return false;
+  const { data } = await supabase
+    .from('follows')
+    .select('id')
+    .eq('follower_id', followerId)
+    .eq('following_id', followingId)
+    .maybeSingle();
+  return !!data;
+}
+
+// 获取关注/粉丝数
+export async function fetchFollowCounts(userId) {
+  if (!isSupabaseConfigured) return { followers: 0, following: 0 };
+  const [{ count: followers }, { count: following }] = await Promise.all([
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', userId),
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', userId),
+  ]);
+  return { followers: followers || 0, following: following || 0 };
+}
+
+// ============ 通知相关 ============
+
+// 获取用户通知列表
+export async function fetchNotifications(userId, { page = 1, pageSize = 30, unreadOnly = false } = {}) {
+  if (!isSupabaseConfigured) return { data: [], count: 0 };
+  let query = supabase
+    .from('notifications')
+    .select('*, sender:sender_id(username, avatar_url)', { count: 'exact' })
+    .eq('user_id', userId);
+  if (unreadOnly) query = query.eq('is_read', false);
+  const { data, count, error } = await query
+    .order('created_at', { ascending: false })
+    .range((page - 1) * pageSize, page * pageSize - 1);
+  if (error) { console.error('获取通知失败:', error); return { data: [], count: 0 }; }
+  return { data: data || [], count: count || 0 };
+}
+
+// 未读通知数
+export async function fetchUnreadCount(userId) {
+  if (!isSupabaseConfigured) return 0;
+  const { count } = await supabase
+    .from('notifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('is_read', false);
+  return count || 0;
+}
+
+// 标记通知已读
+export async function markNotificationRead(notificationId) {
+  if (!isSupabaseConfigured) return;
+  await supabase.from('notifications').update({ is_read: true }).eq('id', notificationId);
+}
+
+// 全部标记已读
+export async function markAllNotificationsRead(userId) {
+  if (!isSupabaseConfigured) return;
+  await supabase.from('notifications').update({ is_read: true }).eq('user_id', userId).eq('is_read', false);
+}
+
+// ============ 任务大厅相关 ============
+
+// 获取任务列表
+export async function fetchTasks({ page = 1, pageSize = 20, category = 'all', status = '', search = '' } = {}) {
+  if (!isSupabaseConfigured) return { data: [], count: 0 };
+  let query = supabase
+    .from('tasks')
+    .select('*, profiles:creator_id(username, avatar_url)', { count: 'exact' });
+  if (category && category !== 'all') query = query.eq('category', category);
+  if (status) query = query.eq('status', status);
+  if (search) query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+  const { data, count, error } = await query
+    .order('created_at', { ascending: false })
+    .range((page - 1) * pageSize, page * pageSize - 1);
+  if (error) { console.error('获取任务失败:', error); return { data: [], count: 0 }; }
+  return { data: data || [], count: count || 0 };
+}
+
+// 创建任务
+export async function createTask(taskData) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { data, error } = await supabase
+    .from('tasks')
+    .insert(taskData)
+    .select('*, profiles:creator_id(username, avatar_url)')
+    .single();
+  return { data, error };
+}
+
+// 申请任务
+export async function applyForTask(taskId, userId, message = '') {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { data, error } = await supabase
+    .from('task_applications')
+    .insert({ task_id: taskId, user_id: userId, message })
+    .select()
+    .single();
+  if (!error) {
+    // 申请数+1
+    await supabase.rpc('increment_task_applicants', { t_id: taskId }).catch(() => {});
+  }
+  return { data, error };
+}
+
+// 获取任务的申请列表
+export async function fetchTaskApplications(taskId) {
+  if (!isSupabaseConfigured) return [];
+  const { data } = await supabase
+    .from('task_applications')
+    .select('*, profiles:user_id(username, avatar_url)')
+    .eq('task_id', taskId)
+    .order('created_at', { ascending: false });
+  return data || [];
+}
+
+// ============ Realtime 订阅 ============
+
+// 订阅歌曲评论实时更新
+export function subscribeComments(songId, callback) {
+  if (!isSupabaseConfigured) return { unsubscribe: () => {} };
+  const channel = supabase
+    .channel(`comments:${songId}`)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'comments',
+      filter: `song_id=eq.${songId}`,
+    }, (payload) => callback(payload.new))
+    .subscribe();
+  return { unsubscribe: () => supabase.removeChannel(channel) };
+}
+
+// 订阅论坛回复实时更新
+export function subscribeForumReplies(postId, callback) {
+  if (!isSupabaseConfigured) return { unsubscribe: () => {} };
+  const channel = supabase
+    .channel(`forum_replies:${postId}`)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'forum_replies',
+      filter: `post_id=eq.${postId}`,
+    }, (payload) => callback(payload.new))
+    .subscribe();
+  return { unsubscribe: () => supabase.removeChannel(channel) };
+}
+
+// 订阅用户通知实时更新
+export function subscribeNotifications(userId, callback) {
+  if (!isSupabaseConfigured) return { unsubscribe: () => {} };
+  const channel = supabase
+    .channel(`notifications:${userId}`)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'notifications',
+      filter: `user_id=eq.${userId}`,
+    }, (payload) => callback(payload.new))
+    .subscribe();
+  return { unsubscribe: () => supabase.removeChannel(channel) };
+}
