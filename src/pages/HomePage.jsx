@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Music, Video, MessageSquare, ShoppingBag, Radio, Crown, ArrowRight, Heart, Eye, Clock, Sparkles, Headphones, Users, TrendingUp, Target } from 'lucide-react';
+import { Music, Video, MessageSquare, ShoppingBag, Radio, Crown, ArrowRight, Heart, Eye, Clock, Sparkles, Headphones, Users, TrendingUp, Target, Gamepad2 } from 'lucide-react';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
 
@@ -20,6 +20,7 @@ const sectionKeys = [
   { to: '/live', icon: Radio, labelKey: 'home.sections.live', descKey: 'home.sections.liveDesc', color: 'from-purple-500/20 to-purple-900/20', iconColor: 'text-purple-400' },
   { to: '/membership', icon: Crown, labelKey: 'home.sections.membership', descKey: 'home.sections.membershipDesc', color: 'from-yellow-500/20 to-yellow-900/20', iconColor: 'text-yellow-400' },
   { to: '/tasks', icon: Target, labelKey: 'home.sections.tasks', descKey: 'home.sections.tasksDesc', color: 'from-amber-500/20 to-orange-900/20', iconColor: 'text-amber-400' },
+  { to: '/releases', icon: Gamepad2, labelKey: 'home.sections.releases', descKey: 'home.sections.releasesDesc', color: 'from-indigo-500/20 to-purple-900/20', iconColor: 'text-indigo-400' },
 ];
 
 // 粒子组件

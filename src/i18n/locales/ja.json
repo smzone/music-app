@@ -49,7 +49,9 @@
       "membership": "メンバーシップ",
       "membershipDesc": "限定特典＆コンテンツ",
       "tasks": "タスクホール",
-      "tasksDesc": "タスク投稿・報酬獲得・懸賞システム"
+      "tasksDesc": "タスク投稿・報酬獲得・懸賞システム",
+      "releases": "ゲーム＆ソフト",
+      "releasesDesc": "インディーゲーム、ツール、プラグイン"
     },
     "blogTitle": "クリエイターログ",
     "latestUpdates": "最新情報",

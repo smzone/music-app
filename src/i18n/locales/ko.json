@@ -49,7 +49,9 @@
       "membership": "멤버십",
       "membershipDesc": "독점 혜택 & 콘텐츠",
       "tasks": "태스크 홀",
-      "tasksDesc": "태스크 게시, 보상 획득, 현상금 시스템"
+      "tasksDesc": "태스크 게시, 보상 획득, 현상금 시스템",
+      "releases": "게임 & 소프트웨어",
+      "releasesDesc": "인디 게임, 도구, 크리에이티브 플러그인"
     },
     "blogTitle": "크리에이터 로그",
     "latestUpdates": "최신 소식",

@@ -49,7 +49,9 @@
       "membership": "Membership",
       "membershipDesc": "Exclusive perks & content",
       "tasks": "Task Hall",
-      "tasksDesc": "Post tasks, earn rewards, bounty system"
+      "tasksDesc": "Post tasks, earn rewards, bounty system",
+      "releases": "Games & Software",
+      "releasesDesc": "Indie games, tools, creative plugins"
     },
     "blogTitle": "Creator's Log",
     "latestUpdates": "Latest Updates",
