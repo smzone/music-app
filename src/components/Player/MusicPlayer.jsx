@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import usePlayerStore from '../../store/usePlayerStore';
 import useSongStore from '../../store/useSongStore';
+import useAuthStore from '../../store/useAuthStore';
 import { formatDuration } from '../../data/songs';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +18,7 @@ export default function MusicPlayer() {
     togglePlay, nextSong, prevSong, setCurrentTime, setVolume, toggleMute, togglePlayMode,
   } = usePlayerStore();
   const { toggleFavorite, isFavorite } = useSongStore();
+  const authUser = useAuthStore((s) => s.user);
 
   const [expanded, setExpanded] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
@@ -132,7 +134,7 @@ export default function MusicPlayer() {
 
           {/* 控制按钮 */}
           <div className="flex items-center gap-1.5">
-            <button onClick={() => toggleFavorite(song.id)} className="p-2 hidden sm:block rounded-lg hover:bg-white/[0.05] transition-colors">
+            <button onClick={() => toggleFavorite(song.id, authUser?.id)} className="p-2 hidden sm:block rounded-lg hover:bg-white/[0.05] transition-colors">
               <Heart size={17} className={fav ? 'fill-primary text-primary' : 'text-text-muted hover:text-white'} />
             </button>
             <button onClick={prevSong} className="p-2 hidden sm:block rounded-lg hover:bg-white/[0.05] transition-colors">
@@ -213,7 +215,7 @@ export default function MusicPlayer() {
 
                 {/* 操作栏 */}
                 <div className="flex items-center gap-5 mt-4">
-                  <button onClick={() => toggleFavorite(song.id)} className="flex flex-col items-center gap-1">
+                  <button onClick={() => toggleFavorite(song.id, authUser?.id)} className="flex flex-col items-center gap-1">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${fav ? 'bg-primary/15' : 'bg-white/[0.05] hover:bg-white/[0.1]'}`}>
                       <Heart size={18} className={fav ? 'fill-primary text-primary' : 'text-text-muted'} />
                     </div>

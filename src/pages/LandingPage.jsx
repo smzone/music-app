@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Play, Pause, Heart, Share2, ChevronDown, Music, Headphones, Award, Users, ArrowRight, Sparkles } from 'lucide-react';
 import usePlayerStore from '../store/usePlayerStore';
 import useSongStore from '../store/useSongStore';
+import useAuthStore from '../store/useAuthStore';
 import { getAverageRating, formatDuration } from '../data/songs';
 import { songsData } from '../data/songs';
 import toast from 'react-hot-toast';
@@ -148,6 +149,7 @@ function FeaturedSongCard({ song, index }) {
   const { t } = useTranslation();
   const { playSong, playlist, currentIndex, isPlaying, togglePlay } = usePlayerStore();
   const { toggleFavorite, isFavorite, openDetail } = useSongStore();
+  const authUser = useAuthStore((s) => s.user);
 
   const isCurrentSong = playlist[currentIndex]?.id === song.id;
   const fav = isFavorite(song.id);
@@ -190,7 +192,7 @@ function FeaturedSongCard({ song, index }) {
         </div>
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/[0.04]">
           <button
-            onClick={() => { toggleFavorite(song.id); toast.success(fav ? t('landing.collected') : t('landing.collect')); }}
+            onClick={() => { toggleFavorite(song.id, authUser?.id); toast.success(fav ? t('landing.collected') : t('landing.collect')); }}
             className="flex items-center gap-1.5 text-sm text-text-muted hover:text-primary transition-colors"
           >
             <Heart size={15} className={fav ? 'fill-primary text-primary' : ''} />

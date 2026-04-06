@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import SongContextMenu from '../components/Song/SongContextMenu';
 import usePlayerStore from '../store/usePlayerStore';
 import useSongStore from '../store/useSongStore';
+import useAuthStore from '../store/useAuthStore';
 import { songsData, genreKeys, formatDuration, getAverageRating } from '../data/songs';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -14,6 +15,7 @@ function SongRow({ song, index, onContextMenu }) {
   const { t } = useTranslation();
   const { playSong, playlist, currentIndex, isPlaying, togglePlay } = usePlayerStore();
   const { toggleFavorite, isFavorite } = useSongStore();
+  const authUser = useAuthStore((s) => s.user);
   const isCurrentSong = playlist[currentIndex]?.id === song.id;
   const fav = isFavorite(song.id);
 
@@ -59,7 +61,7 @@ function SongRow({ song, index, onContextMenu }) {
         <span className="text-xs font-medium">{getAverageRating(song.ratings)}</span>
       </div>
       <span className="text-[13px] text-text-muted font-mono">{formatDuration(song.duration)}</span>
-      <button onClick={() => { toggleFavorite(song.id); toast.success(fav ? t('music.unfavorited') : t('music.favorited')); }}
+      <button onClick={() => { toggleFavorite(song.id, authUser?.id); toast.success(fav ? t('music.unfavorited') : t('music.favorited')); }}
         className="transition-transform hover:scale-110">
         <Heart size={15} className={fav ? 'fill-primary text-primary' : 'text-text-muted hover:text-white transition-colors'} />
       </button>
@@ -76,6 +78,7 @@ export default function MusicPage() {
   const [ctxMenu, setCtxMenu] = useState(null); // { x, y, song }
   const { setPlaylist, playSong } = usePlayerStore();
   const { toggleFavorite, isFavorite } = useSongStore();
+  const authUser = useAuthStore((s) => s.user);
 
   // 右键菜单
   const handleContextMenu = useCallback((e, song) => {
@@ -101,7 +104,7 @@ export default function MusicPage() {
       toast.success(t('music.ctx.addedToQueue'));
     },
     toggleFav: () => {
-      toggleFavorite(ctxMenu.song.id);
+      toggleFavorite(ctxMenu.song.id, authUser?.id);
       toast.success(isFavorite(ctxMenu.song.id) ? t('music.unfavorited') : t('music.favorited'));
     },
     isFav: isFavorite(ctxMenu.song.id),

@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, ThumbsUp, Eye, Clock, Pin, Flame, Search, Plus, X, Image, Film, Sparkles, ChevronRight, Bookmark, Star, TrendingUp } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Eye, Clock, Pin, Flame, Search, Plus, X, Image, Film, Sparkles, ChevronRight, Bookmark, Star, TrendingUp, Loader2 } from 'lucide-react';
 import useAuthStore, { PERMISSIONS, hasPermission } from '../store/useAuthStore';
+import useForumStore from '../store/useForumStore';
+import { isSupabaseConfigured } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { forumCategories, initialPosts as dataInitialPosts, postTags, sortOptions, formatTime, formatNum, getLevelStyle } from '../data/forum';
@@ -129,34 +131,72 @@ export default function ForumPage() {
   useDocumentTitle(t('forum.title'));
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('all');
-  const [posts, setPosts] = useState(dataInitialPosts);
+  const [localPosts, setLocalPosts] = useState(dataInitialPosts);
   const [showNewPost, setShowNewPost] = useState(false);
   const [searchQ, setSearchQ] = useState('');
   const [sortBy, setSortBy] = useState('latest');
   const { user } = useAuthStore();
 
-  const filtered = posts.filter((p) => {
+  // Supabase 模式：从 store 读取
+  const storePosts = useForumStore((s) => s.posts);
+  const postsLoading = useForumStore((s) => s.postsLoading);
+  const loadPosts = useForumStore((s) => s.loadPosts);
+  const storeCreatePost = useForumStore((s) => s.createPost);
+
+  // 是否使用 Supabase 数据
+  const useRemote = isSupabaseConfigured;
+  const posts = useRemote && storePosts.length > 0 ? storePosts : localPosts;
+
+  // 初始化：Supabase 模式下加载帖子
+  useEffect(() => {
+    if (useRemote) loadPosts({ category: activeCategory, sort: sortBy, search: searchQ });
+  }, [useRemote]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 筛选/排序变化时重新加载（Supabase 模式下走服务端，本地模式走前端过滤）
+  const handleFilterChange = useCallback((newCategory, newSort, newSearch) => {
+    if (useRemote) {
+      loadPosts({ category: newCategory, sort: newSort, search: newSearch });
+    }
+  }, [useRemote, loadPosts]);
+
+  // 本地模式前端过滤
+  const filtered = (useRemote ? posts : posts.filter((p) => {
     const matchCategory = activeCategory === 'all' || p.category === activeCategory || p.isPinned;
     const matchSearch = !searchQ || p.title.toLowerCase().includes(searchQ.toLowerCase()) || p.content.toLowerCase().includes(searchQ.toLowerCase());
     return matchCategory && matchSearch;
-  }).sort((a, b) => {
-    if (a.isPinned !== b.isPinned) return b.isPinned - a.isPinned;
-    if (sortBy === 'hot') return b.likes - a.likes;
-    if (sortBy === 'views') return b.views - a.views;
-    if (sortBy === 'comments') return b.comments - a.comments;
-    return new Date(b.date) - new Date(a.date);
+  })).sort((a, b) => {
+    // 兼容 Supabase 字段名 (is_pinned) 和本地字段名 (isPinned)
+    const aPinned = a.is_pinned ?? a.isPinned;
+    const bPinned = b.is_pinned ?? b.isPinned;
+    if (aPinned !== bPinned) return (bPinned ? 1 : 0) - (aPinned ? 1 : 0);
+    if (useRemote) return 0; // Supabase 模式排序已在服务端完成
+    if (sortBy === 'hot') return (b.likes ?? b.like_count ?? 0) - (a.likes ?? a.like_count ?? 0);
+    if (sortBy === 'views') return (b.views ?? b.view_count ?? 0) - (a.views ?? a.view_count ?? 0);
+    if (sortBy === 'comments') return (b.comments ?? b.reply_count ?? 0) - (a.comments ?? a.reply_count ?? 0);
+    return new Date(b.date ?? b.created_at) - new Date(a.date ?? a.created_at);
   });
 
-  const handleNewPost = ({ title, content, category, tags, media }) => {
-    const newPost = {
-      id: Date.now(), title, content, category, tags: tags || [], media: media || [],
-      author: user?.username || t('forum.anonymous'), authorId: user?.id || 'guest', avatar: '😊', level: 'lv1',
-      isPinned: false, isHot: false, isEssence: false,
-      likes: 0, views: 0, comments: 0, shares: 0, bookmarks: 0,
-      date: new Date().toISOString(),
-      replies: [],
-    };
-    setPosts([newPost, ...posts]);
+  const handleNewPost = async ({ title, content, category, tags, media }) => {
+    if (useRemote) {
+      // Supabase 模式：通过 store 创建
+      const { error } = await storeCreatePost({
+        title, content, category,
+        tags: tags || [], media: media || [],
+        author_id: user?.id,
+      });
+      if (error) { toast.error(t('forum.postFailed') || '发帖失败'); return; }
+    } else {
+      // 本地模拟模式
+      const newPost = {
+        id: Date.now(), title, content, category, tags: tags || [], media: media || [],
+        author: user?.username || t('forum.anonymous'), authorId: user?.id || 'guest', avatar: '😊', level: 'lv1',
+        isPinned: false, isHot: false, isEssence: false,
+        likes: 0, views: 0, comments: 0, shares: 0, bookmarks: 0,
+        date: new Date().toISOString(),
+        replies: [],
+      };
+      setLocalPosts([newPost, ...localPosts]);
+    }
     toast.success(t('forum.postSuccess'));
   };
 
@@ -196,7 +236,7 @@ export default function ForumPage() {
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3">
               <h3 className="text-[10px] font-semibold text-text-muted uppercase tracking-widest px-3 mb-2">{t('forum.categoryTitle')}</h3>
               {forumCategories.map((c) => (
-                <button key={c.id} onClick={() => setActiveCategory(c.id)}
+                <button key={c.id} onClick={() => { setActiveCategory(c.id); handleFilterChange(c.id, sortBy, searchQ); }}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${activeCategory === c.id ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-secondary hover:text-white hover:bg-white/[0.04] border border-transparent'}`}>
                   <span className="text-base">{c.icon}</span>
                   <span className="flex-1">{t(c.nameKey)}</span>
@@ -209,13 +249,13 @@ export default function ForumPage() {
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
               <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-1.5"><TrendingUp size={14} className="text-red-400" /> {t('forum.hotRanking')}</h3>
               <div className="space-y-3">
-                {posts.sort((a, b) => b.likes - a.likes).slice(0, 5).map((p, i) => (
+                {[...posts].sort((a, b) => (b.likes ?? b.like_count ?? 0) - (a.likes ?? a.like_count ?? 0)).slice(0, 5).map((p, i) => (
                   <div key={p.id} onClick={() => navigate(`/forum/${p.id}`)}
                     className="flex items-start gap-2.5 cursor-pointer group">
                     <span className={`text-xs font-black w-5 pt-0.5 ${i === 0 ? 'text-red-400' : i === 1 ? 'text-orange-400' : i === 2 ? 'text-yellow-400' : 'text-text-muted'}`}>{i + 1}</span>
                     <div className="min-w-0">
                       <p className="text-xs text-text-secondary line-clamp-2 group-hover:text-primary transition-colors leading-snug">{p.title}</p>
-                      <span className="text-[10px] text-text-muted">{t('forum.likesCount', { count: formatNum(p.likes) })}</span>
+                      <span className="text-[10px] text-text-muted">{t('forum.likesCount', { count: formatNum(p.likes ?? p.like_count ?? 0) })}</span>
                     </div>
                   </div>
                 ))}
@@ -240,12 +280,15 @@ export default function ForumPage() {
           <div className="flex items-center gap-3 mb-5">
             <div className="relative flex-1">
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
-              <input type="text" value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder={t('forum.searchPlaceholder')}
+              <input type="text" value={searchQ}
+                onChange={(e) => setSearchQ(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleFilterChange(activeCategory, sortBy, searchQ); }}
+                placeholder={t('forum.searchPlaceholder')}
                 className="w-full bg-white/[0.04] text-white pl-10 pr-4 py-2.5 rounded-full outline-none border border-white/[0.06] focus:border-primary text-sm placeholder:text-text-muted transition-colors" />
             </div>
             <div className="flex items-center gap-1 bg-white/[0.03] rounded-xl p-1 border border-white/[0.06]">
               {sortOptions.map((s) => (
-                <button key={s.id} onClick={() => setSortBy(s.id)}
+                <button key={s.id} onClick={() => { setSortBy(s.id); handleFilterChange(activeCategory, s.id, searchQ); }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${sortBy === s.id ? 'bg-primary/15 text-primary' : 'text-text-muted hover:text-white'}`}>
                   {t(s.nameKey)}
                 </button>
@@ -265,11 +308,18 @@ export default function ForumPage() {
             </div>
           )}
 
+          {/* 加载状态 */}
+          {postsLoading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 size={28} className="animate-spin text-primary" />
+            </div>
+          )}
+
           {/* 帖子列表 */}
           <div className="space-y-3">
-            {filtered.map((post) => {
+            {!postsLoading && filtered.map((post) => {
               const catInfo = forumCategories.find((c) => c.id === post.category);
-              const lvl = getLevelStyle(post.level);
+              const lvl = getLevelStyle(post.level ?? (post.profiles?.role === 'admin' ? 'admin' : 'lv1'));
               return (
                 <div key={post.id} onClick={() => navigate(`/forum/${post.id}`)}
                   className="rounded-2xl p-5 border border-white/[0.06] bg-white/[0.02] hover:border-primary/20 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(0,0,0,0.2)] group">
@@ -282,9 +332,9 @@ export default function ForumPage() {
                     <div className="flex-1 min-w-0">
                       {/* 标记行 */}
                       <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
-                        {post.isPinned && <span className="flex items-center gap-0.5 text-[10px] text-yellow-400 font-bold bg-yellow-500/10 px-2 py-0.5 rounded-md"><Pin size={9} /> {t('forum.pinned')}</span>}
-                        {post.isHot && <span className="flex items-center gap-0.5 text-[10px] text-red-400 font-bold bg-red-500/10 px-2 py-0.5 rounded-md"><Flame size={9} /> {t('forum.hot')}</span>}
-                        {post.isEssence && <span className="flex items-center gap-0.5 text-[10px] text-yellow-300 font-bold bg-yellow-500/10 px-2 py-0.5 rounded-md"><Star size={9} /> {t('forum.essence')}</span>}
+                        {(post.isPinned ?? post.is_pinned) && <span className="flex items-center gap-0.5 text-[10px] text-yellow-400 font-bold bg-yellow-500/10 px-2 py-0.5 rounded-md"><Pin size={9} /> {t('forum.pinned')}</span>}
+                        {(post.isHot ?? post.is_hot) && <span className="flex items-center gap-0.5 text-[10px] text-red-400 font-bold bg-red-500/10 px-2 py-0.5 rounded-md"><Flame size={9} /> {t('forum.hot')}</span>}
+                        {(post.isEssence ?? post.is_essence) && <span className="flex items-center gap-0.5 text-[10px] text-yellow-300 font-bold bg-yellow-500/10 px-2 py-0.5 rounded-md"><Star size={9} /> {t('forum.essence')}</span>}
                         {catInfo && <span className="text-[10px] text-text-muted bg-white/[0.05] px-2 py-0.5 rounded-md">{catInfo.icon} {t(catInfo.nameKey)}</span>}
                         {post.tags?.map((tagId) => {
                           const tagItem = postTags.find((tg) => tg.id === tagId);
@@ -316,14 +366,14 @@ export default function ForumPage() {
                       {/* 底部信息 */}
                       <div className="flex items-center gap-4 mt-3 text-xs text-text-muted">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-medium text-text-secondary">{post.author}</span>
+                          <span className="font-medium text-text-secondary">{post.author ?? post.profiles?.username ?? t('forum.anonymous')}</span>
                           <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${lvl.color}`}>{lvl.textKey ? t(lvl.textKey) : lvl.text}</span>
                         </div>
-                        <span className="flex items-center gap-1"><Clock size={11} /> {formatTime(post.date, t)}</span>
-                        <span className="flex items-center gap-1"><ThumbsUp size={11} /> {formatNum(post.likes, t)}</span>
-                        <span className="flex items-center gap-1"><Eye size={11} /> {formatNum(post.views, t)}</span>
-                        <span className="flex items-center gap-1"><MessageSquare size={11} /> {post.comments}</span>
-                        <span className="flex items-center gap-1 ml-auto"><Bookmark size={11} /> {formatNum(post.bookmarks, t)}</span>
+                        <span className="flex items-center gap-1"><Clock size={11} /> {formatTime(post.date ?? post.created_at, t)}</span>
+                        <span className="flex items-center gap-1"><ThumbsUp size={11} /> {formatNum(post.likes ?? post.like_count ?? 0, t)}</span>
+                        <span className="flex items-center gap-1"><Eye size={11} /> {formatNum(post.views ?? post.view_count ?? 0, t)}</span>
+                        <span className="flex items-center gap-1"><MessageSquare size={11} /> {post.comments ?? post.reply_count ?? 0}</span>
+                        <span className="flex items-center gap-1 ml-auto"><Bookmark size={11} /> {formatNum(post.bookmarks ?? 0, t)}</span>
                         <ChevronRight size={14} className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </div>

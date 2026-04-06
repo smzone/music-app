@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Eye, MessageSquare, Clock, Share2, Bookmark, ArrowLeft, Send, Heart, Film, ChevronDown, ChevronUp, MoreHorizontal, Flag, Pin, Flame, Star, Image } from 'lucide-react';
+import { Eye, MessageSquare, Clock, Share2, Bookmark, ArrowLeft, Send, Heart, Film, ChevronDown, ChevronUp, MoreHorizontal, Flag, Pin, Flame, Star, Image, Loader2 } from 'lucide-react';
 import useAuthStore, { PERMISSIONS, hasPermission } from '../store/useAuthStore';
+import useForumStore from '../store/useForumStore';
+import { isSupabaseConfigured } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { initialPosts, forumCategories, postTags, formatTime, formatNum, getLevelStyle } from '../data/forum';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -60,13 +62,61 @@ export default function ForumPostPage() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
-  const post = initialPosts.find((p) => p.id === Number(id));
+  // Supabase store
+  const useRemote = isSupabaseConfigured;
+  const storePost = useForumStore((s) => s.currentPost);
+  const storeReplies = useForumStore((s) => s.replies);
+  const postsLoading = useForumStore((s) => s.postsLoading);
+  const repliesLoading = useForumStore((s) => s.repliesLoading);
+  const likedPosts = useForumStore((s) => s.likedPosts);
+  const loadPost = useForumStore((s) => s.loadPost);
+  const loadReplies = useForumStore((s) => s.loadReplies);
+  const addReply = useForumStore((s) => s.addReply);
+  const toggleLike = useForumStore((s) => s.toggleLike);
+  const checkLiked = useForumStore((s) => s.checkLiked);
+  const subscribeToReplies = useForumStore((s) => s.subscribeToReplies);
+  const unsubscribeReplies = useForumStore((s) => s.unsubscribeReplies);
+  const clearCurrentPost = useForumStore((s) => s.clearCurrentPost);
+
+  // 本地 fallback
+  const localPost = initialPosts.find((p) => p.id === Number(id));
+  const post = (useRemote && storePost) ? storePost : localPost;
+  const replies = useRemote ? storeReplies : (localPost?.replies || []);
+
+  // 加载帖子详情 + 回复 + 点赞状态 + Realtime 订阅
+  useEffect(() => {
+    if (useRemote && id) {
+      loadPost(id);
+      loadReplies(id);
+      subscribeToReplies(id);
+      if (user?.id) checkLiked(user.id, id);
+    }
+    return () => {
+      if (useRemote) {
+        unsubscribeReplies();
+        clearCurrentPost();
+      }
+    };
+  }, [id, useRemote]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useDocumentTitle(post ? post.title : t('forumPost.detailTitle'));
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [replyTo, setReplyTo] = useState('');
   const [mediaPreview, setMediaPreview] = useState(null);
+
+  // Supabase 模式下用 store 的点赞状态
+  const isLiked = useRemote ? likedPosts.has(id) : liked;
+
+  // 加载中
+  if (useRemote && postsLoading && !post) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <Loader2 size={32} className="animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (!post) {
     return (
@@ -80,12 +130,22 @@ export default function ForumPostPage() {
   }
 
   const catInfo = forumCategories.find((c) => c.id === post.category);
-  const lvl = getLevelStyle(post.level);
+  const lvl = getLevelStyle(post.level ?? (post.profiles?.role === 'admin' ? 'admin' : 'lv1'));
 
-  const handleReply = () => {
+  const handleReply = async () => {
     if (!user) { toast.error(t('forumPost.loginFirst')); return; }
     if (!hasPermission(user.role, PERMISSIONS.COMMENT)) { toast.error(t('forumPost.noPermission')); return; }
     if (!replyText.trim()) return;
+
+    if (useRemote) {
+      const { error } = await addReply({
+        post_id: id,
+        author_id: user.id,
+        content: replyText.trim(),
+        parent_id: null,
+      });
+      if (error) { toast.error(t('forumPost.replyFailed') || '回复失败'); return; }
+    }
     toast.success(t('forumPost.replySent'));
     setReplyText('');
     setReplyTo('');
@@ -136,9 +196,9 @@ export default function ForumPostPage() {
         <div className="p-6 lg:p-8 border-b border-white/[0.04]">
           {/* 标记 */}
           <div className="flex items-center gap-2 flex-wrap mb-3">
-            {post.isPinned && <span className="flex items-center gap-0.5 text-xs text-yellow-400 font-bold bg-yellow-500/10 px-2.5 py-1 rounded-full"><Pin size={11} /> {t('forumPost.pinned')}</span>}
-            {post.isHot && <span className="flex items-center gap-0.5 text-xs text-red-400 font-bold bg-red-500/10 px-2.5 py-1 rounded-full"><Flame size={11} /> {t('forumPost.hot')}</span>}
-            {post.isEssence && <span className="flex items-center gap-0.5 text-xs text-yellow-300 font-bold bg-yellow-500/10 px-2.5 py-1 rounded-full"><Star size={11} /> {t('forumPost.essence')}</span>}
+            {(post.isPinned ?? post.is_pinned) && <span className="flex items-center gap-0.5 text-xs text-yellow-400 font-bold bg-yellow-500/10 px-2.5 py-1 rounded-full"><Pin size={11} /> {t('forumPost.pinned')}</span>}
+            {(post.isHot ?? post.is_hot) && <span className="flex items-center gap-0.5 text-xs text-red-400 font-bold bg-red-500/10 px-2.5 py-1 rounded-full"><Flame size={11} /> {t('forumPost.hot')}</span>}
+            {(post.isEssence ?? post.is_essence) && <span className="flex items-center gap-0.5 text-xs text-yellow-300 font-bold bg-yellow-500/10 px-2.5 py-1 rounded-full"><Star size={11} /> {t('forumPost.essence')}</span>}
             {catInfo && <span className="text-xs bg-surface-lighter px-2.5 py-1 rounded-full text-text-muted">{catInfo.icon} {t(catInfo.nameKey)}</span>}
             {post.tags?.map((tagId) => {
               const tagItem = postTags.find((tg) => tg.id === tagId);
@@ -151,15 +211,15 @@ export default function ForumPostPage() {
 
           {/* 作者信息 */}
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-full bg-white/[0.06] border border-white/[0.06] flex items-center justify-center text-2xl">{post.avatar}</div>
+            <div className="w-11 h-11 rounded-full bg-white/[0.06] border border-white/[0.06] flex items-center justify-center text-2xl">{post.avatar ?? post.profiles?.avatar_url ?? '😊'}</div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white">{post.author}</span>
+                <span className="text-sm font-bold text-white">{post.author ?? post.profiles?.username}</span>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lvl.color}`}>{lvl.textKey ? t(lvl.textKey) : lvl.text}</span>
               </div>
               <div className="flex items-center gap-3 text-xs text-text-muted mt-0.5">
-                <span className="flex items-center gap-1"><Clock size={11} /> {formatTime(post.date, t)}</span>
-                <span className="flex items-center gap-1"><Eye size={11} /> {formatNum(post.views, t)} {t('forumPost.views')}</span>
+                <span className="flex items-center gap-1"><Clock size={11} /> {formatTime(post.date ?? post.created_at, t)}</span>
+                <span className="flex items-center gap-1"><Eye size={11} /> {formatNum(post.views ?? post.view_count ?? 0, t)} {t('forumPost.views')}</span>
               </div>
             </div>
           </div>
@@ -197,16 +257,16 @@ export default function ForumPostPage() {
 
           {/* 互动栏 */}
           <div className="flex items-center gap-2.5 flex-wrap mt-8 pt-6 border-t border-white/[0.04]">
-            <button onClick={() => setLiked(!liked)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${liked ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-white hover:border-white/[0.1]'}`}>
-              <Heart size={15} className={liked ? 'fill-red-400' : ''} /> {formatNum(post.likes + (liked ? 1 : 0), t)}
+            <button onClick={() => { if (useRemote && user) { toggleLike(user.id, id); } else { setLiked(!liked); } }}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${isLiked ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-white hover:border-white/[0.1]'}`}>
+              <Heart size={15} className={isLiked ? 'fill-red-400' : ''} /> {formatNum((post.likes ?? post.like_count ?? 0) + (!useRemote && liked ? 1 : 0), t)}
             </button>
             <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-white hover:border-white/[0.1] transition-all">
-              <MessageSquare size={15} /> {t('forumPost.repliesCount', { count: post.replies?.length || 0 })}
+              <MessageSquare size={15} /> {t('forumPost.repliesCount', { count: replies.length || post.reply_count || 0 })}
             </button>
             <button onClick={() => { setBookmarked(!bookmarked); toast.success(bookmarked ? t('forumPost.unfavorited') : t('forumPost.favorited')); }}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${bookmarked ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : 'bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-white hover:border-white/[0.1]'}`}>
-              <Bookmark size={15} className={bookmarked ? 'fill-yellow-400' : ''} /> {formatNum(post.bookmarks + (bookmarked ? 1 : 0), t)}
+              <Bookmark size={15} className={bookmarked ? 'fill-yellow-400' : ''} /> {formatNum((post.bookmarks ?? 0) + (bookmarked ? 1 : 0), t)}
             </button>
             <div className="flex-1" />
             <button onClick={handleShare}
@@ -225,16 +285,21 @@ export default function ForumPostPage() {
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <MessageSquare size={17} className="text-primary" /> {t('forumPost.allReplies')}
-            <span className="text-sm font-normal text-text-muted">({post.replies?.length || 0})</span>
+            <span className="text-sm font-normal text-text-muted">({replies.length || post.reply_count || 0})</span>
           </h2>
         </div>
 
         {/* 回复列表 */}
         <div className="rounded-3xl border border-white/[0.06] bg-white/[0.02] divide-y divide-white/[0.04] px-5 lg:px-6">
-          {post.replies?.map((reply) => (
+          {repliesLoading && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 size={22} className="animate-spin text-primary" />
+            </div>
+          )}
+          {!repliesLoading && replies.map((reply) => (
             <ReplyItem key={reply.id} reply={reply} onReplyTo={handleReplyTo} t={t} />
           ))}
-          {(!post.replies || post.replies.length === 0) && (
+          {!repliesLoading && replies.length === 0 && (
             <div className="py-12 text-center text-text-muted">
               <MessageSquare size={32} className="mx-auto mb-3 opacity-30" />
               <p className="text-sm">{t('forumPost.noReplies')}</p>

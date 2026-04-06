@@ -25,7 +25,7 @@ export default function SongDetail() {
 
   const handleRate = (rating) => {
     if (!user) { openAuth('login'); return; }
-    rateSong(song.id, rating);
+    rateSong(song.id, rating, user?.id);
     toast.success(t('songDetail.rated', { rating }));
   };
 
@@ -74,7 +74,7 @@ export default function SongDetail() {
             <Play size={18} /> {t('songDetail.play')}
           </button>
           <button
-            onClick={() => { toggleFavorite(song.id); toast.success(fav ? t('songDetail.unfavorited') : t('songDetail.favorited')); }}
+            onClick={() => { toggleFavorite(song.id, user?.id); toast.success(fav ? t('songDetail.unfavorited') : t('songDetail.favorited')); }}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-[15px] font-medium border transition-colors ${
               fav ? 'border-primary text-primary' : 'border-surface-lighter text-text-secondary hover:text-white hover:border-white'
             }`}

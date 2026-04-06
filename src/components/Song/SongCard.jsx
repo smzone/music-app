@@ -1,6 +1,7 @@
 import { Play, Heart, Star, Share2, MoreHorizontal } from 'lucide-react';
 import usePlayerStore from '../../store/usePlayerStore';
 import useSongStore from '../../store/useSongStore';
+import useAuthStore from '../../store/useAuthStore';
 import { getAverageRating, formatDuration } from '../../data/songs';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +10,7 @@ export default function SongCard({ song }) {
   const { t } = useTranslation();
   const { playSong } = usePlayerStore();
   const { toggleFavorite, isFavorite, openDetail } = useSongStore();
+  const user = useAuthStore((s) => s.user);
 
   const fav = isFavorite(song.id);
   const avgRating = getAverageRating(song.ratings);
@@ -62,7 +64,7 @@ export default function SongCard({ song }) {
         {/* 操作按钮 */}
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-surface-lighter/50 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            onClick={(e) => { e.stopPropagation(); toggleFavorite(song.id); toast.success(fav ? t('songDetail.unfavorited') : t('songDetail.favorited')); }}
+            onClick={(e) => { e.stopPropagation(); toggleFavorite(song.id, user?.id); toast.success(fav ? t('songDetail.unfavorited') : t('songDetail.favorited')); }}
             className="p-1.5 rounded-full hover:bg-surface-lighter transition-colors"
           >
             <Heart size={16} className={fav ? 'fill-primary text-primary' : 'text-text-muted hover:text-white'} />

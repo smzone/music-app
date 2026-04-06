@@ -20,9 +20,10 @@ export default function CommentSection({ song }) {
       user: user.username,
       avatar: user.avatar,
       text: text.trim(),
+      content: text.trim(),
       time: t('comment.justNow'),
       likes: 0,
-    });
+    }, user?.id);
     setText('');
     toast.success(t('comment.success'));
   };
