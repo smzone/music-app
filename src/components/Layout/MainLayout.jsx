@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target } from 'lucide-react';
+import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2 } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import MusicPlayer from '../Player/MusicPlayer';
 import usePlayerStore from '../../store/usePlayerStore';
@@ -18,6 +18,7 @@ const navKeys = [
   { to: '/shop', key: 'nav.shop', icon: ShoppingBag },
   { to: '/live', key: 'nav.live', icon: Radio },
   { to: '/tasks', key: 'nav.tasks', icon: Target },
+  { to: '/releases', key: 'nav.releases', icon: Gamepad2 },
 ];
 
 export default function MainLayout() {

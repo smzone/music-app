@@ -24,6 +24,8 @@ const TaskHallPage = lazy(() => import('./pages/TaskHallPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
+const ReleasesPage = lazy(() => import('./pages/ReleasesPage'));
+const ReleaseDetailPage = lazy(() => import('./pages/ReleaseDetailPage'));
 
 // 管理后台 — 按需加载
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -80,6 +82,8 @@ function App() {
             <Route path="/membership" element={<MembershipPage />} />
             <Route path="/tasks" element={<TaskHallPage />} />
             <Route path="/profile" element={<AuthGuard><UserProfilePage /></AuthGuard>} />
+            <Route path="/releases" element={<ReleasesPage />} />
+            <Route path="/releases/:id" element={<ReleaseDetailPage />} />
           </Route>
 
           {/* 独立页面（无顶部导航） */}
