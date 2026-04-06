@@ -370,7 +370,8 @@
       "daysAgo": "{{count}} days ago"
     },
     "num": { "wan": "{{count}}w", "k": "{{count}}k" },
-    "level": { "admin": "Admin" }
+    "level": { "admin": "Admin" },
+    "noPermission": "You don't have permission to post"
   },
   "shop": {
     "title": "Shop",
@@ -580,7 +581,8 @@
     "favorited": "Bookmarked",
     "unfavorited": "Bookmark removed",
     "loginFirst": "Please log in first",
-    "follow": "Follow"
+    "follow": "Follow",
+    "noPermission": "You don't have permission to comment"
   },
   "dashboard": {
     "title": "Dashboard Overview",
@@ -954,6 +956,21 @@
     "toastBatch": "Batch {{action}} {{count}} users",
     "toastExported": "Exported {{count}} user records",
     "toastLogCleared": "Log cleared"
+  },
+  "accessDenied": {
+    "title": "Access Denied",
+    "heading": "Access Denied",
+    "desc": "You don't have permission to access this page. Contact an admin or upgrade your account.",
+    "goHome": "Go Home",
+    "login": "Login",
+    "goBack": "Go Back"
+  },
+  "permission": {
+    "noPermission": "You don't have permission for this action",
+    "loginRequired": "Please login first",
+    "vipOnly": "This feature is for VIP members only",
+    "modOnly": "This feature is for moderators and above",
+    "adminOnly": "This feature is for admins only"
   },
   "common": {
     "admin": "Admin",

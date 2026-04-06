@@ -99,15 +99,23 @@ export default function LoginPage() {
             <LogIn size={17} /> {loading ? t('login.loading') : t('login.submit')}
           </button>
 
-          {/* 管理员快速登录提示 */}
-          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-            <div className="flex items-center gap-2 mb-2">
+          {/* 测试账号提示 */}
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 space-y-2">
+            <div className="flex items-center gap-2 mb-2.5">
               <Shield size={13} className="text-primary" />
               <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">{t('login.demoTitle')}</p>
             </div>
-            <div className="flex items-center gap-4 text-sm">
-              <span className="text-text-muted">{t('login.demoUser')}: <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono text-xs">admin</code></span>
-              <span className="text-text-muted">{t('login.demoPwd')}: <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono text-xs">admin123</code></span>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-500/15 text-red-400">ADMIN</span>
+              <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">admin / admin123</code>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-400">MOD</span>
+              <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">mod / mod123</code>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-yellow-500/15 text-yellow-400">VIP</span>
+              <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded font-mono">vip / vip123</code>
             </div>
           </div>
         </form>

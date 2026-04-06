@@ -370,7 +370,8 @@
       "daysAgo": "{{count}}日前"
     },
     "num": { "wan": "{{count}}万", "k": "{{count}}k" },
-    "level": { "admin": "管理者" }
+    "level": { "admin": "管理者" },
+    "noPermission": "投稿する権限がありません"
   },
   "shop": {
     "title": "ショップ",
@@ -580,7 +581,8 @@
     "favorited": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u6e08\u307f",
     "unfavorited": "\u30d6\u30c3\u30af\u30de\u30fc\u30af\u89e3\u9664",
     "loginFirst": "\u30ed\u30b0\u30a4\u30f3\u3057\u3066\u304a\u3060\u3055\u3044",
-    "follow": "\u30d5\u30a9\u30ed\u30fc"
+    "follow": "\u30d5\u30a9\u30ed\u30fc",
+    "noPermission": "コメントする権限がありません"
   },
   "dashboard": {
     "title": "ダッシュボード概要",
@@ -954,6 +956,21 @@
     "toastBatch": "{{count}}人を一括{{action}}しました",
     "toastExported": "{{count}}件のユーザーデータを出力しました",
     "toastLogCleared": "ログをクリアしました"
+  },
+  "accessDenied": {
+    "title": "アクセス拒否",
+    "heading": "アクセスが拒否されました",
+    "desc": "このページにアクセスする権限がありません。管理者に連絡するか、アカウントをアップグレードしてください。",
+    "goHome": "ホームへ",
+    "login": "ログイン",
+    "goBack": "戻る"
+  },
+  "permission": {
+    "noPermission": "この操作を行う権限がありません",
+    "loginRequired": "先にログインしてください",
+    "vipOnly": "この機能はVIPメンバー限定です",
+    "modOnly": "この機能はモデレーター以上限定です",
+    "adminOnly": "この機能は管理者限定です"
   },
   "common": {
     "admin": "管理者",

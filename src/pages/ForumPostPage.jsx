@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Eye, MessageSquare, Clock, Share2, Bookmark, ArrowLeft, Send, Heart, Film, ChevronDown, ChevronUp, MoreHorizontal, Flag, Pin, Flame, Star, Image } from 'lucide-react';
-import useAuthStore from '../store/useAuthStore';
+import useAuthStore, { PERMISSIONS, hasPermission } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
 import { initialPosts, forumCategories, postTags, formatTime, formatNum, getLevelStyle } from '../data/forum';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -84,6 +84,7 @@ export default function ForumPostPage() {
 
   const handleReply = () => {
     if (!user) { toast.error(t('forumPost.loginFirst')); return; }
+    if (!hasPermission(user.role, PERMISSIONS.COMMENT)) { toast.error(t('forumPost.noPermission')); return; }
     if (!replyText.trim()) return;
     toast.success(t('forumPost.replySent'));
     setReplyText('');

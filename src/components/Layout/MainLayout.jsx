@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2 } from 'lucide-react';
-import useAuthStore from '../../store/useAuthStore';
+import useAuthStore, { hasRole, ROLES } from '../../store/useAuthStore';
 import MusicPlayer from '../Player/MusicPlayer';
 import usePlayerStore from '../../store/usePlayerStore';
 import ScrollProgress from './ScrollProgress';
@@ -96,9 +96,17 @@ export default function MainLayout() {
                       {/* 用户信息头部 */}
                       <div className="px-4 py-3 border-b border-white/[0.06] mb-1">
                         <p className="text-sm font-semibold text-white">{user.username}</p>
-                        <p className="text-[11px] text-text-muted mt-0.5">{user.role === 'admin' ? t('common.admin') : t('common.user')}</p>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                            user.role === 'admin' ? 'bg-red-500/15 text-red-400' :
+                            user.role === 'moderator' ? 'bg-purple-500/15 text-purple-400' :
+                            user.role === 'vip' ? 'bg-yellow-500/15 text-yellow-400' :
+                            'bg-gray-500/15 text-gray-400'
+                          }`}>{user.role.toUpperCase()}</span>
+                          {user.membership === 'vip' && user.role !== 'vip' && <Crown size={11} className="text-yellow-400" />}
+                        </div>
                       </div>
-                      {user.role === 'admin' && (
+                      {hasRole(user.role, ROLES.MODERATOR) && (
                         <Link to="/admin" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:text-primary hover:bg-white/[0.04] transition-colors mx-1 rounded-lg">
                           <Settings size={15} /> {t('nav.admin')}
                         </Link>

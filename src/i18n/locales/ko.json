@@ -370,7 +370,8 @@
       "daysAgo": "{{count}}일 전"
     },
     "num": { "wan": "{{count}}만", "k": "{{count}}k" },
-    "level": { "admin": "관리자" }
+    "level": { "admin": "관리자" },
+    "noPermission": "게시글 작성 권한이 없습니다"
   },
   "shop": {
     "title": "\uc0f5",
@@ -580,7 +581,8 @@
     "favorited": "\ubd81\ub9c8\ud06c \uc644\ub8cc",
     "unfavorited": "\ubd81\ub9c8\ud06c \ud574\uc81c",
     "loginFirst": "\ub85c\uadf8\uc778\ud574\uc8fc\uc138\uc694",
-    "follow": "\ud314\ub85c\uc6b0"
+    "follow": "\ud314\ub85c\uc6b0",
+    "noPermission": "댓글 작성 권한이 없습니다"
   },
   "dashboard": {
     "title": "\ub300\uc2dc\ubcf4\ub4dc \uac1c\uc694",
@@ -954,6 +956,21 @@
     "toastBatch": "{{count}}명을 일괄 {{action}}했습니다",
     "toastExported": "{{count}}건의 사용자 데이터를 내보냈습니다",
     "toastLogCleared": "로그가 지워졌습니다"
+  },
+  "accessDenied": {
+    "title": "접근 거부",
+    "heading": "접근이 거부되었습니다",
+    "desc": "이 페이지에 접근할 권한이 없습니다. 관리자에게 문의하거나 계정을 업그레이드하세요.",
+    "goHome": "홈으로",
+    "login": "로그인",
+    "goBack": "뒤로가기"
+  },
+  "permission": {
+    "noPermission": "이 작업을 수행할 권한이 없습니다",
+    "loginRequired": "먼저 로그인해주세요",
+    "vipOnly": "이 기능은 VIP 회원 전용입니다",
+    "modOnly": "이 기능은 운영자 이상 전용입니다",
+    "adminOnly": "이 기능은 관리자 전용입니다"
   },
   "common": {
     "admin": "관리자",

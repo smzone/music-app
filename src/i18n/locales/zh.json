@@ -370,7 +370,8 @@
       "daysAgo": "{{count}} 天前"
     },
     "num": { "wan": "{{count}}万", "k": "{{count}}k" },
-    "level": { "admin": "管理员" }
+    "level": { "admin": "管理员" },
+    "noPermission": "你没有发帖权限"
   },
   "shop": {
     "title": "商品商店",
@@ -580,7 +581,8 @@
     "favorited": "\u5df2\u6536\u85cf",
     "unfavorited": "\u5df2\u53d6\u6d88\u6536\u85cf",
     "loginFirst": "\u8bf7\u5148\u767b\u5f55",
-    "follow": "\u5173\u6ce8"
+    "follow": "\u5173\u6ce8",
+    "noPermission": "你没有评论权限"
   },
   "dashboard": {
     "title": "仪表盘概览",
@@ -954,6 +956,21 @@
     "toastBatch": "已批量{{action}} {{count}} 个用户",
     "toastExported": "已导出 {{count}} 条用户数据",
     "toastLogCleared": "日志已清空"
+  },
+  "accessDenied": {
+    "title": "权限不足",
+    "heading": "访问被拒绝",
+    "desc": "你没有权限访问此页面。请联系管理员或升级你的账户等级。",
+    "goHome": "返回首页",
+    "login": "去登录",
+    "goBack": "返回上页"
+  },
+  "permission": {
+    "noPermission": "你没有执行此操作的权限",
+    "loginRequired": "请先登录",
+    "vipOnly": "此功能仅限 VIP 会员使用",
+    "modOnly": "此功能仅限版主及以上角色使用",
+    "adminOnly": "此功能仅限管理员使用"
   },
   "common": {
     "admin": "管理员",

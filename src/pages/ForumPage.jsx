@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, ThumbsUp, Eye, Clock, Pin, Flame, Search, Plus, X, Image, Film, Sparkles, ChevronRight, Bookmark, Star, TrendingUp } from 'lucide-react';
-import useAuthStore from '../store/useAuthStore';
+import useAuthStore, { PERMISSIONS, hasPermission } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { forumCategories, initialPosts as dataInitialPosts, postTags, sortOptions, formatTime, formatNum, getLevelStyle } from '../data/forum';
@@ -181,7 +181,7 @@ export default function ForumPage() {
               <span className="flex items-center gap-1"><ThumbsUp size={14} /> {t('forum.statLikes', { count: posts.reduce((s, p) => s + p.likes, 0).toLocaleString() })}</span>
             </div>
           </div>
-          <button onClick={() => { if (!user) { toast.error(t('live.loginFirst')); return; } setShowNewPost(true); }}
+          <button onClick={() => { if (!user) { toast.error(t('live.loginFirst')); return; } if (!hasPermission(user.role, PERMISSIONS.CREATE_POST)) { toast.error(t('forum.noPermission')); return; } setShowNewPost(true); }}
             className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-full transition-all text-sm self-start hover:shadow-[0_0_25px_rgba(29,185,84,0.2)]">
             <Plus size={16} /> {t('forum.newPost')}
           </button>

@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import useAuthStore from './store/useAuthStore';
+import useAuthStore, { hasRole, ROLES } from './store/useAuthStore';
 import SongDetail from './components/Song/SongDetail';
 import ScrollToTop from './components/Layout/ScrollToTop';
 import PageLoader from './components/Layout/PageLoader';
@@ -38,19 +38,21 @@ const SectionsPage = lazy(() => import('./pages/admin/SectionsPage'));
 const PlaylistsPage = lazy(() => import('./pages/admin/PlaylistsPage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const AccessDeniedPage = lazy(() => import('./pages/AccessDeniedPage'));
 
 // 路由守卫：需要登录
 function AuthGuard({ children }) {
-  const { user } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
   if (!user) return <Navigate to="/login" replace />;
   return children;
 }
 
-// 路由守卫：需要管理员权限
-function AdminGuard({ children }) {
-  const { user } = useAuthStore();
+// 路由守卫：需要指定最低角色等级
+// minRole: ROLES.USER / ROLES.VIP / ROLES.MODERATOR / ROLES.ADMIN
+function RoleGuard({ minRole, children }) {
+  const user = useAuthStore((s) => s.user);
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== 'admin') return <Navigate to="/" replace />;
+  if (!hasRole(user.role, minRole)) return <Navigate to="/access-denied" replace />;
   return children;
 }
 
@@ -90,8 +92,11 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* 管理后台（需要管理员权限） */}
-          <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
+          {/* 权限不足页 */}
+          <Route path="/access-denied" element={<AccessDeniedPage />} />
+
+          {/* 管理后台（版主及以上可进入，具体子页面按权限控制） */}
+          <Route path="/admin" element={<RoleGuard minRole={ROLES.MODERATOR}><AdminLayout /></RoleGuard>}>
             <Route index element={<DashboardPage />} />
             <Route path="songs" element={<SongsManagePage />} />
             <Route path="forum" element={<ForumManagePage />} />

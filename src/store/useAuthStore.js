@@ -126,17 +126,19 @@ const useAuthStore = create(
         if (username && password) {
           const isAdmin = (username === 'admin' && password === 'admin123');
           const isMod = (username === 'mod' && password === 'mod123');
+          const isVip = (username === 'vip' && password === 'vip123');
           let role = ROLES.USER;
           if (isAdmin) role = ROLES.ADMIN;
           else if (isMod) role = ROLES.MODERATOR;
+          else if (isVip) role = ROLES.VIP;
 
           set({
             user: createUserObj({
-              id: isAdmin ? 'admin-001' : isMod ? 'mod-001' : Date.now().toString(),
+              id: isAdmin ? 'admin-001' : isMod ? 'mod-001' : isVip ? 'vip-001' : Date.now().toString(),
               username,
               email: `${username}@myspace.music`,
               role,
-              bio: isAdmin ? 'System Administrator' : '',
+              bio: isAdmin ? 'System Administrator' : isVip ? 'VIP Member' : '',
             }),
             showAuthModal: false,
           });

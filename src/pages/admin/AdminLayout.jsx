@@ -3,18 +3,19 @@ import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import {
   LayoutDashboard, Music, User, ListMusic, Settings, LogOut, Menu, X, GripVertical, MessageSquare, Users, ExternalLink, Shield
 } from 'lucide-react';
-import useAuthStore from '../../store/useAuthStore';
+import useAuthStore, { hasRole, ROLES, hasPermission, PERMISSIONS } from '../../store/useAuthStore';
 import { useTranslation } from 'react-i18next';
 
+// minRole: 该菜单项需要的最低角色等级（不填则 MODERATOR 即可见）
 const adminNav = [
   { to: '/admin', icon: LayoutDashboard, labelKey: 'admin.nav.dashboard', end: true },
-  { to: '/admin/songs', icon: Music, labelKey: 'admin.nav.songs' },
-  { to: '/admin/forum', icon: MessageSquare, labelKey: 'admin.nav.forum' },
-  { to: '/admin/users', icon: Users, labelKey: 'admin.nav.users' },
+  { to: '/admin/songs', icon: Music, labelKey: 'admin.nav.songs', permission: PERMISSIONS.MANAGE_SONGS },
+  { to: '/admin/forum', icon: MessageSquare, labelKey: 'admin.nav.forum', permission: PERMISSIONS.MANAGE_FORUM },
+  { to: '/admin/users', icon: Users, labelKey: 'admin.nav.users', permission: PERMISSIONS.MANAGE_USERS },
   { to: '/admin/profile', icon: User, labelKey: 'admin.nav.profile' },
-  { to: '/admin/sections', icon: GripVertical, labelKey: 'admin.nav.sections' },
+  { to: '/admin/sections', icon: GripVertical, labelKey: 'admin.nav.sections', minRole: ROLES.ADMIN },
   { to: '/admin/playlists', icon: ListMusic, labelKey: 'admin.nav.playlists' },
-  { to: '/admin/settings', icon: Settings, labelKey: 'admin.nav.settings' },
+  { to: '/admin/settings', icon: Settings, labelKey: 'admin.nav.settings', permission: PERMISSIONS.MANAGE_SETTINGS },
 ];
 
 export default function AdminLayout() {
@@ -48,7 +49,11 @@ export default function AdminLayout() {
         </div>
 
         <nav className="flex-1 py-3 px-3 overflow-y-auto">
-          {adminNav.map((item) => {
+          {adminNav.filter((item) => {
+            if (item.permission && !hasPermission(user?.role, item.permission)) return false;
+            if (item.minRole && !hasRole(user?.role, item.minRole)) return false;
+            return true;
+          }).map((item) => {
             const Icon = item.icon;
             return (
               <NavLink
@@ -73,7 +78,9 @@ export default function AdminLayout() {
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary/30 to-emerald-600/30 flex items-center justify-center text-base border border-white/[0.08]">{user?.avatar || '🎵'}</div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-white truncate">{user?.username || t('admin.admin')}</p>
-              <p className="text-[11px] text-primary font-medium">{t('admin.admin')}</p>
+              <p className={`text-[11px] font-bold uppercase tracking-wider ${
+                user?.role === 'admin' ? 'text-red-400' : user?.role === 'moderator' ? 'text-purple-400' : 'text-primary'
+              }`}>{user?.role?.toUpperCase()}</p>
             </div>
           </div>
           <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 py-2 text-sm text-text-muted hover:text-red-400 hover:bg-red-500/[0.05] transition-all rounded-lg">
