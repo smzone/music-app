@@ -74,13 +74,8 @@ export default function RegisterPage() {
     if (password !== confirmPwd) { toast.error(t('register.errorPwdMatch')); return; }
     if (!agreedTerms) { toast.error(t('register.errorTerms')); return; }
 
-    const ok = await register(email.trim(), password, username.trim());
+    const ok = await register(username.trim(), password, { email: email.trim(), avatar: selectedAvatar });
     if (ok) {
-      // 将头像存到用户信息
-      const store = useAuthStore.getState();
-      if (store.user) {
-        useAuthStore.setState({ user: { ...store.user, avatar: selectedAvatar } });
-      }
       toast.success(t('register.success'));
       navigate('/');
     } else {
