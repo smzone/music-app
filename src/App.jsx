@@ -98,13 +98,13 @@ function App() {
           {/* 管理后台（版主及以上可进入，具体子页面按权限控制） */}
           <Route path="/admin" element={<RoleGuard minRole={ROLES.MODERATOR}><AdminLayout /></RoleGuard>}>
             <Route index element={<DashboardPage />} />
-            <Route path="songs" element={<SongsManagePage />} />
+            <Route path="songs" element={<RoleGuard minRole={ROLES.ADMIN}><SongsManagePage /></RoleGuard>} />
             <Route path="forum" element={<ForumManagePage />} />
-            <Route path="users" element={<UsersManagePage />} />
+            <Route path="users" element={<RoleGuard minRole={ROLES.ADMIN}><UsersManagePage /></RoleGuard>} />
             <Route path="profile" element={<ProfileEditPage />} />
-            <Route path="sections" element={<SectionsPage />} />
+            <Route path="sections" element={<RoleGuard minRole={ROLES.ADMIN}><SectionsPage /></RoleGuard>} />
             <Route path="playlists" element={<PlaylistsPage />} />
-            <Route path="settings" element={<SettingsPage />} />
+            <Route path="settings" element={<RoleGuard minRole={ROLES.ADMIN}><SettingsPage /></RoleGuard>} />
           </Route>
 
           {/* 404 通配路由 — 所有未匹配的路径 */}

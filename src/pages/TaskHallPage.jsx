@@ -5,7 +5,7 @@ import {
   Music, Mic, Video, Palette, Code, PenTool, Award, ArrowUpRight, Bookmark,
   Flame
 } from 'lucide-react';
-import useAuthStore from '../store/useAuthStore';
+import useAuthStore, { PERMISSIONS, hasPermission } from '../store/useAuthStore';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
@@ -317,7 +317,7 @@ export default function TaskHallPage() {
               <span className="flex items-center gap-1"><Users size={14} /> {tasks.reduce((s, t) => s + t.applicants, 0)} {t('taskHall.totalApplicants')}</span>
             </div>
           </div>
-          <button onClick={() => { if (!user) { toast.error(t('taskHall.loginFirst')); return; } setShowNewTask(true); }}
+          <button onClick={() => { if (!user) { toast.error(t('taskHall.loginFirst')); return; } if (!hasPermission(user.role, PERMISSIONS.CREATE_POST)) { toast.error(t('permission.noPermission')); return; } setShowNewTask(true); }}
             className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold rounded-full transition-all text-sm self-start shadow-[0_0_25px_rgba(234,179,8,0.2)] hover:shadow-[0_0_35px_rgba(234,179,8,0.3)]">
             <Plus size={16} /> {t('taskHall.publishTask')}
           </button>
@@ -456,7 +456,7 @@ export default function TaskHallPage() {
                       </button>
                       {/* 查看详情/投标 */}
                       {task.status === 'open' && (
-                        <button onClick={() => { if (!user) { toast.error(t('taskHall.loginFirst')); return; } toast.success(t('taskHall.applied')); }}
+                        <button onClick={() => { if (!user) { toast.error(t('taskHall.loginFirst')); return; } if (!hasPermission(user.role, PERMISSIONS.COMMENT)) { toast.error(t('permission.noPermission')); return; } toast.success(t('taskHall.applied')); }}
                           className="flex items-center gap-1 px-3.5 py-1.5 bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 rounded-lg text-xs font-bold transition-colors">
                           {t('taskHall.applyNow')} <ArrowUpRight size={12} />
                         </button>
