@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Users, Search, Shield, ShieldCheck, ShieldX, Ban, CheckCircle, Mail, TrendingUp, Download, History, ChevronLeft, ChevronRight, CheckSquare, Square, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 // 模拟用户数据
 const mockUsers = [
@@ -16,34 +17,35 @@ const mockUsers = [
   { id: 10, username: '摇滚少年', email: 'rock@test.com', avatar: '🎸', role: 'user', level: 'lv3', status: 'muted', posts: 8, likes: 67, joinDate: '2024-09-30', lastActive: '2025-03-14T19:00:00' },
 ];
 
-const roleLabels = {
-  admin: { text: '管理员', color: 'bg-red-500/15 text-red-400' },
-  moderator: { text: '版主', color: 'bg-purple-500/15 text-purple-400' },
-  user: { text: '用户', color: 'bg-gray-500/15 text-gray-400' },
+const roleKeys = {
+  admin: { key: 'usersMgr.roleAdmin', color: 'bg-red-500/15 text-red-400' },
+  moderator: { key: 'usersMgr.roleMod', color: 'bg-purple-500/15 text-purple-400' },
+  user: { key: 'usersMgr.roleUser', color: 'bg-gray-500/15 text-gray-400' },
 };
 
-const statusLabels = {
-  active: { text: '正常', color: 'bg-green-500/15 text-green-400', icon: CheckCircle },
-  muted: { text: '禁言', color: 'bg-yellow-500/15 text-yellow-400', icon: ShieldX },
-  banned: { text: '封禁', color: 'bg-red-500/15 text-red-400', icon: Ban },
+const statusKeys = {
+  active: { key: 'usersMgr.statusActive', color: 'bg-green-500/15 text-green-400', icon: CheckCircle },
+  muted: { key: 'usersMgr.statusMuted', color: 'bg-yellow-500/15 text-yellow-400', icon: ShieldX },
+  banned: { key: 'usersMgr.statusBanned', color: 'bg-red-500/15 text-red-400', icon: Ban },
 };
 
 // 格式化相对时间
-function formatRelativeTime(dateStr) {
+function formatRelativeTime(dateStr, t) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return '刚刚';
-  if (m < 60) return `${m}分钟前`;
+  if (m < 1) return t('usersMgr.timeJust');
+  if (m < 60) return t('usersMgr.timeMin', { n: m });
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}小时前`;
+  if (h < 24) return t('usersMgr.timeHour', { n: h });
   const d = Math.floor(h / 24);
-  if (d < 30) return `${d}天前`;
-  return new Date(dateStr).toLocaleDateString('zh-CN');
+  if (d < 30) return t('usersMgr.timeDay', { n: d });
+  return new Date(dateStr).toLocaleDateString();
 }
 
 const PAGE_SIZE = 6;
 
 export default function UsersManagePage() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState(mockUsers);
   const [searchQ, setSearchQ] = useState('');
   const [filterRole, setFilterRole] = useState('all');
@@ -77,15 +79,15 @@ export default function UsersManagePage() {
   const setRole = (id, role) => {
     const u = users.find(x => x.id === id);
     setUsers(users.map((x) => x.id === id ? { ...x, role } : x));
-    addLog(`角色→${roleLabels[role].text}`, u?.username);
-    toast.success('角色已更新');
+    addLog(t('usersMgr.logRole', { role: t(roleKeys[role].key) }), u?.username);
+    toast.success(t('usersMgr.toastRoleUpdated'));
   };
 
   const setStatus = (id, status) => {
     const u = users.find(x => x.id === id);
     setUsers(users.map((x) => x.id === id ? { ...x, status } : x));
-    addLog(`状态→${statusLabels[status].text}`, u?.username);
-    toast.success('状态已更新');
+    addLog(t('usersMgr.logStatus', { status: t(statusKeys[status].key) }), u?.username);
+    toast.success(t('usersMgr.toastStatusUpdated'));
   };
 
   // 批量操作
@@ -109,43 +111,43 @@ export default function UsersManagePage() {
     if (selectedIds.size === 0) return;
     const names = users.filter(u => selectedIds.has(u.id)).map(u => u.username).join(', ');
     setUsers(users.map(u => selectedIds.has(u.id) ? { ...u, status } : u));
-    addLog(`批量${statusLabels[status].text}(${selectedIds.size}人)`, names);
+    addLog(t('usersMgr.logBatch', { action: t(statusKeys[status].key), count: selectedIds.size }), names);
     setSelectedIds(new Set());
-    toast.success(`已批量${statusLabels[status].text} ${selectedIds.size} 个用户`);
+    toast.success(t('usersMgr.toastBatch', { action: t(statusKeys[status].key), count: selectedIds.size }));
   };
 
   // CSV 导出
   const exportCSV = () => {
-    const header = '用户名,邮箱,角色,状态,帖子,获赞,注册时间\n';
-    const rows = filtered.map(u => `${u.username},${u.email},${roleLabels[u.role].text},${statusLabels[u.status].text},${u.posts},${u.likes},${u.joinDate}`).join('\n');
+    const header = `${t('usersMgr.colUser')},${t('usersMgr.colEmail')},${t('usersMgr.colRole')},${t('usersMgr.colStatus')},${t('usersMgr.colPosts')},${t('usersMgr.colLikes')},${t('usersMgr.colJoinDate')}\n`;
+    const rows = filtered.map(u => `${u.username},${u.email},${t(roleKeys[u.role].key)},${t(statusKeys[u.status].key)},${u.posts},${u.likes},${u.joinDate}`).join('\n');
     const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = `users_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
     URL.revokeObjectURL(url);
-    addLog('导出用户CSV', `${filtered.length}条`);
-    toast.success(`已导出 ${filtered.length} 条用户数据`);
+    addLog(t('usersMgr.logExport'), `${filtered.length}`);
+    toast.success(t('usersMgr.toastExported', { count: filtered.length }));
   };
 
   const stats = [
-    { label: '总用户', value: users.length, icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: '活跃用户', value: users.filter((u) => u.status === 'active').length, icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-400/10' },
-    { label: '版主', value: users.filter((u) => u.role === 'moderator').length, icon: Shield, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { label: '本月新增', value: users.filter((u) => new Date(u.joinDate) > new Date('2025-03-01')).length, icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+    { label: t('usersMgr.statTotal'), value: users.length, icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: t('usersMgr.statActive'), value: users.filter((u) => u.status === 'active').length, icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-400/10' },
+    { label: t('usersMgr.statMod'), value: users.filter((u) => u.role === 'moderator').length, icon: Shield, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { label: t('usersMgr.statNewMonth'), value: users.filter((u) => new Date(u.joinDate) > new Date('2025-03-01')).length, icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-400/10' },
   ];
 
   return (
     <div className="animate-fadeIn">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">用户管理</h1>
+        <h1 className="text-2xl font-bold text-white">{t('usersMgr.title')}</h1>
         <div className="flex items-center gap-2">
           <button onClick={() => setShowLog(!showLog)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${showLog ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-surface-light text-text-muted hover:text-white border border-surface-lighter'}`}>
-            <History size={14} /> 操作日志 {opLog.length > 0 && <span className="px-1.5 py-0.5 bg-primary/20 text-primary rounded-full text-[10px]">{opLog.length}</span>}
+            <History size={14} /> {t('usersMgr.opLog')} {opLog.length > 0 && <span className="px-1.5 py-0.5 bg-primary/20 text-primary rounded-full text-[10px]">{opLog.length}</span>}
           </button>
           <button onClick={exportCSV}
             className="flex items-center gap-1.5 px-3 py-2 bg-surface-light text-text-muted hover:text-white border border-surface-lighter rounded-xl text-xs font-medium transition-all hover:border-primary/30">
-            <Download size={14} /> 导出CSV
+            <Download size={14} /> {t('usersMgr.exportCSV')}
           </button>
         </div>
       </div>
@@ -154,18 +156,18 @@ export default function UsersManagePage() {
       {showLog && (
         <div className="mb-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 animate-fadeIn">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2"><History size={14} className="text-primary" /> 最近操作记录</h3>
+            <h3 className="text-sm font-bold text-white flex items-center gap-2"><History size={14} className="text-primary" /> {t('usersMgr.recentOps')}</h3>
             {opLog.length > 0 && (
-              <button onClick={() => { setOpLog([]); toast.success('日志已清空'); }} className="text-[11px] text-text-muted hover:text-red-400 transition-colors">清空</button>
+              <button onClick={() => { setOpLog([]); toast.success(t('usersMgr.toastLogCleared')); }} className="text-[11px] text-text-muted hover:text-red-400 transition-colors">{t('usersMgr.clear')}</button>
             )}
           </div>
           {opLog.length === 0 ? (
-            <p className="text-xs text-text-muted py-4 text-center">暂无操作记录</p>
+            <p className="text-xs text-text-muted py-4 text-center">{t('usersMgr.noLogs')}</p>
           ) : (
             <div className="space-y-1.5 max-h-48 overflow-y-auto">
               {opLog.map(log => (
                 <div key={log.id} className="flex items-center gap-3 text-xs py-1.5 px-2 rounded-lg hover:bg-white/[0.03]">
-                  <span className="text-text-muted shrink-0 flex items-center gap-1"><Clock size={10} /> {formatRelativeTime(log.time)}</span>
+                  <span className="text-text-muted shrink-0 flex items-center gap-1"><Clock size={10} /> {formatRelativeTime(log.time, t)}</span>
                   <span className="text-primary font-medium">{log.action}</span>
                   <span className="text-text-secondary truncate">{log.target}</span>
                 </div>
@@ -195,41 +197,41 @@ export default function UsersManagePage() {
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input type="text" value={searchQ} onChange={(e) => { setSearchQ(e.target.value); setPage(1); }} placeholder="搜索用户名或邮箱..."
+          <input type="text" value={searchQ} onChange={(e) => { setSearchQ(e.target.value); setPage(1); }} placeholder={t('usersMgr.searchPH')}
             className="w-full bg-surface-light text-white pl-9 pr-4 py-2.5 rounded-xl outline-none border border-surface-lighter focus:border-primary text-sm placeholder:text-text-muted" />
         </div>
         <select value={filterRole} onChange={(e) => { setFilterRole(e.target.value); setPage(1); }}
           className="bg-surface-light text-white px-4 py-2.5 rounded-xl outline-none border border-surface-lighter text-sm">
-          <option value="all">全部角色</option>
-          <option value="admin">管理员</option>
-          <option value="moderator">版主</option>
-          <option value="user">普通用户</option>
+          <option value="all">{t('usersMgr.allRoles')}</option>
+          <option value="admin">{t('usersMgr.roleAdmin')}</option>
+          <option value="moderator">{t('usersMgr.roleMod')}</option>
+          <option value="user">{t('usersMgr.roleUser')}</option>
         </select>
         <select value={filterStatus} onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
           className="bg-surface-light text-white px-4 py-2.5 rounded-xl outline-none border border-surface-lighter text-sm">
-          <option value="all">全部状态</option>
-          <option value="active">正常</option>
-          <option value="muted">禁言</option>
-          <option value="banned">封禁</option>
+          <option value="all">{t('usersMgr.allStatus')}</option>
+          <option value="active">{t('usersMgr.statusActive')}</option>
+          <option value="muted">{t('usersMgr.statusMuted')}</option>
+          <option value="banned">{t('usersMgr.statusBanned')}</option>
         </select>
       </div>
 
       {/* 批量操作栏 */}
       {selectedIds.size > 0 && (
         <div className="flex items-center gap-3 mb-3 px-4 py-2.5 rounded-xl bg-primary/5 border border-primary/20 animate-fadeIn">
-          <span className="text-xs text-primary font-semibold">已选 {selectedIds.size} 人</span>
+          <span className="text-xs text-primary font-semibold">{t('usersMgr.selected', { count: selectedIds.size })}</span>
           <div className="flex items-center gap-1.5 ml-auto">
             <button onClick={() => batchSetStatus('muted')} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors">
-              <ShieldX size={12} /> 批量禁言
+              <ShieldX size={12} /> {t('usersMgr.batchMute')}
             </button>
             <button onClick={() => batchSetStatus('banned')} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">
-              <Ban size={12} /> 批量封禁
+              <Ban size={12} /> {t('usersMgr.batchBan')}
             </button>
             <button onClick={() => batchSetStatus('active')} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors">
-              <CheckCircle size={12} /> 批量解封
+              <CheckCircle size={12} /> {t('usersMgr.batchUnban')}
             </button>
             <button onClick={() => setSelectedIds(new Set())} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-text-muted hover:text-white transition-colors">
-              取消
+              {t('usersMgr.cancel')}
             </button>
           </div>
         </div>
@@ -246,19 +248,19 @@ export default function UsersManagePage() {
                     {selectedIds.size === paged.length && paged.length > 0 ? <CheckSquare size={16} className="text-primary" /> : <Square size={16} />}
                   </button>
                 </th>
-                <th className="px-4 py-3 font-medium">用户</th>
-                <th className="px-4 py-3 font-medium w-20">角色</th>
-                <th className="px-4 py-3 font-medium w-20">状态</th>
-                <th className="px-4 py-3 font-medium w-16 text-center">帖子</th>
-                <th className="px-4 py-3 font-medium w-16 text-center">获赞</th>
-                <th className="px-4 py-3 font-medium w-24">最后活跃</th>
-                <th className="px-4 py-3 font-medium w-36 text-right">操作</th>
+                <th className="px-4 py-3 font-medium">{t('usersMgr.colUser')}</th>
+                <th className="px-4 py-3 font-medium w-20">{t('usersMgr.colRole')}</th>
+                <th className="px-4 py-3 font-medium w-20">{t('usersMgr.colStatus')}</th>
+                <th className="px-4 py-3 font-medium w-16 text-center">{t('usersMgr.colPosts')}</th>
+                <th className="px-4 py-3 font-medium w-16 text-center">{t('usersMgr.colLikes')}</th>
+                <th className="px-4 py-3 font-medium w-24">{t('usersMgr.colLastActive')}</th>
+                <th className="px-4 py-3 font-medium w-36 text-right">{t('usersMgr.colActions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-lighter">
               {paged.map((user) => {
-                const role = roleLabels[user.role];
-                const status = statusLabels[user.status];
+                const role = roleKeys[user.role];
+                const status = statusKeys[user.status];
                 const StatusIcon = status.icon;
                 const isSelected = selectedIds.has(user.id);
                 return (
@@ -278,49 +280,49 @@ export default function UsersManagePage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${role.color}`}>{role.text}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${role.color}`}>{t(role.key)}</span>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded w-fit ${status.color}`}>
-                        <StatusIcon size={10} /> {status.text}
+                        <StatusIcon size={10} /> {t(status.key)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-xs text-text-muted text-center">{user.posts}</td>
                     <td className="px-4 py-3 text-xs text-text-muted text-center">{user.likes}</td>
-                    <td className="px-4 py-3 text-xs text-text-muted" title={user.lastActive}>{formatRelativeTime(user.lastActive)}</td>
+                    <td className="px-4 py-3 text-xs text-text-muted" title={user.lastActive}>{formatRelativeTime(user.lastActive, t)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
                         {user.role !== 'moderator' && user.role !== 'admin' && (
-                          <button onClick={() => setRole(user.id, 'moderator')} title="设为版主"
+                          <button onClick={() => setRole(user.id, 'moderator')} title={t('usersMgr.setMod')}
                             className="p-1.5 rounded-lg text-text-muted hover:text-purple-400 hover:bg-purple-500/10 transition-colors">
                             <ShieldCheck size={14} />
                           </button>
                         )}
                         {user.role === 'moderator' && (
-                          <button onClick={() => setRole(user.id, 'user')} title="取消版主"
+                          <button onClick={() => setRole(user.id, 'user')} title={t('usersMgr.removeMod')}
                             className="p-1.5 rounded-lg text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 transition-colors">
                             <ShieldX size={14} />
                           </button>
                         )}
                         {user.status === 'active' && (
-                          <button onClick={() => setStatus(user.id, 'muted')} title="禁言"
+                          <button onClick={() => setStatus(user.id, 'muted')} title={t('usersMgr.mute')}
                             className="p-1.5 rounded-lg text-text-muted hover:text-yellow-400 hover:bg-yellow-500/10 transition-colors">
                             <ShieldX size={14} />
                           </button>
                         )}
                         {user.status === 'muted' && (
-                          <button onClick={() => setStatus(user.id, 'active')} title="解除禁言"
+                          <button onClick={() => setStatus(user.id, 'active')} title={t('usersMgr.unmute')}
                             className="p-1.5 rounded-lg text-yellow-400 bg-yellow-500/10 hover:bg-yellow-500/20 transition-colors">
                             <CheckCircle size={14} />
                           </button>
                         )}
                         {user.status !== 'banned' ? (
-                          <button onClick={() => setStatus(user.id, 'banned')} title="封禁"
+                          <button onClick={() => setStatus(user.id, 'banned')} title={t('usersMgr.ban')}
                             className="p-1.5 rounded-lg text-text-muted hover:text-danger hover:bg-danger/10 transition-colors">
                             <Ban size={14} />
                           </button>
                         ) : (
-                          <button onClick={() => setStatus(user.id, 'active')} title="解封"
+                          <button onClick={() => setStatus(user.id, 'active')} title={t('usersMgr.unban')}
                             className="p-1.5 rounded-lg text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors">
                             <CheckCircle size={14} />
                           </button>
@@ -334,13 +336,13 @@ export default function UsersManagePage() {
           </table>
         </div>
         {paged.length === 0 && (
-          <div className="py-12 text-center text-text-muted text-sm">暂无匹配的用户</div>
+          <div className="py-12 text-center text-text-muted text-sm">{t('usersMgr.noUsers')}</div>
         )}
 
         {/* 分页 */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-surface-lighter">
-            <span className="text-xs text-text-muted">共 {filtered.length} 条，第 {page}/{totalPages} 页</span>
+            <span className="text-xs text-text-muted">{t('usersMgr.pagination', { total: filtered.length, page, pages: totalPages })}</span>
             <div className="flex items-center gap-1">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-text-muted hover:text-white hover:bg-white/[0.04] disabled:opacity-30 transition-colors">
