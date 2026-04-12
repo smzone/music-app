@@ -1,5 +1,6 @@
 import { Music, Users, Headphones, Star, TrendingUp, MessageSquare, ArrowUpRight, Activity, Clock, Shield, Settings } from 'lucide-react';
-import { songsData } from '../../data/songs';
+import useSongStore from '../../store/useSongStore';
+import useForumStore from '../../store/useForumStore';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -23,24 +24,29 @@ const quickActions = [
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const totalPlays = songsData.reduce((sum, s) => sum + s.plays, 0);
-  const totalComments = songsData.reduce((sum, s) => sum + (s.comments?.length || 0), 0);
-  const avgRating = (songsData.reduce((sum, s) => {
-    const avg = s.ratings.length ? s.ratings.reduce((a, b) => a + b, 0) / s.ratings.length : 0;
-    return sum + avg;
-  }, 0) / songsData.length).toFixed(1);
+  const songs = useSongStore((s) => s.songs);
+  const forumPosts = useForumStore((s) => s.posts);
+  const totalPlays = songs.reduce((sum, s) => sum + (s.play_count || s.plays || 0), 0);
+  const totalComments = songs.reduce((sum, s) => sum + (s.comments?.length || 0), 0);
+  const avgRating = songs.length > 0
+    ? (songs.reduce((sum, s) => {
+        const ratings = s.ratings || [];
+        const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+        return sum + avg;
+      }, 0) / songs.length).toFixed(1)
+    : '0.0';
 
   const cards = [
-    { icon: Music, labelKey: 'dashboard.totalSongs', value: songsData.length, color: 'text-primary', bg: 'from-green-500/20 to-green-900/10', trend: '+2' },
+    { icon: Music, labelKey: 'dashboard.totalSongs', value: songs.length, color: 'text-primary', bg: 'from-green-500/20 to-green-900/10', trend: '+2' },
     { icon: Headphones, labelKey: 'dashboard.totalPlays', value: totalPlays.toLocaleString(), color: 'text-blue-400', bg: 'from-blue-500/20 to-blue-900/10', trend: '+8.5%' },
     { icon: Star, labelKey: 'dashboard.avgRating', value: avgRating, color: 'text-yellow-400', bg: 'from-yellow-500/20 to-yellow-900/10', trend: '+0.2' },
-    { icon: MessageSquare, labelKey: 'dashboard.comments', value: totalComments, color: 'text-purple-400', bg: 'from-purple-500/20 to-purple-900/10', trend: '+15' },
-    { icon: Users, labelKey: 'dashboard.fans', value: '10,234', color: 'text-pink-400', bg: 'from-pink-500/20 to-pink-900/10', trend: '+128' },
+    { icon: MessageSquare, labelKey: 'dashboard.comments', value: totalComments + (forumPosts?.length || 0), color: 'text-purple-400', bg: 'from-purple-500/20 to-purple-900/10', trend: '+15' },
+    { icon: Users, labelKey: 'dashboard.fans', value: (forumPosts?.length || 0).toLocaleString(), color: 'text-pink-400', bg: 'from-pink-500/20 to-pink-900/10', trend: '+128' },
     { icon: TrendingUp, labelKey: 'dashboard.monthGrowth', value: '+12%', color: 'text-green-400', bg: 'from-green-500/20 to-green-900/10', trend: '↑' },
   ];
 
   // 最近歌曲排行
-  const topSongs = [...songsData].sort((a, b) => b.plays - a.plays).slice(0, 5);
+  const topSongs = [...songs].sort((a, b) => (b.play_count || b.plays || 0) - (a.play_count || a.plays || 0)).slice(0, 5);
 
   return (
     <div className="animate-fadeIn">
@@ -86,7 +92,7 @@ export default function DashboardPage() {
                   <p className="text-xs text-text-muted truncate">{song.artist}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-white">{song.plays.toLocaleString()}</p>
+                  <p className="text-sm font-semibold text-white">{(song.play_count || song.plays || 0).toLocaleString()}</p>
                   <p className="text-[11px] text-text-muted">{t('dashboard.plays')}</p>
                 </div>
               </div>

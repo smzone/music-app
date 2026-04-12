@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Edit3, Trash2, Search, X, Upload, Music } from 'lucide-react';
-import { songsData, formatDuration, getAverageRating } from '../../data/songs';
+import { formatDuration, getAverageRating } from '../../data/songs';
+import useSongStore from '../../store/useSongStore';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -97,25 +98,26 @@ export default function SongsManagePage() {
   const [searchQ, setSearchQ] = useState('');
   const [editSong, setEditSong] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  // 使用本地状态模拟管理（接入 Supabase 后切换为真实 CRUD）
-  const [localSongs, setLocalSongs] = useState([...songsData]);
+  // 从 store 读取歌曲列表（Supabase / 本地双模式）
+  const storeSongs = useSongStore((s) => s.songs);
+  const [localSongs, setLocalSongs] = useState(null);
+  const songs = localSongs || storeSongs;
 
-  const filtered = localSongs.filter((s) =>
+  const filtered = songs.filter((s) =>
     s.title.toLowerCase().includes(searchQ.toLowerCase()) ||
     s.artist.toLowerCase().includes(searchQ.toLowerCase())
   );
 
   const handleSave = (song) => {
-    setLocalSongs((prev) => {
-      const idx = prev.findIndex((s) => s.id === song.id);
-      if (idx >= 0) { const next = [...prev]; next[idx] = song; return next; }
-      return [song, ...prev];
-    });
+    const base = localSongs || [...storeSongs];
+    const idx = base.findIndex((s) => s.id === song.id);
+    if (idx >= 0) { const next = [...base]; next[idx] = song; setLocalSongs(next); }
+    else setLocalSongs([song, ...base]);
   };
 
   const handleDelete = (id) => {
     if (!confirm(t('songsMgr.confirmDelete'))) return;
-    setLocalSongs((prev) => prev.filter((s) => s.id !== id));
+    setLocalSongs((localSongs || [...storeSongs]).filter((s) => s.id !== id));
     toast.success(t('songsMgr.deleted'));
   };
 
@@ -124,7 +126,7 @@ export default function SongsManagePage() {
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight">{t('songsMgr.title')}</h1>
-          <p className="text-sm text-text-muted mt-1">{t('songsMgr.totalCount', { count: localSongs.length })}</p>
+          <p className="text-sm text-text-muted mt-1">{t('songsMgr.totalCount', { count: songs.length })}</p>
         </div>
         <button onClick={() => { setEditSong(null); setShowModal(true); }}
           className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-full transition-all hover:shadow-[0_0_20px_rgba(29,185,84,0.15)]">
@@ -172,7 +174,7 @@ export default function SongsManagePage() {
             <span className="hidden md:block text-sm text-text-muted truncate">{song.album}</span>
             <span className="hidden md:block text-xs text-text-muted bg-white/[0.04] px-2 py-0.5 rounded w-fit">{song.genre}</span>
             <span className="hidden md:block text-sm text-text-muted">{formatDuration(song.duration)}</span>
-            <span className="hidden md:block text-sm text-yellow-400">★ {getAverageRating(song.ratings)}</span>
+            <span className="hidden md:block text-sm text-yellow-400">★ {getAverageRating(song.ratings || [])}</span>
             <div className="flex items-center gap-1">
               <button onClick={() => { setEditSong(song); setShowModal(true); }}
                 className="p-2 rounded-lg hover:bg-white/[0.04] text-text-muted hover:text-primary transition-colors">

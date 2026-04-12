@@ -54,6 +54,15 @@ export default function MusicPlayer() {
     return idx;
   }, [currentTime, lyricsData]);
 
+  // 切歌时自动计数播放量
+  const prevSongIdRef = useRef(null);
+  useEffect(() => {
+    if (song && song.id !== prevSongIdRef.current) {
+      prevSongIdRef.current = song.id;
+      useSongStore.getState().incrementPlay(song.id);
+    }
+  }, [song]);
+
   // 模拟播放进度
   useEffect(() => {
     if (isPlaying && song) {

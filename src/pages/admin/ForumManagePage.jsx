@@ -1,12 +1,19 @@
 import { useState } from 'react';
 import { MessageSquare, Search, Pin, Flame, Star, Trash2, Filter } from 'lucide-react';
-import { initialPosts, forumCategories, formatTime, formatNum } from '../../data/forum';
+import { forumCategories, formatTime, formatNum, initialPosts } from '../../data/forum';
+import useForumStore from '../../store/useForumStore';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 export default function ForumManagePage() {
   const { t } = useTranslation();
-  const [posts, setPosts] = useState(initialPosts);
+  // 从 store 读取帖子列表（Supabase / 本地双模式）
+  const storePosts = useForumStore((s) => s.posts);
+  const storeTogglePin = useForumStore((s) => s.togglePin);
+  const storeToggleEssence = useForumStore((s) => s.toggleEssence);
+  const storeRemovePost = useForumStore((s) => s.removePost);
+  const [localPosts, setLocalPosts] = useState(null);
+  const posts = localPosts || (storePosts.length > 0 ? storePosts : initialPosts);
   const [searchQ, setSearchQ] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -18,23 +25,28 @@ export default function ForumManagePage() {
     return matchSearch;
   });
 
+  const updateLocal = (fn) => setLocalPosts(fn(localPosts || [...posts]));
+
   const togglePin = (id) => {
-    setPosts(posts.map((p) => p.id === id ? { ...p, isPinned: !p.isPinned } : p));
+    updateLocal((arr) => arr.map((p) => p.id === id ? { ...p, isPinned: !p.isPinned } : p));
+    storeTogglePin?.(id);
     toast.success(t('forumMgr.pinUpdated'));
   };
 
   const toggleHot = (id) => {
-    setPosts(posts.map((p) => p.id === id ? { ...p, isHot: !p.isHot } : p));
+    updateLocal((arr) => arr.map((p) => p.id === id ? { ...p, isHot: !p.isHot } : p));
     toast.success(t('forumMgr.hotUpdated'));
   };
 
   const toggleEssence = (id) => {
-    setPosts(posts.map((p) => p.id === id ? { ...p, isEssence: !p.isEssence } : p));
+    updateLocal((arr) => arr.map((p) => p.id === id ? { ...p, isEssence: !p.isEssence } : p));
+    storeToggleEssence?.(id);
     toast.success(t('forumMgr.essenceUpdated'));
   };
 
   const deletePost = (id) => {
-    setPosts(posts.filter((p) => p.id !== id));
+    updateLocal((arr) => arr.filter((p) => p.id !== id));
+    storeRemovePost?.(id);
     toast.success(t('forumMgr.postDeleted'));
   };
 

@@ -27,6 +27,9 @@
     "system": "시스템",
     "defaultMsg": "님이 메시지를 보냈습니다"
   },
+  "sidebar": {
+    "favorites": "즐겨찾기"
+  },
   "home": {
     "title": "홈",
     "tagIndependent": "인디 뮤지션",
@@ -711,6 +714,7 @@
     "likesReceived": "\ubc1b\uc740 \uc88b\uc544\uc694",
     "posts": "\uac8c\uc2dc\uae00",
     "followers": "\ud314\ub85c\uc6cc",
+    "following": "\ud314\ub85c\uc789",
     "permissionsTitle": "\ub0b4 \uad8c\ud55c",
     "perm_canPost": "\uac8c\uc2dc\uae00 \uc791\uc131",
     "perm_canComment": "\ub313\uae00",

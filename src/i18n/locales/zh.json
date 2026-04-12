@@ -27,6 +27,9 @@
     "system": "系统",
     "defaultMsg": "给你发了一条消息"
   },
+  "sidebar": {
+    "favorites": "收藏"
+  },
   "home": {
     "title": "首页",
     "tagIndependent": "独立音乐人",
@@ -710,7 +713,8 @@
     "songsPlayed": "播放歌曲",
     "likesReceived": "获得点赞",
     "posts": "发帖数",
-    "followers": "粉丝",
+    "followers": "\u7c89\u4e1d",
+    "following": "\u5173\u6ce8",
     "permissionsTitle": "我的权限",
     "perm_canPost": "发布帖子",
     "perm_canComment": "发表评论",

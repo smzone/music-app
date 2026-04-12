@@ -27,6 +27,9 @@
     "system": "System",
     "defaultMsg": "sent you a message"
   },
+  "sidebar": {
+    "favorites": "Favorites"
+  },
   "home": {
     "title": "Home",
     "tagIndependent": "Indie Musician",
@@ -711,6 +714,7 @@
     "likesReceived": "Likes Received",
     "posts": "Posts",
     "followers": "Followers",
+    "following": "Following",
     "permissionsTitle": "My Permissions",
     "perm_canPost": "Create Posts",
     "perm_canComment": "Comment",

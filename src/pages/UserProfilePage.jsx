@@ -1,7 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Music, Heart, MessageSquare, Calendar, Shield, Crown, Edit3, Save, X, Headphones, Users, Award } from 'lucide-react';
+import { User, Mail, Music, Heart, MessageSquare, Calendar, Shield, Crown, Edit3, Save, X, Headphones, Users, Award, Loader2 } from 'lucide-react';
 import useAuthStore, { ROLES } from '../store/useAuthStore';
+import useSongStore from '../store/useSongStore';
+import useForumStore from '../store/useForumStore';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { fetchFollowCounts } from '../lib/supabaseService';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -26,6 +30,22 @@ export default function UserProfilePage() {
     genres: (user?.genres || []).join(', '),
   });
 
+  // 从各 store 读取实时统计（hooks 必须在 early return 之前）
+  const favCount = useSongStore((s) => s.favorites.length);
+  const forumPosts = useForumStore((s) => s.posts);
+  const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
+  const [followLoading, setFollowLoading] = useState(false);
+
+  // Supabase 模式：加载关注/粉丝数
+  useEffect(() => {
+    if (!isSupabaseConfigured || !user?.id) return;
+    setFollowLoading(true);
+    fetchFollowCounts(user.id).then((counts) => {
+      setFollowCounts(counts);
+      setFollowLoading(false);
+    });
+  }, [user?.id]);
+
   // 未登录跳转
   if (!user) {
     navigate('/login');
@@ -34,6 +54,7 @@ export default function UserProfilePage() {
 
   const badge = roleBadge[user.role] || roleBadge[ROLES.USER];
   const BadgeIcon = badge.icon;
+  const myPostsCount = forumPosts.filter((p) => (p.author === user?.username || p.user_id === user?.id)).length;
 
   const handleSave = () => {
     if (!form.username.trim()) { toast.error(t('userProfile.errUsername')); return; }
@@ -52,10 +73,10 @@ export default function UserProfilePage() {
 
   // 统计数据
   const stats = [
-    { icon: Headphones, label: t('userProfile.songsPlayed'), value: user.songsPlayed || 0 },
-    { icon: Heart, label: t('userProfile.likesReceived'), value: user.likesReceived || 0 },
-    { icon: MessageSquare, label: t('userProfile.posts'), value: user.postsCount || 0 },
-    { icon: Users, label: t('userProfile.followers'), value: user.followers || 0 },
+    { icon: Heart, label: t('userProfile.likesReceived'), value: favCount },
+    { icon: MessageSquare, label: t('userProfile.posts'), value: myPostsCount || user.postsCount || 0 },
+    { icon: Users, label: t('userProfile.followers'), value: followLoading ? -1 : (followCounts.followers || user.followers || 0) },
+    { icon: Headphones, label: t('userProfile.following'), value: followLoading ? -1 : (followCounts.following || 0) },
   ];
 
   return (
@@ -143,7 +164,11 @@ export default function UserProfilePage() {
           return (
             <div key={i} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 text-center hover:border-white/[0.1] transition-all">
               <Icon size={20} className="mx-auto text-primary mb-2" />
-              <p className="text-xl font-black text-white">{s.value.toLocaleString()}</p>
+              {s.value === -1 ? (
+                <Loader2 size={18} className="animate-spin text-primary mx-auto" />
+              ) : (
+                <p className="text-xl font-black text-white">{s.value.toLocaleString()}</p>
+              )}
               <p className="text-xs text-text-muted mt-1">{s.label}</p>
             </div>
           );

@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Users, Search, Shield, ShieldCheck, ShieldX, Ban, CheckCircle, Mail, TrendingUp, Download, History, ChevronLeft, ChevronRight, CheckSquare, Square, Clock } from 'lucide-react';
+import { Users, Search, Shield, ShieldCheck, ShieldX, Ban, CheckCircle, Mail, TrendingUp, Download, History, ChevronLeft, ChevronRight, CheckSquare, Square, Clock, Loader2 } from 'lucide-react';
+import { isSupabaseConfigured } from '../../lib/supabase';
+import { fetchAllProfiles, updateUserRole as updateRoleApi, updateUserStatus as updateStatusApi } from '../../lib/supabaseService';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -47,6 +49,31 @@ const PAGE_SIZE = 6;
 export default function UsersManagePage() {
   const { t } = useTranslation();
   const [users, setUsers] = useState(mockUsers);
+  const [usersLoading, setUsersLoading] = useState(false);
+
+  // Supabase 模式：从远端拉取用户列表
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    setUsersLoading(true);
+    fetchAllProfiles().then((profiles) => {
+      if (profiles.length > 0) {
+        setUsers(profiles.map((p) => ({
+          id: p.id,
+          username: p.username || p.email || 'Unknown',
+          email: p.email || '',
+          avatar: p.avatar_url || '🎵',
+          role: p.role || 'user',
+          level: '',
+          status: p.status || 'active',
+          posts: p.posts_count || 0,
+          likes: p.likes_count || 0,
+          joinDate: p.created_at ? p.created_at.split('T')[0] : '',
+          lastActive: p.last_sign_in_at || p.updated_at || p.created_at || '',
+        })));
+      }
+      setUsersLoading(false);
+    });
+  }, []);
   const [searchQ, setSearchQ] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -76,18 +103,22 @@ export default function UsersManagePage() {
     setOpLog(prev => [{ id: Date.now(), time: new Date().toISOString(), action, target }, ...prev].slice(0, 50));
   };
 
-  const setRole = (id, role) => {
+  const setRole = async (id, role) => {
     const u = users.find(x => x.id === id);
+    // 乐观更新
     setUsers(users.map((x) => x.id === id ? { ...x, role } : x));
     addLog(t('usersMgr.logRole', { role: t(roleKeys[role].key) }), u?.username);
     toast.success(t('usersMgr.toastRoleUpdated'));
+    // Supabase 同步
+    if (isSupabaseConfigured) await updateRoleApi(id, role).catch(() => {});
   };
 
-  const setStatus = (id, status) => {
+  const setStatus = async (id, status) => {
     const u = users.find(x => x.id === id);
     setUsers(users.map((x) => x.id === id ? { ...x, status } : x));
     addLog(t('usersMgr.logStatus', { status: t(statusKeys[status].key) }), u?.username);
     toast.success(t('usersMgr.toastStatusUpdated'));
+    if (isSupabaseConfigured) await updateStatusApi(id, status).catch(() => {});
   };
 
   // 批量操作
@@ -238,7 +269,12 @@ export default function UsersManagePage() {
       )}
 
       {/* 用户列表 */}
-      <div className="bg-surface-light rounded-2xl border border-surface-lighter overflow-hidden">
+      {usersLoading && (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 size={28} className="animate-spin text-primary" />
+        </div>
+      )}
+      <div className={`bg-surface-light rounded-2xl border border-surface-lighter overflow-hidden ${usersLoading ? 'hidden' : ''}`}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

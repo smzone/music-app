@@ -1,17 +1,23 @@
-import { Home, Search, Library, Heart, X } from 'lucide-react';
+import { Home, Search, Library, Heart, X, Bell } from 'lucide-react';
 import useSongStore from '../../store/useSongStore';
 import useAuthStore from '../../store/useAuthStore';
+import useNotificationStore from '../../store/useNotificationStore';
+import { useTranslation } from 'react-i18next';
 
 const navItems = [
-  { id: 'home', label: '首页', icon: Home },
-  { id: 'search', label: '搜索', icon: Search },
-  { id: 'library', label: '曲库', icon: Library },
-  { id: 'favorites', label: '收藏', icon: Heart },
+  { id: 'home', key: 'nav.home', icon: Home },
+  { id: 'search', key: 'nav.music', icon: Search },
+  { id: 'library', key: 'nav.music', icon: Library },
+  { id: 'favorites', key: 'sidebar.favorites', icon: Heart, badge: 'favCount' },
+  { id: 'notifications', key: 'nav.notifications', icon: Bell, badge: 'unreadCount' },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
-  const { activePage, setActivePage } = useSongStore();
+  const { t } = useTranslation();
+  const { activePage, setActivePage, favorites } = useSongStore();
   const { user, openAuth, logout } = useAuthStore();
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
+  const badgeValues = { favCount: favorites.length, unreadCount };
 
   const handleNav = (page) => {
     setActivePage(page);
@@ -41,7 +47,7 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="flex items-center justify-between px-6 py-6">
           <div className="flex items-center gap-3">
             <span className="text-3xl">🎵</span>
-            <h1 className="text-xl font-bold text-white tracking-tight">音乐平台</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight">MySpace</h1>
           </div>
           <button onClick={onClose} className="lg:hidden text-text-secondary hover:text-white p-1">
             <X size={22} />
@@ -67,7 +73,12 @@ export default function Sidebar({ isOpen, onClose }) {
                 `}
               >
                 <Icon size={22} className={isActive ? 'text-primary' : ''} />
-                <span>{item.label}</span>
+                <span className="flex-1">{t(item.key)}</span>
+                {item.badge && badgeValues[item.badge] > 0 && (
+                  <span className="min-w-[20px] h-5 bg-primary/20 text-primary text-[11px] font-bold rounded-full flex items-center justify-center px-1.5">
+                    {badgeValues[item.badge]}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -86,7 +97,7 @@ export default function Sidebar({ isOpen, onClose }) {
                   onClick={logout}
                   className="text-sm text-text-muted hover:text-danger transition-colors"
                 >
-                  退出登录
+                  {t('nav.logout')}
                 </button>
               </div>
             </div>
@@ -95,7 +106,7 @@ export default function Sidebar({ isOpen, onClose }) {
               onClick={() => openAuth('login')}
               className="w-full py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-full text-[15px] transition-colors"
             >
-              登录 / 注册
+              {t('nav.login')} / {t('nav.register')}
             </button>
           )}
         </div>

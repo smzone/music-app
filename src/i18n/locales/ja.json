@@ -27,6 +27,9 @@
     "system": "システム",
     "defaultMsg": "からメッセージが届きました"
   },
+  "sidebar": {
+    "favorites": "お気に入り"
+  },
   "home": {
     "title": "ホーム",
     "tagIndependent": "インディーズ",
@@ -711,6 +714,7 @@
     "likesReceived": "いいね数",
     "posts": "投稿数",
     "followers": "フォロワー",
+    "following": "フォロー中",
     "permissionsTitle": "権限一覧",
     "perm_canPost": "投稿作成",
     "perm_canComment": "コメント",
