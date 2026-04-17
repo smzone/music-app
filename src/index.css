@@ -338,6 +338,7 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.2); }
 [data-theme="light"] .bg-\[\#13131b\] { background-color: #fafafa !important; }
 [data-theme="light"] .bg-\[\#15151e\] { background-color: #fff !important; }
 [data-theme="light"] .bg-\[\#15151e\]\/95 { background-color: rgba(255,255,255,0.97) !important; }
+[data-theme="light"] .bg-\[\#1a1a2e\]\/95 { background-color: rgba(255,255,255,0.97) !important; }
 
 /* Light 模式文字渐变保持可见 */
 [data-theme="light"] .text-gradient {
