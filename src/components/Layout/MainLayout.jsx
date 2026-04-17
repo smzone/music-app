@@ -74,7 +74,7 @@ export default function MainLayout() {
           </Link>
 
           {/* 桌面导航 */}
-          <div className="hidden lg:flex items-center gap-0.5 bg-white/[0.03] rounded-2xl p-1 border border-white/[0.04]">
+          <div className={`hidden lg:flex items-center gap-0.5 rounded-2xl p-1 border ${theme === 'light' ? 'bg-black/[0.03] border-black/[0.06]' : 'bg-white/[0.03] border-white/[0.04]'}`}>
             {navKeys.map((item) => {
               const Icon = item.icon;
               return (
