@@ -266,6 +266,22 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.2); }
   border-color: rgba(0, 0, 0, 0.12) !important;
 }
 
+/* hover 边框在 light 模式下改为半透明黑色 */
+[data-theme="light"] .hover\:border-white\/\[0\.06\]:hover,
+[data-theme="light"] .hover\:border-white\/\[0\.08\]:hover {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+[data-theme="light"] .hover\:border-white\/\[0\.1\]:hover,
+[data-theme="light"] .hover\:border-white\/\[0\.15\]:hover {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* divide 分隔线在 light 模式下调整 */
+[data-theme="light"] .divide-white\/\[0\.04\] > :not(:first-child),
+[data-theme="light"] .divide-white\/\[0\.06\] > :not(:first-child) {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
 /* Light 模式弹窗/浮层 */
 [data-theme="light"] .bg-\[\#111118\],
 [data-theme="light"] .bg-\[\#15151e\],
