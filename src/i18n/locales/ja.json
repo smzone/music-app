@@ -1042,5 +1042,11 @@
   "common": {
     "admin": "管理者",
     "user": "一般ユーザー"
+  },
+  "commandPalette": {
+    "placeholder": "曲やページを検索...",
+    "noResults": "該当する結果が見つかりません",
+    "navigate": "移動",
+    "select": "選択"
   }
 }

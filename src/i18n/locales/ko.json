@@ -1042,5 +1042,11 @@
   "common": {
     "admin": "관리자",
     "user": "일반 사용자"
+  },
+  "commandPalette": {
+    "placeholder": "노래, 페이지 검색...",
+    "noResults": "일치하는 결과가 없습니다",
+    "navigate": "이동",
+    "select": "선택"
   }
 }

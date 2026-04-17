@@ -1042,5 +1042,11 @@
   "common": {
     "admin": "管理员",
     "user": "普通用户"
+  },
+  "commandPalette": {
+    "placeholder": "搜索歌曲、页面...",
+    "noResults": "没有找到匹配结果",
+    "navigate": "导航",
+    "select": "选择"
   }
 }
