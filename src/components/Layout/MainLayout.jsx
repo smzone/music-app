@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell } from 'lucide-react';
+import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell, Sun, Moon } from 'lucide-react';
 import useAuthStore, { hasRole, ROLES } from '../../store/useAuthStore';
 import useNotificationStore from '../../store/useNotificationStore';
 import MusicPlayer from '../Player/MusicPlayer';
@@ -9,6 +9,7 @@ import ScrollProgress from './ScrollProgress';
 import BackToTop from './BackToTop';
 import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
 import LanguageSwitcher from './LanguageSwitcher';
+import useThemeStore from '../../store/useThemeStore';
 import { useTranslation } from 'react-i18next';
 
 const navKeys = [
@@ -32,6 +33,7 @@ export default function MainLayout() {
   const { showPlayer } = usePlayerStore();
   const unreadCount = useNotificationStore((s) => s.unreadCount);
   const location = useLocation();
+  const { theme, toggleTheme } = useThemeStore();
 
   // 路由变化时关闭菜单
   useEffect(() => { setMenuOpen(false); setUserMenuOpen(false); }, [location.pathname]);
@@ -146,6 +148,16 @@ export default function MainLayout() {
               </div>
             )}
 
+            {/* 主题切换 */}
+            <button
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-text-muted hover:text-white transition-all"
+              aria-label={theme === 'dark' ? t('nav.lightMode') : t('nav.darkMode')}
+              title={theme === 'dark' ? t('nav.lightMode') : t('nav.darkMode')}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
             {/* 语言切换 */}
             <LanguageSwitcher />
 
@@ -177,9 +189,9 @@ export default function MainLayout() {
         </div>
       </nav>
 
-      {/* 页面内容（顶部留出导航高度） — 路由切换淡入动画 */}
-      <main id="main-content" className={`pt-16 ${showPlayer ? 'pb-20' : ''}`} key={location.pathname}>
-        <div className="animate-page-in">
+      {/* 页面内容 — 撑满视口高度，顶部留出导航高度 */}
+      <main id="main-content" className={`pt-16 min-h-screen flex flex-col ${showPlayer ? 'pb-20' : ''}`} key={location.pathname}>
+        <div className="animate-page-in flex-1 flex flex-col">
           <Outlet />
         </div>
       </main>

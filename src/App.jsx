@@ -1,7 +1,8 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import useAuthStore, { hasRole, ROLES } from './store/useAuthStore';
+import useThemeStore from './store/useThemeStore';
 import SongDetail from './components/Song/SongDetail';
 import ScrollToTop from './components/Layout/ScrollToTop';
 import PageLoader from './components/Layout/PageLoader';
@@ -27,6 +28,8 @@ const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 const ReleasesPage = lazy(() => import('./pages/ReleasesPage'));
 const ReleaseDetailPage = lazy(() => import('./pages/ReleaseDetailPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const OrdersPage = lazy(() => import('./pages/OrdersPage'));
 
 // 管理后台 — 按需加载
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -58,6 +61,10 @@ function RoleGuard({ minRole, children }) {
 }
 
 function App() {
+  // 初始化主题（确保 DOM data-theme 属性与 store 同步）
+  const initTheme = useThemeStore((s) => s.initTheme);
+  useEffect(() => { initTheme(); }, [initTheme]);
+
   return (
     <ErrorBoundary>
     <CursorGlow />
@@ -88,6 +95,8 @@ function App() {
             <Route path="/releases" element={<ReleasesPage />} />
             <Route path="/releases/:id" element={<ReleaseDetailPage />} />
             <Route path="/notifications" element={<AuthGuard><NotificationsPage /></AuthGuard>} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/orders" element={<AuthGuard><OrdersPage /></AuthGuard>} />
           </Route>
 
           {/* 独立页面（无顶部导航） */}

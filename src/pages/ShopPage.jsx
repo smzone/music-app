@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Star, Heart, X, Plus, Minus, Trash2, Search, Tag, TrendingUp, Package, Sparkles, ShoppingBag, Check } from 'lucide-react';
+import useCartStore from '../store/useCartStore';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +26,7 @@ const shopCategories = [
 ];
 
 // 购物车侧边栏 — 增强版
-function CartSidebar({ cart, onClose, onUpdateQty, onRemove, t }) {
+function CartSidebar({ cart, onClose, onUpdateQty, onRemove, onCheckout, t }) {
   const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   const totalItems = cart.reduce((sum, i) => sum + i.qty, 0);
 
@@ -83,7 +85,7 @@ function CartSidebar({ cart, onClose, onUpdateQty, onRemove, t }) {
               <span className="text-base font-bold text-white">{t('shop.total')}</span>
               <span className="text-2xl font-black text-primary">¥{total.toFixed(0)}</span>
             </div>
-            <button onClick={() => toast.success(t('shop.checkoutWip'))}
+            <button onClick={() => { onClose(); onCheckout(); }}
               className="w-full py-3.5 bg-primary hover:bg-primary-hover text-black font-bold rounded-full transition-all text-[15px] hover:shadow-[0_0_25px_rgba(29,185,84,0.3)]">
               {t('shop.checkout')}
             </button>
@@ -96,9 +98,10 @@ function CartSidebar({ cart, onClose, onUpdateQty, onRemove, t }) {
 
 export default function ShopPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   useDocumentTitle(t('shop.title'));
   const [activeCategory, setActiveCategory] = useState('all');
-  const [cart, setCart] = useState([]);
+  const { cart, addToCart: storeAdd, updateQty, removeFromCart } = useCartStore();
   const [showCart, setShowCart] = useState(false);
   const [likedItems, setLikedItems] = useState(new Set());
   const [searchQ, setSearchQ] = useState('');
@@ -119,20 +122,9 @@ export default function ShopPage() {
   }, [activeCategory, searchQ, sortBy]);
 
   const addToCart = (product) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.id === product.id);
-      if (existing) return prev.map((i) => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
-      return [...prev, { ...product, qty: 1 }];
-    });
+    storeAdd(product);
     toast.success(t('shop.addedToCart'));
   };
-
-  const updateQty = (id, qty) => {
-    if (qty <= 0) { setCart((prev) => prev.filter((i) => i.id !== id)); return; }
-    setCart((prev) => prev.map((i) => i.id === id ? { ...i, qty } : i));
-  };
-
-  const removeFromCart = (id) => setCart((prev) => prev.filter((i) => i.id !== id));
 
   const toggleLike = (id) => {
     setLikedItems((prev) => {
@@ -279,7 +271,7 @@ export default function ShopPage() {
         </div>
       )}
 
-      {showCart && <CartSidebar cart={cart} onClose={() => setShowCart(false)} onUpdateQty={updateQty} onRemove={removeFromCart} t={t} />}
+      {showCart && <CartSidebar cart={cart} onClose={() => setShowCart(false)} onUpdateQty={updateQty} onRemove={removeFromCart} onCheckout={() => navigate('/checkout')} t={t} />}
     </div>
   );
 }
