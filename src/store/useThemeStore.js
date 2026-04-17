@@ -1,5 +1,15 @@
 import { create } from 'zustand';
 
+// 主题对应的 meta theme-color 颜色值
+const THEME_COLORS = { dark: '#0a0a0f', light: '#ffffff' };
+
+// 同步 meta theme-color 标签
+const syncMetaThemeColor = (theme) => {
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) { meta = document.createElement('meta'); meta.name = 'theme-color'; document.head.appendChild(meta); }
+  meta.content = THEME_COLORS[theme] || THEME_COLORS.dark;
+};
+
 // 主题切换 Store — 支持 dark / light 双主题，持久化到 localStorage
 const useThemeStore = create((set) => ({
   // 初始化：优先读取 localStorage，默认 dark
@@ -10,6 +20,7 @@ const useThemeStore = create((set) => ({
     const next = state.theme === 'dark' ? 'light' : 'dark';
     localStorage.setItem('app-theme', next);
     document.documentElement.setAttribute('data-theme', next);
+    syncMetaThemeColor(next);
     return { theme: next };
   }),
 
@@ -17,6 +28,7 @@ const useThemeStore = create((set) => ({
   setTheme: (theme) => set(() => {
     localStorage.setItem('app-theme', theme);
     document.documentElement.setAttribute('data-theme', theme);
+    syncMetaThemeColor(theme);
     return { theme };
   }),
 
@@ -24,6 +36,7 @@ const useThemeStore = create((set) => ({
   initTheme: () => set(() => {
     const saved = localStorage.getItem('app-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', saved);
+    syncMetaThemeColor(saved);
     return { theme: saved };
   }),
 }));
