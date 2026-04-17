@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { User, Mail, Music, Heart, MessageSquare, Calendar, Shield, Crown, Edit3, Save, X, Headphones, Users, Award, Loader2 } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { User, Mail, Music, Heart, MessageSquare, Calendar, Shield, Crown, Edit3, Save, X, Headphones, Users, Award, Loader2, Package, ShoppingBag, ArrowRight } from 'lucide-react';
 import useAuthStore, { ROLES } from '../store/useAuthStore';
 import useSongStore from '../store/useSongStore';
 import useForumStore from '../store/useForumStore';
@@ -173,6 +173,40 @@ export default function UserProfilePage() {
             </div>
           );
         })}
+      </div>
+
+      {/* 快捷入口 */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+        <Link to="/orders" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 hover:border-primary/30 transition-all flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Package size={20} className="text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white">{t('nav.orders')}</p>
+            <p className="text-xs text-text-muted">{t('userProfile.viewOrders')}</p>
+          </div>
+          <ArrowRight size={16} className="text-text-muted group-hover:text-primary transition-colors shrink-0" />
+        </Link>
+        <Link to="/shop" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 hover:border-primary/30 transition-all flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+            <ShoppingBag size={20} className="text-orange-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white">{t('nav.shop')}</p>
+            <p className="text-xs text-text-muted">{t('userProfile.goShopping')}</p>
+          </div>
+          <ArrowRight size={16} className="text-text-muted group-hover:text-primary transition-colors shrink-0" />
+        </Link>
+        <Link to="/membership" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 hover:border-yellow-500/30 transition-all flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center shrink-0">
+            <Crown size={20} className="text-yellow-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white">{t('nav.membership')}</p>
+            <p className="text-xs text-text-muted">{t('userProfile.manageMembership')}</p>
+          </div>
+          <ArrowRight size={16} className="text-text-muted group-hover:text-yellow-400 transition-colors shrink-0" />
+        </Link>
       </div>
 
       {/* 编辑表单 */}

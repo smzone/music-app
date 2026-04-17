@@ -2,6 +2,7 @@ import { Home, Search, Library, Heart, X, Bell } from 'lucide-react';
 import useSongStore from '../../store/useSongStore';
 import useAuthStore from '../../store/useAuthStore';
 import useNotificationStore from '../../store/useNotificationStore';
+import useThemeStore from '../../store/useThemeStore';
 import { useTranslation } from 'react-i18next';
 
 const navItems = [
@@ -17,6 +18,8 @@ export default function Sidebar({ isOpen, onClose }) {
   const { activePage, setActivePage, favorites } = useSongStore();
   const { user, openAuth, logout } = useAuthStore();
   const unreadCount = useNotificationStore((s) => s.unreadCount);
+  const theme = useThemeStore((s) => s.theme);
+  const isLight = theme === 'light';
   const badgeValues = { favCount: favorites.length, unreadCount };
 
   const handleNav = (page) => {
@@ -29,7 +32,7 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* 移动端遮罩 */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          className={`fixed inset-0 z-40 lg:hidden ${isLight ? 'bg-black/30' : 'bg-black/60'}`}
           onClick={onClose}
         />
       )}
@@ -37,9 +40,10 @@ export default function Sidebar({ isOpen, onClose }) {
       {/* 侧边栏 */}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-72 bg-black z-50 flex flex-col
+          fixed top-0 left-0 h-full w-72 z-50 flex flex-col
           transition-transform duration-300 ease-in-out
           lg:translate-x-0 lg:static lg:z-auto
+          ${isLight ? 'bg-white border-r border-black/[0.08] shadow-[4px_0_20px_rgba(0,0,0,0.05)]' : 'bg-black'}
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
@@ -85,7 +89,7 @@ export default function Sidebar({ isOpen, onClose }) {
         </nav>
 
         {/* 用户信息 */}
-        <div className="px-5 py-5 border-t border-surface-lighter">
+        <div className={`px-5 py-5 border-t ${isLight ? 'border-black/[0.06]' : 'border-surface-lighter'}`}>
           {user ? (
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-xl">

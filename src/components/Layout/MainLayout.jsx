@@ -185,7 +185,7 @@ export default function MainLayout() {
 
         {/* 移动端导航 — 滑入动画 */}
         <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-out ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-          <div className="bg-[#0a0a0f]/98 backdrop-blur-xl border-t border-white/[0.06]">
+          <div className={`backdrop-blur-xl border-t ${theme === 'light' ? 'bg-white/98 border-black/[0.06]' : 'bg-[#0a0a0f]/98 border-white/[0.06]'}`}>
             <div className="px-4 py-3 space-y-1">
               {navKeys.map((item) => {
                 const Icon = item.icon;

@@ -777,7 +777,10 @@
     "role_moderator": "モデレーター",
     "role_vip": "VIP",
     "role_user": "ユーザー",
-    "role_guest": "ゲスト"
+    "role_guest": "ゲスト",
+    "viewOrders": "購入履歴を見る",
+    "goShopping": "商品を探す",
+    "manageMembership": "メンバーシップ管理"
   },
   "settings": {
     "title": "設定",

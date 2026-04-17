@@ -777,7 +777,10 @@
     "role_moderator": "Moderator",
     "role_vip": "VIP",
     "role_user": "User",
-    "role_guest": "Guest"
+    "role_guest": "Guest",
+    "viewOrders": "View purchase history",
+    "goShopping": "Discover products",
+    "manageMembership": "Manage membership"
   },
   "settings": {
     "title": "Settings",

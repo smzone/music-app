@@ -777,7 +777,10 @@
     "role_moderator": "\ubaa8\ub354\ub808\uc774\ud130",
     "role_vip": "VIP",
     "role_user": "\uc0ac\uc6a9\uc790",
-    "role_guest": "\uac8c\uc2a4\ud2b8"
+    "role_guest": "\uac8c\uc2a4\ud2b8",
+    "viewOrders": "구매 내역 보기",
+    "goShopping": "상품 둘러보기",
+    "manageMembership": "멤버십 관리"
   },
   "settings": {
     "title": "\uc124\uc815",
