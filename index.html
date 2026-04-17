@@ -21,8 +21,15 @@
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
 
     <title>MySpace - 发现与分享音乐</title>
+    <!-- 防闪烁：在 DOM 渲染前同步设置 data-theme -->
+    <script>
+      (function(){
+        var t = localStorage.getItem('app-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
   </head>
-  <body class="bg-[#121212] text-white">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

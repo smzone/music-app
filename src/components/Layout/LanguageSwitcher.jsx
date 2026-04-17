@@ -2,12 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe, Check, ChevronDown } from 'lucide-react';
 import { languages } from '../../i18n';
+import useThemeStore from '../../store/useThemeStore';
 
 // 语言切换器 — 高科技感下拉菜单，支持中/英/日/韩
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const isLight = useThemeStore((s) => s.theme === 'light');
 
   // 当前语言
   const currentLang = languages.find((l) => l.code === i18n.language) || languages[0];
@@ -51,7 +53,7 @@ export default function LanguageSwitcher() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-[calc(100%+8px)] w-52 bg-[#15151e]/95 backdrop-blur-2xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6),0_0_1px_rgba(255,255,255,0.1)] border border-white/[0.08] z-50 py-2 px-1.5 animate-fadeIn">
+          <div className={`absolute right-0 top-[calc(100%+8px)] w-52 backdrop-blur-2xl rounded-2xl z-50 py-2 px-1.5 animate-fadeIn border ${isLight ? 'bg-white/98 border-black/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.12)]' : 'bg-[#15151e]/95 border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.6),0_0_1px_rgba(255,255,255,0.1)]'}`}>
             {/* 标题 */}
             <div className="px-3 py-2 mb-1">
               <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted flex items-center gap-1.5">
