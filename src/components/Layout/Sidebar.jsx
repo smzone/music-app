@@ -1,7 +1,8 @@
-import { Home, Search, Library, Heart, X, Bell } from 'lucide-react';
+import { Home, Search, Library, Heart, X, Bell, Play, Pause, SkipForward } from 'lucide-react';
 import useSongStore from '../../store/useSongStore';
 import useAuthStore from '../../store/useAuthStore';
 import useNotificationStore from '../../store/useNotificationStore';
+import usePlayerStore from '../../store/usePlayerStore';
 import useThemeStore from '../../store/useThemeStore';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +19,8 @@ export default function Sidebar({ isOpen, onClose }) {
   const { activePage, setActivePage, favorites } = useSongStore();
   const { user, openAuth, logout } = useAuthStore();
   const unreadCount = useNotificationStore((s) => s.unreadCount);
+  const { playlist, currentIndex, isPlaying, togglePlay, nextSong, showPlayer } = usePlayerStore();
+  const currentSong = playlist[currentIndex];
   const theme = useThemeStore((s) => s.theme);
   const isLight = theme === 'light';
   const badgeValues = { favCount: favorites.length, unreadCount };
@@ -87,6 +90,46 @@ export default function Sidebar({ isOpen, onClose }) {
             );
           })}
         </nav>
+
+        {/* 正在播放 mini widget */}
+        {showPlayer && currentSong && (
+          <div className={`mx-4 mb-3 p-3 rounded-2xl border transition-all ${
+            isLight
+              ? 'bg-primary/[0.04] border-primary/10'
+              : 'bg-white/[0.03] border-white/[0.06]'
+          }`}>
+            <div className="flex items-center gap-3">
+              <div className="relative shrink-0">
+                <img
+                  src={currentSong.cover}
+                  alt={currentSong.title}
+                  className={`w-11 h-11 rounded-lg object-cover ${isPlaying ? 'shadow-[0_0_12px_rgba(29,185,84,0.25)]' : ''}`}
+                />
+                {isPlaying && (
+                  <div className="absolute inset-0 rounded-lg ring-2 ring-primary/30 animate-pulse" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-semibold text-white truncate">{currentSong.title}</p>
+                <p className="text-[11px] text-text-muted truncate">{currentSong.artist}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-3 mt-2.5">
+              <button
+                onClick={togglePlay}
+                className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-black hover:bg-primary-hover transition-colors shadow-[0_2px_8px_rgba(29,185,84,0.3)]"
+              >
+                {isPlaying ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}
+              </button>
+              <button
+                onClick={nextSong}
+                className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center text-text-muted hover:text-white transition-colors"
+              >
+                <SkipForward size={13} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* 用户信息 */}
         <div className={`px-5 py-5 border-t ${isLight ? 'border-black/[0.06]' : 'border-surface-lighter'}`}>
