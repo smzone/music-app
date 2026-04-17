@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
+import useThemeStore from '../../store/useThemeStore';
 
 // 全局鼠标特效 — 赛博朋克十字准星 + 旋转六边形 + 粒子拖尾 + 磁力吸附 + 点击涟漪
 // 仅在非触屏桌面设备上启用
 export default function CursorGlow() {
   const canvasRef = useRef(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const theme = useThemeStore((s) => s.theme);
 
   // 检测触屏设备
   useEffect(() => {
@@ -292,7 +294,7 @@ export default function CursorGlow() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-[9999]"
-      style={{ mixBlendMode: 'screen' }}
+      style={{ mixBlendMode: theme === 'light' ? 'multiply' : 'screen' }}
     />
   );
 }
