@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, UserPlus, ArrowLeft, Sparkles, Check, X, AlertCircle, Info } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, ArrowLeft, Sparkles, Check, X, AlertCircle, Info, Sun, Moon } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
+import useThemeStore from '../store/useThemeStore';
 
 // 可选头像列表
 const avatarOptions = ['🎵', '🎸', '🎹', '🎤', '🎧', '🥁', '🎷', '🎺', '🎻', '🪗', '🎶', '🌟', '🦊', '🐱', '🐼', '🦁'];
@@ -87,8 +88,15 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      {/* 右上角语言切换 */}
-      <div className="absolute top-5 right-5 z-20">
+      {/* 右上角主题/语言切换 */}
+      <div className="absolute top-5 right-5 z-20 flex items-center gap-2">
+        <button
+          onClick={useThemeStore.getState().toggleTheme}
+          className="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-text-muted hover:text-white transition-all"
+          aria-label={useThemeStore.getState().theme === 'dark' ? t('nav.lightMode') : t('nav.darkMode')}
+        >
+          {useThemeStore.getState().theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
         <LanguageSwitcher />
       </div>
       {/* 背景光效 */}
