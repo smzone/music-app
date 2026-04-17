@@ -3,6 +3,7 @@ import useSongStore from '../../store/useSongStore';
 import useForumStore from '../../store/useForumStore';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import AnimatedNumber from '../../components/UI/AnimatedNumber';
 
 // 模拟最近活动日志
 const recentActivities = [
@@ -71,7 +72,12 @@ export default function DashboardPage() {
                   <ArrowUpRight size={11} /> {card.trend}
                 </span>
               </div>
-              <p className="text-2xl font-black text-white">{card.value}</p>
+              <p className="text-2xl font-black text-white">
+                {typeof card.value === 'number'
+                  ? <AnimatedNumber value={card.value} duration={1000} />
+                  : card.value
+                }
+              </p>
               <p className="text-xs text-text-muted mt-1">{t(card.labelKey)}</p>
             </div>
           );
