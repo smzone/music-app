@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Play, Pause, Heart, Share2, ChevronDown, Music, Headphones, Award, Users, ArrowRight, Sparkles } from 'lucide-react';
+import { Play, Pause, Heart, Share2, ChevronDown, Music, Headphones, Award, Users, ArrowRight, Sparkles, Sun, Moon } from 'lucide-react';
 import usePlayerStore from '../store/usePlayerStore';
 import useSongStore from '../store/useSongStore';
 import useAuthStore from '../store/useAuthStore';
@@ -336,7 +336,16 @@ function Navbar() {
             {t('nav.login')}
           </Link>
         </div>
-        <LanguageSwitcher />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={useThemeStore.getState().toggleTheme}
+            className="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-text-muted hover:text-white transition-all"
+            aria-label={theme === 'dark' ? t('nav.lightMode') : t('nav.darkMode')}
+          >
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          <LanguageSwitcher />
+        </div>
       </div>
     </nav>
   );
