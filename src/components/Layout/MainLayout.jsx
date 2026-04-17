@@ -54,7 +54,15 @@ export default function MainLayout() {
       </a>
 
       {/* 顶部导航 */}
-      <nav aria-label="主导航" className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#0a0a0f]/95 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.3)] border-b border-white/[0.04]' : 'bg-[#0a0a0f]/80 backdrop-blur-md'}`}>
+      <nav aria-label="主导航" className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? theme === 'light'
+            ? 'bg-white/90 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.06)] border-b border-black/[0.06]'
+            : 'bg-[#0a0a0f]/95 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.3)] border-b border-white/[0.04]'
+          : theme === 'light'
+            ? 'bg-white/70 backdrop-blur-md'
+            : 'bg-[#0a0a0f]/80 backdrop-blur-md'
+      }`}>
         <ScrollProgress />
         <div className="smart-container flex items-center justify-between h-16">
           {/* Logo */}
@@ -119,7 +127,7 @@ export default function MainLayout() {
                 {userMenuOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                    <div className="absolute right-0 top-14 w-56 bg-[#15151e] rounded-2xl shadow-[0_15px_50px_rgba(0,0,0,0.5)] border border-white/[0.08] z-50 py-2 animate-fadeIn">
+                    <div className={`absolute right-0 top-14 w-56 rounded-2xl z-50 py-2 animate-fadeIn border ${theme === 'light' ? 'bg-white border-black/[0.08] shadow-[0_15px_50px_rgba(0,0,0,0.12)]' : 'bg-[#15151e] border-white/[0.08] shadow-[0_15px_50px_rgba(0,0,0,0.5)]'}`}>
                       {/* 用户信息头部 */}
                       <div className="px-4 py-3 border-b border-white/[0.06] mb-1">
                         <p className="text-sm font-semibold text-white">{user.username}</p>
