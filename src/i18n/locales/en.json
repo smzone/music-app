@@ -17,7 +17,8 @@
     "releases": "Releases",
     "notifications": "Notifications",
     "lightMode": "Switch to Light Mode",
-    "darkMode": "Switch to Dark Mode"
+    "darkMode": "Switch to Dark Mode",
+    "orders": "My Orders"
   },
   "notifications": {
     "title": "Notifications",

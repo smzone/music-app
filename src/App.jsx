@@ -63,7 +63,13 @@ function RoleGuard({ minRole, children }) {
 function App() {
   // 初始化主题（确保 DOM data-theme 属性与 store 同步）
   const initTheme = useThemeStore((s) => s.initTheme);
+  const theme = useThemeStore((s) => s.theme);
   useEffect(() => { initTheme(); }, [initTheme]);
+
+  // Toaster 随主题变化
+  const toastStyle = theme === 'light'
+    ? { background: '#fff', color: '#1a1a2e', borderRadius: '12px', fontSize: '14px', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }
+    : { background: '#282828', color: '#fff', borderRadius: '12px', fontSize: '14px' };
 
   return (
     <ErrorBoundary>
@@ -73,7 +79,7 @@ function App() {
       <Toaster
         position="top-center"
         toastOptions={{
-          style: { background: '#282828', color: '#fff', borderRadius: '8px', fontSize: '14px' },
+          style: toastStyle,
           duration: 2000,
         }}
       />

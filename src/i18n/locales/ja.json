@@ -17,7 +17,8 @@
     "releases": "リリース",
     "notifications": "通知",
     "lightMode": "ライトモードに切替",
-    "darkMode": "ダークモードに切替"
+    "darkMode": "ダークモードに切替",
+    "orders": "注文履歴"
   },
   "notifications": {
     "title": "通知",

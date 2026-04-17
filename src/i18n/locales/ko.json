@@ -17,7 +17,8 @@
     "releases": "릴리스",
     "notifications": "알림",
     "lightMode": "라이트 모드로 전환",
-    "darkMode": "다크 모드로 전환"
+    "darkMode": "다크 모드로 전환",
+    "orders": "주문 내역"
   },
   "notifications": {
     "title": "알림",

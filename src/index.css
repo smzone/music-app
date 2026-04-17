@@ -289,6 +289,62 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.2); }
   background: #d1d1d6;
 }
 
+/* Light 模式迷你播放器底栏 */
+[data-theme="light"] .bg-\[\#0a0a0f\]\/90 {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-top-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Light 模式全屏播放器背景渐变 */
+[data-theme="light"] .from-black\/80 { --tw-gradient-from: rgba(245,245,247,0.85) !important; }
+[data-theme="light"] .via-\[\#0a0a0f\]\/95 { --tw-gradient-via: rgba(245,245,247,0.97) !important; }
+[data-theme="light"] .to-\[\#0a0a0f\] { --tw-gradient-to: #f5f5f7 !important; }
+
+/* Light 模式 — 黑色遮罩层变淡 */
+[data-theme="light"] .bg-black\/80 { background-color: rgba(0,0,0,0.4) !important; }
+[data-theme="light"] .bg-black\/70 { background-color: rgba(0,0,0,0.3) !important; }
+[data-theme="light"] .bg-black\/40 { background-color: rgba(0,0,0,0.15) !important; }
+
+/* Light 模式渐变 hero 区域 */
+[data-theme="light"] .from-blue-600\/20 { --tw-gradient-from: rgba(37,99,235,0.08) !important; }
+[data-theme="light"] .via-violet-600\/15 { --tw-gradient-via: rgba(124,58,237,0.06) !important; }
+[data-theme="light"] .to-cyan-600\/20 { --tw-gradient-to: rgba(8,145,178,0.08) !important; }
+[data-theme="light"] .from-orange-600\/20 { --tw-gradient-from: rgba(234,88,12,0.08) !important; }
+[data-theme="light"] .via-pink-600\/15 { --tw-gradient-via: rgba(219,39,119,0.06) !important; }
+[data-theme="light"] .to-purple-600\/20 { --tw-gradient-to: rgba(147,51,234,0.08) !important; }
+
+/* ====== Light 模式管理后台 ====== */
+[data-theme="light"] .bg-\[\#0a0a0f\] { background-color: #f0f0f3 !important; }
+[data-theme="light"] .bg-\[\#0c0c14\] { background-color: #fff !important; }
+[data-theme="light"] .bg-\[\#0a0a0f\]\/80 {
+  background-color: rgba(255,255,255,0.85) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Light 模式管理后台卡片 */
+[data-theme="light"] .bg-\[\#111118\] { background-color: #fff !important; }
+[data-theme="light"] .bg-\[\#13131b\] { background-color: #fafafa !important; }
+
+/* Light 模式文字渐变保持可见 */
+[data-theme="light"] .text-gradient {
+  background: linear-gradient(135deg, #1DB954, #059669, #7c3aed, #1DB954);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Light 模式阴影增强层次感 */
+[data-theme="light"] .shadow-\[0_15px_50px_rgba\(0\,0\,0\,0\.5\)\] {
+  box-shadow: 0 15px 50px rgba(0,0,0,0.1) !important;
+}
+[data-theme="light"] .shadow-\[0_20px_60px_rgba\(0\,0\,0\,0\.3\)\] {
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08) !important;
+}
+
 /* 页面过渡动画 — 更流畅 */
 @keyframes pageSlideIn {
   from { opacity: 0; transform: translateY(12px) scale(0.99); filter: blur(4px); }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell, Sun, Moon } from 'lucide-react';
+import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell, Sun, Moon, ShoppingCart, Package } from 'lucide-react';
 import useAuthStore, { hasRole, ROLES } from '../../store/useAuthStore';
 import useNotificationStore from '../../store/useNotificationStore';
 import MusicPlayer from '../Player/MusicPlayer';
@@ -10,6 +10,7 @@ import BackToTop from './BackToTop';
 import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
 import LanguageSwitcher from './LanguageSwitcher';
 import useThemeStore from '../../store/useThemeStore';
+import useCartStore from '../../store/useCartStore';
 import { useTranslation } from 'react-i18next';
 
 const navKeys = [
@@ -34,6 +35,7 @@ export default function MainLayout() {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
   const location = useLocation();
   const { theme, toggleTheme } = useThemeStore();
+  const cartCount = useCartStore((s) => s.getCartCount());
 
   // 路由变化时关闭菜单
   useEffect(() => { setMenuOpen(false); setUserMenuOpen(false); }, [location.pathname]);
@@ -85,6 +87,16 @@ export default function MainLayout() {
 
           {/* 右侧操作区 */}
           <div className="flex items-center gap-2.5">
+            {/* 购物车徽章 */}
+            <Link to="/shop" className="relative p-2 rounded-xl hover:bg-white/[0.05] transition-colors" aria-label={t('nav.shop')}>
+              <ShoppingCart size={18} className="text-text-muted hover:text-white transition-colors" />
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-primary text-black text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </Link>
+
             {/* 通知铃铛 */}
             {user && (
               <Link to="/notifications" className="relative p-2 rounded-xl hover:bg-white/[0.05] transition-colors" aria-label={t('nav.notifications')}>
@@ -131,6 +143,9 @@ export default function MainLayout() {
                       </Link>
                       <Link to="/profile" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:text-white hover:bg-white/[0.04] transition-colors mx-1 rounded-lg">
                         <User size={15} /> {t('nav.profile')}
+                      </Link>
+                      <Link to="/orders" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:text-white hover:bg-white/[0.04] transition-colors mx-1 rounded-lg">
+                        <Package size={15} /> {t('nav.orders')}
                       </Link>
                       <div className="border-t border-white/[0.06] my-1" />
                       <button onClick={() => { logout(); setUserMenuOpen(false); }}
