@@ -411,6 +411,17 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.2); }
 /* Light 模式 — 粒子在白底上减弱 */
 [data-theme="light"] .bg-primary\/60 { background-color: rgba(29,185,84,0.25) !important; }
 
+/* Light 模式 — 头像硬编码边框色修正 */
+[data-theme="light"] .border-\[\#0f0f17\] { border-color: #fff !important; }
+
+/* Light 模式 — 文字色覆盖 */
+[data-theme="light"] .text-white { color: var(--color-text-primary); }
+[data-theme="light"] .text-text-secondary { color: var(--color-text-secondary); }
+[data-theme="light"] .text-text-muted { color: var(--color-text-muted); }
+
+/* Light 模式 — hover 文字色覆盖 */
+[data-theme="light"] .hover\:text-white:hover { color: var(--color-text-primary) !important; }
+
 /* 页面过渡动画 — 更流畅 */
 @keyframes pageSlideIn {
   from { opacity: 0; transform: translateY(12px) scale(0.99); filter: blur(4px); }
