@@ -8,3 +8,4 @@ export { default as useNetworkStatus } from './useNetworkStatus';
 export { default as useIntersectionObserver } from './useIntersectionObserver';
 export { default as useDebounce } from './useDebounce';
 export { default as useCopyToClipboard } from './useCopyToClipboard';
+export { default as useMediaQuery } from './useMediaQuery';

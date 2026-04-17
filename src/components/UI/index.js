@@ -9,3 +9,4 @@ export { default as Tooltip } from './Tooltip';
 export { default as ConfirmDialog } from './ConfirmDialog';
 export { default as AnimatedNumber } from './AnimatedNumber';
 export { default as EmptyState } from './EmptyState';
+export { default as ProgressBar } from './ProgressBar';
