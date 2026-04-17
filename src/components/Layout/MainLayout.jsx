@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell, Sun, Moon, ShoppingCart, Package } from 'lucide-react';
+import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell, Sun, Moon, ShoppingCart, Package, Search, Command } from 'lucide-react';
 import useAuthStore, { hasRole, ROLES } from '../../store/useAuthStore';
 import useNotificationStore from '../../store/useNotificationStore';
 import MusicPlayer from '../Player/MusicPlayer';
@@ -96,6 +96,18 @@ export default function MainLayout() {
 
           {/* 右侧操作区 */}
           <div className="flex items-center gap-2.5">
+            {/* 搜索触发按钮 — 点击或 Ctrl+K 打开 CommandPalette */}
+            <button
+              onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:border-white/[0.1] hover:bg-white/[0.06] text-text-muted transition-all text-sm"
+            >
+              <Search size={14} />
+              <span className="text-xs">{t('commandPalette.placeholder')}</span>
+              <kbd className="hidden md:flex items-center gap-0.5 ml-1 px-1.5 py-0.5 bg-white/[0.06] rounded text-[10px] font-medium">
+                <Command size={9} />K
+              </kbd>
+            </button>
+
             {/* 购物车徽章 */}
             <Link to="/shop" className="relative p-2 rounded-xl hover:bg-white/[0.05] transition-colors" aria-label={t('nav.shop')}>
               <ShoppingCart size={18} className="text-text-muted hover:text-white transition-colors" />
