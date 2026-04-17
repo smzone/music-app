@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/Layout/LanguageSwitcher';
+import useThemeStore from '../store/useThemeStore';
 
 // Hero 区域 — 沉浸式科技感
 function HeroSection() {
@@ -304,6 +305,7 @@ function Footer() {
 // 顶部导航栏
 function Navbar() {
   const { t } = useTranslation();
+  const theme = useThemeStore((s) => s.theme);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -313,7 +315,12 @@ function Navbar() {
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#0a0a0f]/95 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.3)] border-b border-white/[0.04]' : 'bg-transparent'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
+      ? theme === 'light'
+        ? 'bg-white/90 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.06)] border-b border-black/[0.06]'
+        : 'bg-[#0a0a0f]/95 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.3)] border-b border-white/[0.04]'
+      : 'bg-transparent'
+    }`}>
       <div className="smart-container flex items-center justify-between py-4">
         <Link to="/" className="flex items-center gap-2.5 group">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(29,185,84,0.3)] transition-shadow">
