@@ -247,6 +247,14 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.2); }
 [data-theme="light"] .bg-white\/10 { background-color: rgba(0, 0, 0, 0.06) !important; }
 [data-theme="light"] .bg-white\/15 { background-color: rgba(0, 0, 0, 0.08) !important; }
 
+/* hover 状态半透明白色背景在 light 模式下改为半透明黑色 */
+[data-theme="light"] .hover\:bg-white\/\[0\.04\]:hover,
+[data-theme="light"] .hover\:bg-white\/\[0\.05\]:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+[data-theme="light"] .hover\:bg-white\/\[0\.06\]:hover { background-color: rgba(0, 0, 0, 0.05) !important; }
+[data-theme="light"] .hover\:bg-white\/\[0\.1\]:hover { background-color: rgba(0, 0, 0, 0.06) !important; }
+
 /* 半透明白色边框在 light 模式下改为半透明黑色 */
 [data-theme="light"] .border-white\/\[0\.04\],
 [data-theme="light"] .border-white\/\[0\.06\],
