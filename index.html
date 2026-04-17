@@ -24,7 +24,12 @@
     <!-- 防闪烁：在 DOM 渲染前同步设置 data-theme -->
     <script>
       (function(){
-        var t = localStorage.getItem('app-theme') || 'dark';
+        var t = localStorage.getItem('app-theme');
+        if (!t) {
+          // 首次访问：检测系统偏好
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          localStorage.setItem('app-theme', t);
+        }
         document.documentElement.setAttribute('data-theme', t);
       })();
     </script>
