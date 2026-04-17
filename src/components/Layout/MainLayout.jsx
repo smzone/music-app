@@ -174,11 +174,13 @@ export default function MainLayout() {
             {/* 主题切换 */}
             <button
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-text-muted hover:text-white transition-all"
+              className="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-text-muted hover:text-white transition-all active:scale-90"
               aria-label={theme === 'dark' ? t('nav.lightMode') : t('nav.darkMode')}
               title={theme === 'dark' ? t('nav.lightMode') : t('nav.darkMode')}
             >
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              <span className="transition-transform duration-500" style={{ display: 'flex', transform: theme === 'dark' ? 'rotate(0deg)' : 'rotate(180deg)' }}>
+                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              </span>
             </button>
 
             {/* 语言切换 */}
