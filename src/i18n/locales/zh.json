@@ -1048,5 +1048,9 @@
     "noResults": "没有找到匹配结果",
     "navigate": "导航",
     "select": "选择"
+  },
+  "network": {
+    "offline": "网络连接已断开，部分功能可能不可用",
+    "restored": "网络已恢复连接"
   }
 }

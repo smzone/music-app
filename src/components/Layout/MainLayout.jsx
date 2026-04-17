@@ -12,6 +12,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 import useThemeStore from '../../store/useThemeStore';
 import useCartStore from '../../store/useCartStore';
 import CommandPalette from '../UI/CommandPalette';
+import NetworkBanner from '../UI/NetworkBanner';
 import { useTranslation } from 'react-i18next';
 
 const navKeys = [
@@ -242,6 +243,9 @@ export default function MainLayout() {
 
       {/* 全局搜索面板 Ctrl+K */}
       <CommandPalette />
+
+      {/* 网络状态提示 */}
+      <NetworkBanner />
     </div>
   );
 }
