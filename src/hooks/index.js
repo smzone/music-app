@@ -6,3 +6,5 @@ export { default as useDocumentTitle } from './useDocumentTitle';
 export { default as useLocalStorage } from './useLocalStorage';
 export { default as useNetworkStatus } from './useNetworkStatus';
 export { default as useIntersectionObserver } from './useIntersectionObserver';
+export { default as useDebounce } from './useDebounce';
+export { default as useCopyToClipboard } from './useCopyToClipboard';
