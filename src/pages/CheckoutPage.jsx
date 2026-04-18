@@ -50,30 +50,30 @@ export default function CheckoutPage() {
           <div className="w-20 h-20 bg-primary/15 rounded-full flex items-center justify-center mx-auto mb-6">
             <Check size={40} className="text-primary" />
           </div>
-          <h1 className="text-3xl font-black text-white mb-2">{t('checkout.successTitle')}</h1>
+          <h1 className="text-3xl font-black text-text-primary mb-2">{t('checkout.successTitle')}</h1>
           <p className="text-text-secondary mb-6">{t('checkout.successDesc')}</p>
 
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 text-left mb-8">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm text-text-muted">{t('checkout.orderId')}</span>
-              <span className="text-sm font-mono text-white">{orderResult.id}</span>
+              <span className="text-sm font-mono text-text-primary">{orderResult.id}</span>
             </div>
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm text-text-muted">{t('checkout.payMethodLabel')}</span>
-              <span className="text-sm text-white">{t(`checkout.${orderResult.paymentMethod}`)}</span>
+              <span className="text-sm text-text-primary">{t(`checkout.${orderResult.paymentMethod}`)}</span>
             </div>
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm text-text-muted">{t('checkout.itemsCount')}</span>
-              <span className="text-sm text-white">{orderResult.items.reduce((s, i) => s + i.qty, 0)} {t('checkout.pieces')}</span>
+              <span className="text-sm text-text-primary">{orderResult.items.reduce((s, i) => s + i.qty, 0)} {t('checkout.pieces')}</span>
             </div>
             <div className="border-t border-white/[0.06] pt-4 flex items-center justify-between">
-              <span className="text-base font-bold text-white">{t('checkout.totalPaid')}</span>
+              <span className="text-base font-bold text-text-primary">{t('checkout.totalPaid')}</span>
               <span className="text-2xl font-black text-primary">¥{orderResult.total.toFixed(2)}</span>
             </div>
           </div>
 
           <div className="flex gap-3">
-            <button onClick={() => navigate('/orders')} className="flex-1 py-3 border border-white/[0.08] text-text-secondary rounded-full hover:text-white hover:border-white/[0.15] transition-colors text-sm font-medium">
+            <button onClick={() => navigate('/orders')} className="flex-1 py-3 border border-white/[0.08] text-text-secondary rounded-full hover:text-text-primary hover:border-white/[0.15] transition-colors text-sm font-medium">
               {t('checkout.viewOrders')}
             </button>
             <button onClick={() => navigate('/shop')} className="flex-1 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-full transition-all text-sm">
@@ -91,7 +91,7 @@ export default function CheckoutPage() {
       <div className="smart-container pt-10 pb-16 flex-1 flex items-center justify-center">
         <div className="text-center animate-fadeIn">
           <Package size={56} className="mx-auto mb-4 text-text-muted opacity-30" />
-          <h2 className="text-xl font-bold text-white mb-2">{t('checkout.emptyTitle')}</h2>
+          <h2 className="text-xl font-bold text-text-primary mb-2">{t('checkout.emptyTitle')}</h2>
           <p className="text-text-muted mb-6">{t('checkout.emptyDesc')}</p>
           <button onClick={() => navigate('/shop')} className="px-8 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-full transition-all">
             {t('checkout.goShopping')}
@@ -104,11 +104,11 @@ export default function CheckoutPage() {
   return (
     <div className="smart-container pt-8 pb-16 animate-fadeIn">
       {/* 返回按钮 */}
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-text-muted hover:text-white transition-colors mb-6">
+      <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors mb-6">
         <ChevronLeft size={16} /> {t('checkout.back')}
       </button>
 
-      <h1 className="text-2xl font-black text-white mb-8">{t('checkout.title')}</h1>
+      <h1 className="text-2xl font-black text-text-primary mb-8">{t('checkout.title')}</h1>
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* 左侧：商品列表 + 收货地址 + 支付方式 */}
@@ -116,7 +116,7 @@ export default function CheckoutPage() {
           {/* 商品列表 */}
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
             <div className="px-5 py-4 border-b border-white/[0.06]">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
                 <Package size={16} className="text-primary" /> {t('checkout.orderItems')} ({itemCount})
               </h2>
             </div>
@@ -125,7 +125,7 @@ export default function CheckoutPage() {
                 <div key={item.id} className="flex items-center gap-4 px-5 py-4">
                   <img src={item.image} alt={item.name} className="w-16 h-16 rounded-xl object-cover shrink-0 border border-white/[0.06]" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{item.name}</p>
+                    <p className="text-sm font-semibold text-text-primary truncate">{item.name}</p>
                     <p className="text-xs text-text-muted mt-0.5">x{item.qty}</p>
                   </div>
                   <span className="text-sm font-bold text-primary shrink-0">¥{(item.price * item.qty).toFixed(2)}</span>
@@ -136,7 +136,7 @@ export default function CheckoutPage() {
 
           {/* 收货地址 */}
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 mb-4">
+            <h2 className="text-base font-bold text-text-primary flex items-center gap-2 mb-4">
               <MapPin size={16} className="text-primary" /> {t('checkout.address')}
             </h2>
             <textarea
@@ -144,13 +144,13 @@ export default function CheckoutPage() {
               onChange={(e) => setAddress(e.target.value)}
               rows={3}
               placeholder={t('checkout.addressPH')}
-              className="w-full bg-white/[0.04] text-white px-4 py-3 rounded-xl outline-none border border-white/[0.06] focus:border-primary text-sm placeholder:text-text-muted resize-none transition-colors"
+              className="w-full bg-white/[0.04] text-text-primary px-4 py-3 rounded-xl outline-none border border-white/[0.06] focus:border-primary text-sm placeholder:text-text-muted resize-none transition-colors"
             />
           </div>
 
           {/* 支付方式 */}
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
-            <h2 className="text-base font-bold text-white flex items-center gap-2 mb-4">
+            <h2 className="text-base font-bold text-text-primary flex items-center gap-2 mb-4">
               <CreditCard size={16} className="text-primary" /> {t('checkout.payMethodLabel')}
             </h2>
             <div className="grid grid-cols-2 gap-3">
@@ -171,7 +171,7 @@ export default function CheckoutPage() {
                       <Icon size={20} className={m.color} />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-white">{t(m.nameKey)}</p>
+                      <p className="text-sm font-semibold text-text-primary">{t(m.nameKey)}</p>
                       <p className="text-[11px] text-text-muted">{m.desc}</p>
                     </div>
                     {active && (
@@ -189,12 +189,12 @@ export default function CheckoutPage() {
         {/* 右侧：订单摘要 */}
         <div className="lg:w-80 shrink-0">
           <div className="lg:sticky lg:top-24 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
-            <h2 className="text-base font-bold text-white mb-5">{t('checkout.summary')}</h2>
+            <h2 className="text-base font-bold text-text-primary mb-5">{t('checkout.summary')}</h2>
 
             <div className="space-y-3 mb-5">
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">{t('checkout.subtotal')}</span>
-                <span className="text-white">¥{total.toFixed(2)}</span>
+                <span className="text-text-primary">¥{total.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-text-muted">{t('checkout.shipping')}</span>
@@ -208,7 +208,7 @@ export default function CheckoutPage() {
 
             <div className="border-t border-white/[0.06] pt-4 mb-6">
               <div className="flex justify-between items-center">
-                <span className="text-base font-bold text-white">{t('checkout.totalAmount')}</span>
+                <span className="text-base font-bold text-text-primary">{t('checkout.totalAmount')}</span>
                 <span className="text-2xl font-black text-primary">¥{total.toFixed(2)}</span>
               </div>
             </div>
