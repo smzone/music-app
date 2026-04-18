@@ -5,6 +5,8 @@ import useCartStore from '../store/useCartStore';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
+import useThemeStore from '../store/useThemeStore';
+import LazyImage from '../components/UI/LazyImage';
 
 // 模拟商品数据
 const productsData = [
@@ -205,9 +207,9 @@ export default function ShopPage() {
       {/* ===== 商品网格 ===== */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
         {filtered.map((product) => (
-          <div key={product.id} className="group rounded-2xl overflow-hidden border border-white/[0.06] bg-white/[0.02] hover:border-primary/20 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <div key={product.id} className={`group rounded-2xl overflow-hidden border transition-all duration-500 hover:-translate-y-2 ${useThemeStore.getState().theme === 'light' ? 'border-black/[0.06] bg-white hover:border-primary/20 hover:shadow-[0_20px_60px_rgba(0,0,0,0.08)]' : 'border-white/[0.06] bg-white/[0.02] hover:border-primary/20 hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)]'}`}>
             <div className="relative aspect-square overflow-hidden">
-              <img src={product.image} alt={product.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              <LazyImage src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" wrapperClassName="w-full h-full" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               {/* 标签 */}
               {product.tags.length > 0 && (
@@ -236,7 +238,7 @@ export default function ShopPage() {
             </div>
             <div className="p-4">
               <p className="text-[11px] text-text-muted mb-1.5">{product.category}</p>
-              <h3 className="text-sm font-semibold text-white line-clamp-2 mb-2 min-h-[36px] group-hover:text-primary transition-colors">{product.name}</h3>
+              <h3 className="text-sm font-semibold text-text-primary line-clamp-2 mb-2 min-h-[36px] group-hover:text-primary transition-colors">{product.name}</h3>
               <p className="text-xs text-text-muted line-clamp-1 mb-3">{product.desc}</p>
               <div className="flex items-center gap-1.5 mb-3">
                 <div className="flex">
