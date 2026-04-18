@@ -18,11 +18,11 @@ export default function OrdersPage() {
 
   return (
     <div className="smart-container pt-8 pb-16 animate-fadeIn">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-text-muted hover:text-white transition-colors mb-6">
+      <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors mb-6">
         <ChevronLeft size={16} /> {t('orders.back')}
       </button>
 
-      <h1 className="text-2xl font-black text-white mb-8 flex items-center gap-2.5">
+      <h1 className="text-2xl font-black text-text-primary mb-8 flex items-center gap-2.5">
         <Package size={22} className="text-primary" /> {t('orders.title')}
       </h1>
 
@@ -30,7 +30,7 @@ export default function OrdersPage() {
         <div className="flex-1 flex items-center justify-center py-20">
           <div className="text-center">
             <ShoppingBag size={56} className="mx-auto mb-4 text-text-muted opacity-30" />
-            <h2 className="text-lg font-bold text-white mb-2">{t('orders.empty')}</h2>
+            <h2 className="text-lg font-bold text-text-primary mb-2">{t('orders.empty')}</h2>
             <p className="text-text-muted mb-6">{t('orders.emptyDesc')}</p>
             <button onClick={() => navigate('/shop')} className="px-8 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-full transition-all text-sm">
               {t('orders.goShopping')}
@@ -61,10 +61,10 @@ export default function OrdersPage() {
                     <div key={item.id} className="flex items-center gap-4 px-5 py-3">
                       <img src={item.image} alt={item.name} className="w-14 h-14 rounded-xl object-cover shrink-0 border border-white/[0.06]" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">{item.name}</p>
+                        <p className="text-sm font-medium text-text-primary truncate">{item.name}</p>
                         <p className="text-xs text-text-muted">x{item.qty} · ¥{item.price}</p>
                       </div>
-                      <span className="text-sm font-semibold text-white shrink-0">¥{(item.price * item.qty).toFixed(2)}</span>
+                      <span className="text-sm font-semibold text-text-primary shrink-0">¥{(item.price * item.qty).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>

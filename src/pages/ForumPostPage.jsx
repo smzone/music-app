@@ -24,7 +24,7 @@ function ReplyItem({ reply, depth = 0, onReplyTo, t }) {
         <div className="flex-1 min-w-0">
           {/* 作者信息 */}
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-sm font-semibold text-white">{reply.author}</span>
+            <span className="text-sm font-semibold text-text-primary">{reply.author}</span>
             <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${lvl.color}`}>{lvl.textKey ? t(lvl.textKey) : lvl.text}</span>
             <span className="text-xs text-text-muted">{formatTime(reply.date, t)}</span>
           </div>
@@ -32,11 +32,11 @@ function ReplyItem({ reply, depth = 0, onReplyTo, t }) {
           <p className="text-[14px] text-text-secondary leading-relaxed whitespace-pre-line">{reply.content}</p>
           {/* 操作栏 */}
           <div className="flex items-center gap-4 mt-2.5">
-            <button onClick={() => { setLiked(!liked); }} className={`flex items-center gap-1 text-xs transition-colors ${liked ? 'text-red-400' : 'text-text-muted hover:text-white'}`}>
+            <button onClick={() => { setLiked(!liked); }} className={`flex items-center gap-1 text-xs transition-colors ${liked ? 'text-red-400' : 'text-text-muted hover:text-text-primary'}`}>
               <Heart size={13} className={liked ? 'fill-red-400' : ''} /> {reply.likes + (liked ? 1 : 0)}
             </button>
             <button onClick={() => onReplyTo(reply.author)} className="text-xs text-text-muted hover:text-primary transition-colors">{t('forumPost.reply')}</button>
-            <button className="text-xs text-text-muted hover:text-white transition-colors opacity-0 group-hover:opacity-100"><MoreHorizontal size={14} /></button>
+            <button className="text-xs text-text-muted hover:text-text-primary transition-colors opacity-0 group-hover:opacity-100"><MoreHorizontal size={14} /></button>
           </div>
           {/* 嵌套回复 */}
           {reply.replies?.length > 0 && (
@@ -122,7 +122,7 @@ export default function ForumPostPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center">
         <MessageSquare size={48} className="mx-auto mb-4 text-text-muted opacity-30" />
-        <h2 className="text-xl font-bold text-white mb-2">{t('forumPost.notFound')}</h2>
+        <h2 className="text-xl font-bold text-text-primary mb-2">{t('forumPost.notFound')}</h2>
         <p className="text-text-muted mb-6">{t('forumPost.notFoundDesc')}</p>
         <Link to="/forum" className="text-primary hover:underline">{t('forumPost.backToForum')}</Link>
       </div>
@@ -166,14 +166,14 @@ export default function ForumPostPage() {
   // 渲染帖子内容（简单 Markdown 支持）
   const renderContent = (text) => {
     return text.split('\n').map((line, i) => {
-      if (line.startsWith('## ')) return <h3 key={i} className="text-lg font-bold text-white mt-4 mb-2">{line.replace('## ', '')}</h3>;
+      if (line.startsWith('## ')) return <h3 key={i} className="text-lg font-bold text-text-primary mt-4 mb-2">{line.replace('## ', '')}</h3>;
       if (line.startsWith('- **')) {
         const match = line.match(/- \*\*(.+?)\*\*(.*)$/);
-        if (match) return <li key={i} className="ml-4 mb-1"><strong className="text-white">{match[1]}</strong><span className="text-text-secondary">{match[2]}</span></li>;
+        if (match) return <li key={i} className="ml-4 mb-1"><strong className="text-text-primary">{match[1]}</strong><span className="text-text-secondary">{match[2]}</span></li>;
       }
       if (line.startsWith('- ')) return <li key={i} className="text-text-secondary ml-4 mb-1">{line.replace('- ', '')}</li>;
       if (line.match(/^\d+\./)) return <li key={i} className="text-text-secondary ml-4 mb-1">{line}</li>;
-      if (line.startsWith('**') && line.endsWith('**')) return <p key={i} className="font-bold text-white mt-3 mb-1">{line.replace(/\*\*/g, '')}</p>;
+      if (line.startsWith('**') && line.endsWith('**')) return <p key={i} className="font-bold text-text-primary mt-3 mb-1">{line.replace(/\*\*/g, '')}</p>;
       if (line.trim() === '') return <br key={i} />;
       return <p key={i} className="text-text-secondary leading-relaxed mb-1">{line}</p>;
     });
@@ -207,14 +207,14 @@ export default function ForumPostPage() {
           </div>
 
           {/* 标题 */}
-          <h1 className="text-2xl lg:text-3xl font-black text-white leading-snug mb-5 break-words">{post.title}</h1>
+          <h1 className="text-2xl lg:text-3xl font-black text-text-primary leading-snug mb-5 break-words">{post.title}</h1>
 
           {/* 作者信息 */}
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-full bg-white/[0.06] border border-white/[0.06] flex items-center justify-center text-2xl">{post.avatar ?? post.profiles?.avatar_url ?? '😊'}</div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white">{post.author ?? post.profiles?.username}</span>
+                <span className="text-sm font-bold text-text-primary">{post.author ?? post.profiles?.username}</span>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lvl.color}`}>{lvl.textKey ? t(lvl.textKey) : lvl.text}</span>
               </div>
               <div className="flex items-center gap-3 text-xs text-text-muted mt-0.5">
@@ -258,22 +258,22 @@ export default function ForumPostPage() {
           {/* 互动栏 */}
           <div className="flex items-center gap-2.5 flex-wrap mt-8 pt-6 border-t border-white/[0.04]">
             <button onClick={() => { if (useRemote && user) { toggleLike(user.id, id); } else { setLiked(!liked); } }}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${isLiked ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-white hover:border-white/[0.1]'}`}>
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${isLiked ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-text-primary hover:border-white/[0.1]'}`}>
               <Heart size={15} className={isLiked ? 'fill-red-400' : ''} /> {formatNum((post.likes ?? post.like_count ?? 0) + (!useRemote && liked ? 1 : 0), t)}
             </button>
-            <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-white hover:border-white/[0.1] transition-all">
+            <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-text-primary hover:border-white/[0.1] transition-all">
               <MessageSquare size={15} /> {t('forumPost.repliesCount', { count: replies.length || post.reply_count || 0 })}
             </button>
             <button onClick={() => { setBookmarked(!bookmarked); toast.success(bookmarked ? t('forumPost.unfavorited') : t('forumPost.favorited')); }}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${bookmarked ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : 'bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-white hover:border-white/[0.1]'}`}>
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${bookmarked ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : 'bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-text-primary hover:border-white/[0.1]'}`}>
               <Bookmark size={15} className={bookmarked ? 'fill-yellow-400' : ''} /> {formatNum((post.bookmarks ?? 0) + (bookmarked ? 1 : 0), t)}
             </button>
             <div className="flex-1" />
             <button onClick={handleShare}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-white hover:border-white/[0.1] transition-all">
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-white/[0.04] border border-white/[0.06] text-text-secondary hover:text-text-primary hover:border-white/[0.1] transition-all">
               <Share2 size={15} /> {t('forumPost.share')}
             </button>
-            <button className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.06] text-text-muted hover:text-white hover:border-white/[0.1] transition-all">
+            <button className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.06] text-text-muted hover:text-text-primary hover:border-white/[0.1] transition-all">
               <Flag size={15} />
             </button>
           </div>
@@ -283,7 +283,7 @@ export default function ForumPostPage() {
       {/* 回复区域 */}
       <div className="mt-8">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
             <MessageSquare size={17} className="text-primary" /> {t('forumPost.allReplies')}
             <span className="text-sm font-normal text-text-muted">({replies.length || post.reply_count || 0})</span>
           </h2>
