@@ -104,7 +104,7 @@ export default function UserProfilePage() {
             {/* 文字信息 */}
             <div className="flex-1 min-w-0 md:pb-1">
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl md:text-3xl font-black text-white">{user.username}</h1>
+                <h1 className="text-2xl md:text-3xl font-black text-text-primary">{user.username}</h1>
                 <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${badge.bg} ${badge.text} border uppercase tracking-wider`}>
                   {t(`userProfile.role_${user.role}`)}
                 </span>
@@ -137,7 +137,7 @@ export default function UserProfilePage() {
             <div className="flex gap-2 md:pb-1">
               {!editing ? (
                 <button onClick={() => setEditing(true)}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] text-white text-sm font-medium rounded-xl border border-white/[0.08] transition-all">
+                  className="flex items-center gap-2 px-5 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] text-text-primary text-sm font-medium rounded-xl border border-white/[0.08] transition-all">
                   <Edit3 size={14} /> {t('userProfile.editProfile')}
                 </button>
               ) : (
@@ -167,7 +167,7 @@ export default function UserProfilePage() {
               {s.value === -1 ? (
                 <Loader2 size={18} className="animate-spin text-primary mx-auto" />
               ) : (
-                <p className="text-xl font-black text-white">{s.value.toLocaleString()}</p>
+                <p className="text-xl font-black text-text-primary">{s.value.toLocaleString()}</p>
               )}
               <p className="text-xs text-text-muted mt-1">{s.label}</p>
             </div>
@@ -182,7 +182,7 @@ export default function UserProfilePage() {
             <Package size={20} className="text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white">{t('nav.orders')}</p>
+            <p className="text-sm font-semibold text-text-primary">{t('nav.orders')}</p>
             <p className="text-xs text-text-muted">{t('userProfile.viewOrders')}</p>
           </div>
           <ArrowRight size={16} className="text-text-muted group-hover:text-primary transition-colors shrink-0" />
@@ -192,7 +192,7 @@ export default function UserProfilePage() {
             <ShoppingBag size={20} className="text-orange-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white">{t('nav.shop')}</p>
+            <p className="text-sm font-semibold text-text-primary">{t('nav.shop')}</p>
             <p className="text-xs text-text-muted">{t('userProfile.goShopping')}</p>
           </div>
           <ArrowRight size={16} className="text-text-muted group-hover:text-primary transition-colors shrink-0" />
@@ -202,7 +202,7 @@ export default function UserProfilePage() {
             <Crown size={20} className="text-yellow-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white">{t('nav.membership')}</p>
+            <p className="text-sm font-semibold text-text-primary">{t('nav.membership')}</p>
             <p className="text-xs text-text-muted">{t('userProfile.manageMembership')}</p>
           </div>
           <ArrowRight size={16} className="text-text-muted group-hover:text-yellow-400 transition-colors shrink-0" />
@@ -212,7 +212,7 @@ export default function UserProfilePage() {
       {/* 编辑表单 */}
       {editing && (
         <div className="mt-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 animate-fadeIn">
-          <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2"><Edit3 size={18} /> {t('userProfile.editTitle')}</h2>
+          <h2 className="text-lg font-bold text-text-primary mb-5 flex items-center gap-2"><Edit3 size={18} /> {t('userProfile.editTitle')}</h2>
           <div className="space-y-5">
             {/* 头像选择 */}
             <div>
@@ -231,12 +231,12 @@ export default function UserProfilePage() {
               <div>
                 <label className="text-xs font-semibold text-text-muted uppercase tracking-wider block mb-2">{t('userProfile.username')}</label>
                 <input type="text" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })}
-                  className="w-full bg-white/[0.04] text-white px-4 py-2.5 rounded-xl outline-none border border-white/[0.08] focus:border-primary text-[14px] transition-all" />
+                  className="w-full bg-white/[0.04] text-text-primary px-4 py-2.5 rounded-xl outline-none border border-white/[0.08] focus:border-primary text-[14px] transition-all" />
               </div>
               <div>
                 <label className="text-xs font-semibold text-text-muted uppercase tracking-wider block mb-2">{t('userProfile.email')}</label>
                 <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full bg-white/[0.04] text-white px-4 py-2.5 rounded-xl outline-none border border-white/[0.08] focus:border-primary text-[14px] transition-all" />
+                  className="w-full bg-white/[0.04] text-text-primary px-4 py-2.5 rounded-xl outline-none border border-white/[0.08] focus:border-primary text-[14px] transition-all" />
               </div>
             </div>
 
@@ -244,7 +244,7 @@ export default function UserProfilePage() {
               <label className="text-xs font-semibold text-text-muted uppercase tracking-wider block mb-2">{t('userProfile.bio')}</label>
               <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3}
                 placeholder={t('userProfile.bioPlaceholder')}
-                className="w-full bg-white/[0.04] text-white px-4 py-2.5 rounded-xl outline-none border border-white/[0.08] focus:border-primary text-[14px] resize-none transition-all" />
+                className="w-full bg-white/[0.04] text-text-primary px-4 py-2.5 rounded-xl outline-none border border-white/[0.08] focus:border-primary text-[14px] resize-none transition-all" />
             </div>
 
             <div>
@@ -259,7 +259,7 @@ export default function UserProfilePage() {
 
       {/* 权限信息 */}
       <div className="mt-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
-        <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><Shield size={18} /> {t('userProfile.permissionsTitle')}</h2>
+        <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2"><Shield size={18} /> {t('userProfile.permissionsTitle')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[
             { key: 'canPost', check: user.role !== ROLES.GUEST },
@@ -275,7 +275,7 @@ export default function UserProfilePage() {
               <div className={`w-5 h-5 rounded-md flex items-center justify-center text-xs ${p.check ? 'bg-primary/20 text-primary' : 'bg-white/[0.06] text-text-muted'}`}>
                 {p.check ? '✓' : '✗'}
               </div>
-              <span className={`text-sm ${p.check ? 'text-white' : 'text-text-muted'}`}>{t(`userProfile.perm_${p.key}`)}</span>
+              <span className={`text-sm ${p.check ? 'text-text-primary' : 'text-text-muted'}`}>{t(`userProfile.perm_${p.key}`)}</span>
             </div>
           ))}
         </div>
