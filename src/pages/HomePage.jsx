@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Music, Video, MessageSquare, ShoppingBag, Radio, Crown, ArrowRight, Heart, Eye, Clock, Sparkles, Headphones, Users, TrendingUp, Target, Gamepad2 } from 'lucide-react';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
+import useThemeStore from '../store/useThemeStore';
 
 // 博客文章模拟数据
 const blogPosts = [
@@ -76,7 +77,7 @@ function AnimatedCounter({ target, label, icon: Icon }) {
       <div className="w-14 h-14 mx-auto mb-3 rounded-2xl glass-strong flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
         <Icon size={24} className="text-primary" />
       </div>
-      <p className="text-3xl font-black text-white mb-1">{count.toLocaleString()}+</p>
+      <p className="text-3xl font-black text-text-primary mb-1">{count.toLocaleString()}+</p>
       <p className="text-sm text-text-muted">{label}</p>
     </div>
   );
@@ -102,8 +103,10 @@ export default function HomePage() {
     return () => { if (el) el.removeEventListener('mousemove', handleMouse); };
   }, []);
 
+  const isLight = useThemeStore((s) => s.theme === 'light');
+
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className={`min-h-screen ${isLight ? 'bg-white' : 'bg-[#0a0a0f]'}`}>
       {/* ===== HERO — Windsurf 科技感风格 ===== */}
       <section ref={heroRef} className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
         {/* 动态渐变光球 */}
@@ -136,7 +139,7 @@ export default function HomePage() {
 
           {/* 大标题 */}
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[1.1] mb-6 tracking-tight">
-            <span className="block text-white">{t('home.heroTitle1')}</span>
+            <span className={`block ${isLight ? 'text-gray-900' : 'text-white'}`}>{t('home.heroTitle1')}</span>
             <span className="block text-gradient">{t('home.heroTitle2')}</span>
           </h1>
 
@@ -155,7 +158,7 @@ export default function HomePage() {
               <span className="absolute inset-0 rounded-full bg-primary/20 animate-ping opacity-30 group-hover:opacity-0" />
             </Link>
             <Link to="/videos"
-              className="px-8 py-4 glass-strong hover:bg-white/10 text-white font-semibold rounded-full text-[15px] transition-all flex items-center gap-2">
+              className={`px-8 py-4 glass-strong font-semibold rounded-full text-[15px] transition-all flex items-center gap-2 ${isLight ? 'hover:bg-black/[0.06] text-gray-900' : 'hover:bg-white/10 text-white'}`}>
               {t('home.exploreMore')} <ArrowRight size={16} />
             </Link>
           </div>
