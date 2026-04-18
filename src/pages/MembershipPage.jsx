@@ -81,7 +81,7 @@ export default function MembershipPage() {
           <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 flex items-center justify-center">
             <Crown size={32} className="text-yellow-400" />
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight">{t('membership.heading')}</h1>
+          <h1 className="text-4xl md:text-6xl font-black text-text-primary mb-4 tracking-tight">{t('membership.heading')}</h1>
           <p className="text-lg text-text-secondary max-w-xl mx-auto leading-relaxed">{t('membership.desc')}</p>
 
           {/* 数据统计 */}
@@ -91,7 +91,7 @@ export default function MembershipPage() {
               return (
                 <div key={i} className="flex items-center gap-2">
                   <Icon size={16} className="text-yellow-400" />
-                  <span className="text-white font-bold">{s.value}</span>
+                  <span className="text-text-primary font-bold">{s.value}</span>
                   <span className="text-text-muted text-sm">{t(s.labelKey)}</span>
                 </div>
               );
@@ -101,11 +101,11 @@ export default function MembershipPage() {
           {/* 计费周期切换 */}
           <div className="inline-flex items-center gap-1 mt-8 p-1 bg-white/[0.04] border border-white/[0.06] rounded-full">
             <button onClick={() => setBillingCycle('monthly')}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${billingCycle === 'monthly' ? 'bg-primary text-black shadow-[0_0_15px_rgba(29,185,84,0.2)]' : 'text-text-secondary hover:text-white'}`}>
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${billingCycle === 'monthly' ? 'bg-primary text-black shadow-[0_0_15px_rgba(29,185,84,0.2)]' : 'text-text-secondary hover:text-text-primary'}`}>
               {t('membership.monthly')}
             </button>
             <button onClick={() => setBillingCycle('yearly')}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${billingCycle === 'yearly' ? 'bg-primary text-black shadow-[0_0_15px_rgba(29,185,84,0.2)]' : 'text-text-secondary hover:text-white'}`}>
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${billingCycle === 'yearly' ? 'bg-primary text-black shadow-[0_0_15px_rgba(29,185,84,0.2)]' : 'text-text-secondary hover:text-text-primary'}`}>
               {t('membership.yearly')} <span className="ml-1 px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] font-bold rounded">{t('membership.yearlyDiscount')}</span>
             </button>
           </div>
@@ -132,16 +132,16 @@ export default function MembershipPage() {
                 </span>
               )}
 
-              <h3 className="text-xl font-bold text-white mb-1">{t(plan.nameKey)}</h3>
+              <h3 className="text-xl font-bold text-text-primary mb-1">{t(plan.nameKey)}</h3>
               <p className="text-sm text-text-muted mb-5">{t(plan.descKey)}</p>
 
               <div className="mb-6">
                 {plan.price === 0 ? (
-                  <span className="text-4xl font-black text-white">{t('membership.free')}</span>
+                  <span className="text-4xl font-black text-text-primary">{t('membership.free')}</span>
                 ) : (
                   <div className="flex items-baseline gap-1">
                     <span className="text-base text-text-muted">¥</span>
-                    <span className="text-5xl font-black text-white tracking-tight">{displayPrice}</span>
+                    <span className="text-5xl font-black text-text-primary tracking-tight">{displayPrice}</span>
                     <span className="text-sm text-text-muted">{displayPeriod}</span>
                   </div>
                 )}
@@ -178,7 +178,7 @@ export default function MembershipPage() {
       <div className="mb-20">
         <div className="text-center mb-10">
           <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-medium mb-3">{t('membership.benefitsTag')}</span>
-          <h2 className="text-3xl font-black text-white">{t('membership.benefitsTitle')}</h2>
+          <h2 className="text-3xl font-black text-text-primary">{t('membership.benefitsTitle')}</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
           {benefitItems.map((b, i) => {
@@ -188,7 +188,7 @@ export default function MembershipPage() {
                 <div className={`w-12 h-12 rounded-2xl ${b.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <Icon size={22} className={b.color} />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">{t(b.titleKey)}</h3>
+                <h3 className="text-base font-bold text-text-primary mb-2">{t(b.titleKey)}</h3>
                 <p className="text-sm text-text-muted leading-relaxed">{t(b.descKey)}</p>
               </div>
             );
@@ -200,14 +200,14 @@ export default function MembershipPage() {
       <div className="smart-container-sm">
         <div className="text-center mb-8">
           <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-medium mb-3">{t('membership.faqTag')}</span>
-          <h2 className="text-3xl font-black text-white">{t('membership.faqTitle')}</h2>
+          <h2 className="text-3xl font-black text-text-primary">{t('membership.faqTitle')}</h2>
         </div>
         <div className="space-y-3">
           {[0, 1, 2, 3, 4].map((i) => (
             <button key={i} onClick={() => setOpenFaq(openFaq === i ? null : i)}
               className="w-full rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] transition-all text-left overflow-hidden">
               <div className="flex items-center justify-between p-5">
-                <h3 className="text-[15px] font-semibold text-white">{t(`membership.faq.${i}.q`)}</h3>
+                <h3 className="text-[15px] font-semibold text-text-primary">{t(`membership.faq.${i}.q`)}</h3>
                 <ChevronDown size={16} className={`text-text-muted shrink-0 transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
               </div>
               {openFaq === i && (
