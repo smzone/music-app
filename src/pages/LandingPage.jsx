@@ -85,7 +85,7 @@ function StatsSection() {
   ];
 
   return (
-    <section className="py-20 bg-[#0a0a0f]">
+    <section className={`py-20 ${useThemeStore.getState().theme === 'light' ? 'bg-white' : 'bg-[#0a0a0f]'}`}>
       <div className="smart-container grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
@@ -109,7 +109,7 @@ function AboutSection() {
   const { t } = useTranslation();
   const aboutGenres = ['electronic', 'pop', 'synthwave', 'folk', 'rock'];
   return (
-    <section id="about" className="py-24 px-6 bg-[#0a0a0f]">
+    <section id="about" className={`py-24 px-6 ${useThemeStore.getState().theme === 'light' ? 'bg-gray-50' : 'bg-[#0a0a0f]'}`}>
       <div className="smart-container grid md:grid-cols-2 gap-14 items-center">
         <div className="relative">
           <div className="absolute -inset-3 bg-gradient-to-br from-primary/10 to-purple-600/10 rounded-3xl blur-xl" />
@@ -218,7 +218,7 @@ function MusicSection() {
   const displaySongs = showAll ? songs : songs.slice(0, 6);
 
   return (
-    <section id="music" className="py-24 px-6 bg-[#0a0a0f]">
+    <section id="music" className={`py-24 px-6 ${useThemeStore.getState().theme === 'light' ? 'bg-white' : 'bg-[#0a0a0f]'}`}>
       <div className="smart-container">
         <div className="text-center mb-14">
           <span className="inline-block px-4 py-1.5 bg-white/[0.06] border border-white/[0.08] rounded-full text-xs font-medium text-primary mb-4">{t('landing.worksTag')}</span>
@@ -251,11 +251,11 @@ function MusicSection() {
 function ContactSection() {
   const { t } = useTranslation();
   return (
-    <section id="contact" className="py-24 px-6 bg-[#0a0a0f]">
+    <section id="contact" className={`py-24 px-6 ${useThemeStore.getState().theme === 'light' ? 'bg-gray-50' : 'bg-[#0a0a0f]'}`}>
       <div className="smart-container-md">
         <div className="relative rounded-3xl overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-600/15 to-cyan-500/20" />
-          <div className="absolute inset-0 bg-[#0a0a0f]/50 backdrop-blur-sm" />
+          <div className={`absolute inset-0 backdrop-blur-sm ${useThemeStore.getState().theme === 'light' ? 'bg-white/50' : 'bg-[#0a0a0f]/50'}`} />
           <div className="absolute inset-0 border border-white/[0.06] rounded-3xl" />
           <div className="relative px-8 lg:px-16 py-20 text-center">
             <span className="inline-block px-4 py-1.5 bg-white/[0.06] border border-white/[0.08] rounded-full text-xs font-medium text-primary mb-4">{t('landing.contactTag')}</span>
@@ -282,7 +282,7 @@ function ContactSection() {
 function Footer() {
   const { t } = useTranslation();
   return (
-    <footer className="border-t border-white/[0.04] py-10 px-6 bg-[#0a0a0f]">
+    <footer className={`border-t py-10 px-6 ${useThemeStore.getState().theme === 'light' ? 'border-black/[0.06] bg-white' : 'border-white/[0.04] bg-[#0a0a0f]'}`}>
       <div className="smart-container flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center">
@@ -356,7 +356,7 @@ export default function LandingPage() {
   const { t } = useTranslation();
   useDocumentTitle(t('landing.title'));
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className={`min-h-screen ${useThemeStore.getState().theme === 'light' ? 'bg-white' : 'bg-[#0a0a0f]'}`}>
       <Navbar />
       <HeroSection />
       <StatsSection />
