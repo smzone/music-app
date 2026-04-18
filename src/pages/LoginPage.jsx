@@ -13,6 +13,7 @@ export default function LoginPage() {
   useDocumentTitle(t('login.title'));
   const navigate = useNavigate();
   const { login, loading } = useAuthStore();
+  const theme = useThemeStore((s) => s.theme);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
@@ -34,7 +35,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4 relative overflow-hidden">
+    <div className={`min-h-screen flex items-center justify-center px-4 relative overflow-hidden ${theme === 'light' ? 'bg-gray-50' : 'bg-[#0a0a0f]'}`}>
       {/* 右上角主题/语言切换 */}
       <div className="absolute top-5 right-5 z-20 flex items-center gap-2">
         <button

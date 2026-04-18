@@ -10,6 +10,7 @@ import useTaskStore from '../store/useTaskStore';
 import { isSupabaseConfigured } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import useThemeStore from '../store/useThemeStore';
 import { useTranslation } from 'react-i18next';
 
 // 任务分类
@@ -398,7 +399,7 @@ export default function TaskHallPage() {
               <button className="flex items-center gap-1.5 px-4 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl text-sm text-text-secondary hover:text-white hover:border-white/[0.1] transition-colors">
                 <Filter size={14} /> {t('taskHall.sort')} <ChevronDown size={13} />
               </button>
-              <div className="absolute right-0 top-full mt-1 w-48 bg-[#15151e] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-white/[0.08] py-1 z-30 hidden group-hover:block">
+              <div className={`absolute right-0 top-full mt-1 w-48 rounded-xl border py-1 z-30 hidden group-hover:block ${useThemeStore.getState().theme === 'light' ? 'bg-white border-black/[0.08] shadow-[0_10px_40px_rgba(0,0,0,0.12)]' : 'bg-[#15151e] border-white/[0.08] shadow-[0_10px_40px_rgba(0,0,0,0.5)]'}`}>
                 {sortOpts.map(opt => (
                   <button key={opt.id} onClick={() => setSortBy(opt.id)}
                     className={`w-full text-left px-4 py-2 text-sm transition-colors ${sortBy === opt.id ? 'text-amber-400 bg-amber-500/10' : 'text-text-secondary hover:text-white hover:bg-white/[0.04]'}`}>

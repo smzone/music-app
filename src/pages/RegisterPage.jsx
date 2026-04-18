@@ -16,6 +16,7 @@ export default function RegisterPage() {
   useDocumentTitle(t('register.title'));
   const navigate = useNavigate();
   const { register, loading } = useAuthStore();
+  const theme = useThemeStore((s) => s.theme);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -87,7 +88,7 @@ export default function RegisterPage() {
   const inputCls = "w-full bg-white/[0.04] text-white px-4 py-3.5 rounded-xl outline-none border border-white/[0.08] focus:border-primary text-[15px] placeholder:text-text-muted transition-all focus:shadow-[0_0_0_3px_rgba(29,185,84,0.1)]";
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4 py-12 relative overflow-hidden">
+    <div className={`min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden ${theme === 'light' ? 'bg-gray-50' : 'bg-[#0a0a0f]'}`}>
       {/* 右上角主题/语言切换 */}
       <div className="absolute top-5 right-5 z-20 flex items-center gap-2">
         <button

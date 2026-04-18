@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import useAuthStore, { hasRole, ROLES, hasPermission, PERMISSIONS } from '../../store/useAuthStore';
 import { useTranslation } from 'react-i18next';
+import useThemeStore from '../../store/useThemeStore';
 
 // minRole: 该菜单项需要的最低角色等级（不填则 MODERATOR 即可见）
 const adminNav = [
@@ -23,6 +24,8 @@ export default function AdminLayout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const theme = useThemeStore((s) => s.theme);
+  const isLight = theme === 'light';
 
   const handleLogout = () => {
     logout();
@@ -30,12 +33,12 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#0a0a0f]">
+    <div className={`flex h-screen overflow-hidden ${isLight ? 'bg-gray-50' : 'bg-[#0a0a0f]'}`}>
       {/* 移动端遮罩 */}
       {sideOpen && <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSideOpen(false)} />}
 
       {/* 侧边栏 */}
-      <aside className={`fixed top-0 left-0 h-full w-64 bg-[#0c0c14] border-r border-white/[0.04] z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto ${sideOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed top-0 left-0 h-full w-64 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto border-r ${isLight ? 'bg-white border-black/[0.06]' : 'bg-[#0c0c14] border-white/[0.04]'} ${sideOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between px-5 py-5 border-b border-white/[0.04]">
           <Link to="/admin" className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center">
@@ -91,11 +94,11 @@ export default function AdminLayout() {
 
       {/* 主内容区 */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex items-center gap-4 px-5 lg:px-8 py-4 bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/[0.04] shrink-0">
-          <button onClick={() => setSideOpen(true)} className="lg:hidden text-text-muted hover:text-white p-1.5 rounded-lg hover:bg-white/[0.04] transition-colors">
+        <header className={`flex items-center gap-4 px-5 lg:px-8 py-4 backdrop-blur-xl border-b shrink-0 ${isLight ? 'bg-white/80 border-black/[0.06]' : 'bg-[#0a0a0f]/80 border-white/[0.04]'}`}>
+          <button onClick={() => setSideOpen(true)} className={`lg:hidden text-text-muted p-1.5 rounded-lg transition-colors ${isLight ? 'hover:text-gray-900 hover:bg-black/[0.04]' : 'hover:text-white hover:bg-white/[0.04]'}`}>
             <Menu size={20} />
           </button>
-          <h2 className="text-base font-bold text-white">{t('admin.header')}</h2>
+          <h2 className={`text-base font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{t('admin.header')}</h2>
           <div className="flex-1" />
           <a href="/" target="_blank" className="flex items-center gap-1.5 text-sm text-text-muted hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-white/[0.04]">
             <ExternalLink size={13} /> {t('admin.viewSite')}

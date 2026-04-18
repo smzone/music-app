@@ -3,6 +3,7 @@ import { ShieldX, ArrowLeft, Home, LogIn } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
+import useThemeStore from '../store/useThemeStore';
 
 export default function AccessDeniedPage() {
   const { t } = useTranslation();
@@ -10,7 +11,7 @@ export default function AccessDeniedPage() {
   const user = useAuthStore((s) => s.user);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
+    <div className={`min-h-screen flex items-center justify-center px-4 ${useThemeStore.getState().theme === 'light' ? 'bg-gray-50' : 'bg-[#0a0a0f]'}`}>
       <div className="text-center max-w-md">
         {/* 图标 */}
         <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center border border-red-500/10">

@@ -2,13 +2,14 @@ import { Link } from 'react-router-dom';
 import { Home, ArrowLeft, Music } from 'lucide-react';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
+import useThemeStore from '../store/useThemeStore';
 
 export default function NotFoundPage() {
   const { t } = useTranslation();
   useDocumentTitle(t('notFound.title'));
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4 relative overflow-hidden">
+    <div className={`min-h-screen flex items-center justify-center px-4 relative overflow-hidden ${useThemeStore.getState().theme === 'light' ? 'bg-gray-50' : 'bg-[#0a0a0f]'}`}>
       {/* 背景光效 */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute w-[500px] h-[500px] top-1/4 left-1/4 rounded-full bg-gradient-to-br from-primary/10 to-cyan-500/5 blur-3xl animate-glow" />
