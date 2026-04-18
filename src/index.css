@@ -456,6 +456,12 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.2); }
 }
 .animate-page-in { animation: pageSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
 
+/* 条纹滚动动画 — ProgressBar 条纹效果 */
+@keyframes stripeMove {
+  0% { background-position: 1rem 0; }
+  100% { background-position: 0 0; }
+}
+
 /* 弹跳音波动画 — 播放器指示 */
 @keyframes barBounce {
   0%, 100% { height: 30%; }

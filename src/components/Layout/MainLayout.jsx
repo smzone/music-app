@@ -72,7 +72,7 @@ export default function MainLayout() {
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(29,185,84,0.3)] transition-shadow">
               <span className="text-black font-black text-lg">M</span>
             </div>
-            <span className="text-lg font-bold text-white hidden sm:block tracking-tight">MySpace</span>
+            <span className={`text-lg font-bold hidden sm:block tracking-tight ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>MySpace</span>
           </Link>
 
           {/* 桌面导航 */}
@@ -100,18 +100,18 @@ export default function MainLayout() {
             {/* 搜索触发按钮 — 点击或 Ctrl+K 打开 CommandPalette */}
             <button
               onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:border-white/[0.1] hover:bg-white/[0.06] text-text-muted transition-all text-sm"
+              className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl text-text-muted transition-all text-sm border ${theme === 'light' ? 'bg-black/[0.03] border-black/[0.06] hover:border-black/[0.1] hover:bg-black/[0.05]' : 'bg-white/[0.04] border-white/[0.06] hover:border-white/[0.1] hover:bg-white/[0.06]'}`}
             >
               <Search size={14} />
               <span className="text-xs">{t('commandPalette.placeholder')}</span>
-              <kbd className="hidden md:flex items-center gap-0.5 ml-1 px-1.5 py-0.5 bg-white/[0.06] rounded text-[10px] font-medium">
+              <kbd className={`hidden md:flex items-center gap-0.5 ml-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${theme === 'light' ? 'bg-black/[0.05]' : 'bg-white/[0.06]'}`}>
                 <Command size={9} />K
               </kbd>
             </button>
 
             {/* 购物车徽章 */}
-            <Link to="/shop" className="relative p-2 rounded-xl hover:bg-white/[0.05] transition-colors" aria-label={t('nav.shop')}>
-              <ShoppingCart size={18} className="text-text-muted hover:text-white transition-colors" />
+            <Link to="/shop" className={`relative p-2 rounded-xl transition-colors ${theme === 'light' ? 'hover:bg-black/[0.04]' : 'hover:bg-white/[0.05]'}`} aria-label={t('nav.shop')}>
+              <ShoppingCart size={18} className={`text-text-muted transition-colors ${theme === 'light' ? 'hover:text-gray-900' : 'hover:text-white'}`} />
               {cartCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-primary text-black text-[10px] font-bold rounded-full flex items-center justify-center px-1">
                   {cartCount > 99 ? '99+' : cartCount}
@@ -121,8 +121,8 @@ export default function MainLayout() {
 
             {/* 通知铃铛 */}
             {user && (
-              <Link to="/notifications" className="relative p-2 rounded-xl hover:bg-white/[0.05] transition-colors" aria-label={t('nav.notifications')}>
-                <Bell size={18} className="text-text-muted hover:text-white transition-colors" />
+              <Link to="/notifications" className={`relative p-2 rounded-xl transition-colors ${theme === 'light' ? 'hover:bg-black/[0.04]' : 'hover:bg-white/[0.05]'}`} aria-label={t('nav.notifications')}>
+                <Bell size={18} className={`text-text-muted transition-colors ${theme === 'light' ? 'hover:text-gray-900' : 'hover:text-white'}`} />
                 {unreadCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-[0_0_8px_rgba(239,68,68,0.4)]">
                     {unreadCount > 99 ? '99+' : unreadCount}
@@ -133,9 +133,9 @@ export default function MainLayout() {
             {user ? (
               <div className="relative">
                 <button onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-white/[0.05] transition-colors border border-transparent hover:border-white/[0.06]">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/30 to-emerald-600/30 flex items-center justify-center text-sm border border-white/[0.1]">{user.avatar || '🎵'}</div>
-                  <span className="text-sm text-white hidden sm:block font-medium">{user.username}</span>
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded-xl transition-colors border border-transparent ${theme === 'light' ? 'hover:bg-black/[0.04] hover:border-black/[0.06]' : 'hover:bg-white/[0.05] hover:border-white/[0.06]'}`}>
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br from-primary/30 to-emerald-600/30 flex items-center justify-center text-sm border ${theme === 'light' ? 'border-black/[0.08]' : 'border-white/[0.1]'}`}>{user.avatar || '🎵'}</div>
+                  <span className={`text-sm hidden sm:block font-medium ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>{user.username}</span>
                   <ChevronDown size={13} className={`text-text-muted transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {userMenuOpen && (
@@ -143,8 +143,8 @@ export default function MainLayout() {
                     <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
                     <div className={`absolute right-0 top-14 w-56 rounded-2xl z-50 py-2 animate-fadeIn border ${theme === 'light' ? 'bg-white border-black/[0.08] shadow-[0_15px_50px_rgba(0,0,0,0.12)]' : 'bg-[#15151e] border-white/[0.08] shadow-[0_15px_50px_rgba(0,0,0,0.5)]'}`}>
                       {/* 用户信息头部 */}
-                      <div className="px-4 py-3 border-b border-white/[0.06] mb-1">
-                        <p className="text-sm font-semibold text-white">{user.username}</p>
+                      <div className={`px-4 py-3 border-b mb-1 ${theme === 'light' ? 'border-black/[0.06]' : 'border-white/[0.06]'}`}>
+                        <p className={`text-sm font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>{user.username}</p>
                         <div className="flex items-center gap-1.5 mt-1">
                           <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                             user.role === 'admin' ? 'bg-red-500/15 text-red-400' :
@@ -163,13 +163,13 @@ export default function MainLayout() {
                       <Link to="/membership" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:text-yellow-400 hover:bg-white/[0.04] transition-colors mx-1 rounded-lg">
                         <Crown size={15} className="text-yellow-500" /> {t('nav.membership')}
                       </Link>
-                      <Link to="/profile" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:text-white hover:bg-white/[0.04] transition-colors mx-1 rounded-lg">
+                      <Link to="/profile" className={`flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary transition-colors mx-1 rounded-lg ${theme === 'light' ? 'hover:text-gray-900 hover:bg-black/[0.04]' : 'hover:text-white hover:bg-white/[0.04]'}`}>
                         <User size={15} /> {t('nav.profile')}
                       </Link>
-                      <Link to="/orders" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:text-white hover:bg-white/[0.04] transition-colors mx-1 rounded-lg">
+                      <Link to="/orders" className={`flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary transition-colors mx-1 rounded-lg ${theme === 'light' ? 'hover:text-gray-900 hover:bg-black/[0.04]' : 'hover:text-white hover:bg-white/[0.04]'}`}>
                         <Package size={15} /> {t('nav.orders')}
                       </Link>
-                      <div className="border-t border-white/[0.06] my-1" />
+                      <div className={`border-t my-1 ${theme === 'light' ? 'border-black/[0.06]' : 'border-white/[0.06]'}`} />
                       <button onClick={() => { logout(); setUserMenuOpen(false); }}
                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-muted hover:text-red-400 hover:bg-red-500/[0.05] transition-colors mx-1 rounded-lg">
                         <LogOut size={15} /> {t('nav.logout')}
@@ -180,7 +180,7 @@ export default function MainLayout() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Link to="/login" className="text-sm text-text-muted hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/[0.04]">{t('nav.login')}</Link>
+                <Link to="/login" className={`text-sm text-text-muted transition-colors px-3 py-1.5 rounded-lg ${theme === 'light' ? 'hover:text-gray-900 hover:bg-black/[0.04]' : 'hover:text-white hover:bg-white/[0.04]'}`}>{t('nav.login')}</Link>
                 <Link to="/register" className="text-sm bg-primary hover:bg-primary-hover text-black font-bold px-5 py-2 rounded-full transition-all hover:shadow-[0_0_20px_rgba(29,185,84,0.2)]">{t('nav.register')}</Link>
               </div>
             )}
@@ -188,7 +188,7 @@ export default function MainLayout() {
             {/* 主题切换 */}
             <button
               onClick={toggleTheme}
-              className="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-text-muted hover:text-white transition-all active:scale-90"
+              className={`w-9 h-9 rounded-xl flex items-center justify-center text-text-muted transition-all active:scale-90 ${theme === 'light' ? 'bg-black/[0.04] hover:bg-black/[0.08] hover:text-gray-900' : 'bg-white/[0.05] hover:bg-white/[0.1] hover:text-white'}`}
               aria-label={theme === 'dark' ? t('nav.lightMode') : t('nav.darkMode')}
               title={theme === 'dark' ? t('nav.lightMode') : t('nav.darkMode')}
             >
@@ -201,7 +201,7 @@ export default function MainLayout() {
             <LanguageSwitcher />
 
             {/* 移动端汉堡菜单 */}
-            <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-text-muted hover:text-white transition-colors">
+            <button onClick={() => setMenuOpen(!menuOpen)} className={`lg:hidden w-9 h-9 rounded-xl flex items-center justify-center text-text-muted transition-colors ${theme === 'light' ? 'bg-black/[0.04] hover:bg-black/[0.08] hover:text-gray-900' : 'bg-white/[0.05] hover:bg-white/[0.1] hover:text-white'}`}>
               {menuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>

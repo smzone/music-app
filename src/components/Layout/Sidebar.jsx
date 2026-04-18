@@ -54,9 +54,9 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="flex items-center justify-between px-6 py-6">
           <div className="flex items-center gap-3">
             <span className="text-3xl">🎵</span>
-            <h1 className="text-xl font-bold text-white tracking-tight">MySpace</h1>
+            <h1 className={`text-xl font-bold tracking-tight ${isLight ? 'text-gray-900' : 'text-white'}`}>MySpace</h1>
           </div>
-          <button onClick={onClose} className="lg:hidden text-text-secondary hover:text-white p-1">
+          <button onClick={onClose} className={`lg:hidden text-text-secondary p-1 ${isLight ? 'hover:text-gray-900' : 'hover:text-white'}`}>
             <X size={22} />
           </button>
         </div>
@@ -74,8 +74,12 @@ export default function Sidebar({ isOpen, onClose }) {
                   w-full flex items-center gap-4 px-4 py-3.5 rounded-xl mb-1
                   transition-all duration-200 text-[15px] font-medium
                   ${isActive
-                    ? 'bg-surface-lighter text-white shadow-lg shadow-black/20'
-                    : 'text-text-secondary hover:text-white hover:bg-surface-light'
+                    ? isLight
+                      ? 'bg-primary/10 text-gray-900 shadow-sm'
+                      : 'bg-surface-lighter text-white shadow-lg shadow-black/20'
+                    : isLight
+                      ? 'text-gray-600 hover:text-gray-900 hover:bg-black/[0.04]'
+                      : 'text-text-secondary hover:text-white hover:bg-surface-light'
                   }
                 `}
               >
@@ -110,7 +114,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-white truncate">{currentSong.title}</p>
+                <p className={`text-[13px] font-semibold truncate ${isLight ? 'text-gray-900' : 'text-white'}`}>{currentSong.title}</p>
                 <p className="text-[11px] text-text-muted truncate">{currentSong.artist}</p>
               </div>
             </div>
@@ -123,7 +127,7 @@ export default function Sidebar({ isOpen, onClose }) {
               </button>
               <button
                 onClick={nextSong}
-                className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center text-text-muted hover:text-white transition-colors"
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-text-muted transition-colors ${isLight ? 'bg-black/[0.04] hover:text-gray-900' : 'bg-white/[0.06] hover:text-white'}`}
               >
                 <SkipForward size={13} />
               </button>
@@ -139,7 +143,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 {user.avatar}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-medium text-white truncate">{user.username}</p>
+                <p className={`text-[15px] font-medium truncate ${isLight ? 'text-gray-900' : 'text-white'}`}>{user.username}</p>
                 <button
                   onClick={logout}
                   className="text-sm text-text-muted hover:text-danger transition-colors"

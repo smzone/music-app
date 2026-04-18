@@ -10,9 +10,12 @@ import useAuthStore from '../../store/useAuthStore';
 import { formatDuration } from '../../data/songs';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import useThemeStore from '../../store/useThemeStore';
 
 export default function MusicPlayer() {
   const { t } = useTranslation();
+  const theme = useThemeStore((s) => s.theme);
+  const isLight = theme === 'light';
   const {
     playlist, currentIndex, isPlaying, currentTime, volume, isMuted, playMode, showPlayer,
     togglePlay, nextSong, prevSong, setCurrentTime, setVolume, toggleMute, togglePlayMode,
@@ -104,12 +107,13 @@ export default function MusicPlayer() {
       <div
         className={`
           fixed bottom-0 left-0 right-0 z-30
-          transition-transform duration-300 backdrop-blur-xl bg-[#0a0a0f]/90 border-t border-white/[0.06]
+          transition-transform duration-300 backdrop-blur-xl border-t
+          ${isLight ? 'bg-white/90 border-black/[0.08] shadow-[0_-2px_20px_rgba(0,0,0,0.06)]' : 'bg-[#0a0a0f]/90 border-white/[0.06]'}
           ${expanded ? 'translate-y-full' : 'translate-y-0'}
         `}
       >
         {/* 进度条 — 悬浮可拖拽 */}
-        <div className="h-1 bg-white/[0.06] group cursor-pointer relative -mt-0.5"
+        <div className={`h-1 group cursor-pointer relative -mt-0.5 ${isLight ? 'bg-black/[0.06]' : 'bg-white/[0.06]'}`}
           onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
             const pct = (e.clientX - rect.left) / rect.width;
@@ -136,31 +140,31 @@ export default function MusicPlayer() {
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-white line-clamp-1">{song.title}</p>
+              <p className={`text-sm font-semibold line-clamp-1 ${isLight ? 'text-gray-900' : 'text-white'}`}>{song.title}</p>
               <p className="text-xs text-text-muted line-clamp-1">{song.artist}</p>
             </div>
           </div>
 
           {/* 控制按钮 */}
           <div className="flex items-center gap-1.5">
-            <button onClick={() => toggleFavorite(song.id, authUser?.id)} className="p-2 hidden sm:block rounded-lg hover:bg-white/[0.05] transition-colors">
-              <Heart size={17} className={fav ? 'fill-primary text-primary' : 'text-text-muted hover:text-white'} />
+            <button onClick={() => toggleFavorite(song.id, authUser?.id)} className={`p-2 hidden sm:block rounded-lg transition-colors ${isLight ? 'hover:bg-black/[0.04]' : 'hover:bg-white/[0.05]'}`}>
+              <Heart size={17} className={fav ? 'fill-primary text-primary' : `text-text-muted ${isLight ? 'hover:text-gray-900' : 'hover:text-white'}`} />
             </button>
-            <button onClick={prevSong} className="p-2 hidden sm:block rounded-lg hover:bg-white/[0.05] transition-colors">
-              <SkipBack size={17} className="text-white" />
+            <button onClick={prevSong} className={`p-2 hidden sm:block rounded-lg transition-colors ${isLight ? 'hover:bg-black/[0.04]' : 'hover:bg-white/[0.05]'}`}>
+              <SkipBack size={17} className={isLight ? 'text-gray-900' : 'text-white'} />
             </button>
             <button onClick={togglePlay} className="p-2.5 bg-primary hover:bg-primary-hover rounded-full hover:scale-105 transition-all shadow-[0_0_15px_rgba(29,185,84,0.15)]">
               {isPlaying ? <Pause size={17} className="text-black" /> : <Play size={17} className="text-black ml-0.5" />}
             </button>
-            <button onClick={nextSong} className="p-2 hidden sm:block rounded-lg hover:bg-white/[0.05] transition-colors">
-              <SkipForward size={17} className="text-white" />
+            <button onClick={nextSong} className={`p-2 hidden sm:block rounded-lg transition-colors ${isLight ? 'hover:bg-black/[0.04]' : 'hover:bg-white/[0.05]'}`}>
+              <SkipForward size={17} className={isLight ? 'text-gray-900' : 'text-white'} />
             </button>
           </div>
 
           {/* 时间 + 展开 */}
           <div className="flex items-center gap-2">
             <span className="text-[10px] text-text-muted hidden md:block font-mono">{formatDuration(currentTime)} / {formatDuration(song.duration)}</span>
-            <button onClick={() => setExpanded(true)} className="p-2 rounded-lg hover:bg-white/[0.05] text-text-muted hover:text-white transition-colors">
+            <button onClick={() => setExpanded(true)} className={`p-2 rounded-lg text-text-muted transition-colors ${isLight ? 'hover:bg-black/[0.04] hover:text-gray-900' : 'hover:bg-white/[0.05] hover:text-white'}`}>
               <ChevronUp size={17} />
             </button>
           </div>
