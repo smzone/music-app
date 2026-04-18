@@ -51,7 +51,7 @@ function SongRow({ song, index, onContextMenu }) {
           {isCurrentSong && <div className="absolute inset-0 rounded-lg ring-2 ring-primary/40" />}
         </div>
         <div className="min-w-0">
-          <p className={`text-[14px] font-semibold truncate ${isCurrentSong ? 'text-primary' : 'text-white'}`}>{song.title}</p>
+          <p className={`text-[14px] font-semibold truncate ${isCurrentSong ? 'text-primary' : 'text-text-primary'}`}>{song.title}</p>
           <p className="text-[12px] text-text-muted truncate mt-0.5">{song.artist}</p>
         </div>
       </div>
@@ -63,7 +63,7 @@ function SongRow({ song, index, onContextMenu }) {
       <span className="text-[13px] text-text-muted font-mono">{formatDuration(song.duration)}</span>
       <button onClick={() => { toggleFavorite(song.id, authUser?.id); toast.success(fav ? t('music.unfavorited') : t('music.favorited')); }}
         className="transition-transform hover:scale-110">
-        <Heart size={15} className={fav ? 'fill-primary text-primary' : 'text-text-muted hover:text-white transition-colors'} />
+        <Heart size={15} className={fav ? 'fill-primary text-primary' : 'text-text-muted hover:text-text-primary transition-colors'} />
       </button>
     </div>
   );
@@ -169,7 +169,7 @@ export default function MusicPage() {
             <span className="inline-block px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-xs font-medium text-white/80 mb-3">
               <Disc3 size={11} className="inline mr-1" /> {t('music.badge')}
             </span>
-            <h1 className="text-4xl lg:text-5xl font-black text-white mb-3 tracking-tight">{t('music.heroTitle')}</h1>
+            <h1 className="text-4xl lg:text-5xl font-black text-text-primary mb-3 tracking-tight">{t('music.heroTitle')}</h1>
             <p className="text-text-secondary mb-5 text-base">{t('music.heroDesc', { count: songs.length, duration: totalDuration })}</p>
             <div className="flex items-center gap-3">
               <button onClick={handlePlayAll}
@@ -185,17 +185,17 @@ export default function MusicPage() {
           {/* 右侧统计数据 */}
           <div className="hidden lg:flex items-center gap-6 text-center pb-2">
             <div>
-              <p className="text-2xl font-black text-white">{songs.length}</p>
+              <p className="text-2xl font-black text-text-primary">{songs.length}</p>
               <p className="text-xs text-text-muted mt-1">{t('music.songs')}</p>
             </div>
             <div className="w-px h-8 bg-white/10" />
             <div>
-              <p className="text-2xl font-black text-white">{totalDuration}</p>
+              <p className="text-2xl font-black text-text-primary">{totalDuration}</p>
               <p className="text-xs text-text-muted mt-1">{t('music.totalDuration')}</p>
             </div>
             <div className="w-px h-8 bg-white/10" />
             <div>
-              <p className="text-2xl font-black text-white">{genreKeys.length - 1}</p>
+              <p className="text-2xl font-black text-text-primary">{genreKeys.length - 1}</p>
               <p className="text-xs text-text-muted mt-1">{t('music.styles')}</p>
             </div>
           </div>
@@ -255,7 +255,7 @@ export default function MusicPage() {
         <div className="lg:w-72 shrink-0 space-y-6">
           {/* 热门歌曲 Top 5 */}
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
-            <h3 className="flex items-center gap-2 text-sm font-bold text-white mb-4">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-text-primary mb-4">
               <TrendingUp size={16} className="text-primary" /> {t('music.hotRanking')}
             </h3>
             <div className="space-y-2.5">
@@ -267,7 +267,7 @@ export default function MusicPage() {
                     <span className={`text-sm font-black w-5 ${i < 3 ? 'text-primary' : 'text-text-muted'}`}>{i + 1}</span>
                     <img src={song.cover} alt={song.title} className="w-10 h-10 rounded-lg object-cover shrink-0 group-hover:shadow-lg transition-shadow" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13px] font-semibold text-white truncate group-hover:text-primary transition-colors">{song.title}</p>
+                      <p className="text-[13px] font-semibold text-text-primary truncate group-hover:text-primary transition-colors">{song.title}</p>
                       <p className="text-[11px] text-text-muted truncate">{song.artist}</p>
                     </div>
                     <div className="flex items-center gap-0.5 text-star shrink-0">
@@ -282,7 +282,7 @@ export default function MusicPage() {
 
           {/* 收听统计 */}
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
-            <h3 className="flex items-center gap-2 text-sm font-bold text-white mb-4">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-text-primary mb-4">
               <BarChart3 size={16} className="text-primary" /> {t('music.listeningData')}
             </h3>
             <div className="space-y-4">
@@ -299,7 +299,7 @@ export default function MusicPage() {
                     </div>
                     <div className="flex-1">
                       <p className="text-xs text-text-muted">{t(stat.labelKey)}</p>
-                      <p className="text-sm font-bold text-white">{stat.value}</p>
+                      <p className="text-sm font-bold text-text-primary">{stat.value}</p>
                     </div>
                   </div>
                 );
@@ -309,7 +309,7 @@ export default function MusicPage() {
 
           {/* 风格分布 */}
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
-            <h3 className="flex items-center gap-2 text-sm font-bold text-white mb-4">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-text-primary mb-4">
               <Disc3 size={16} className="text-primary" /> {t('music.genreDistribution')}
             </h3>
             <div className="space-y-3">
