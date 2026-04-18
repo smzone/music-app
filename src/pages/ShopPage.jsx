@@ -35,7 +35,7 @@ function CartSidebar({ cart, onClose, onUpdateQty, onRemove, onCheckout, t }) {
   return (
     <div className="fixed inset-0 z-50" onClick={onClose}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div className="absolute top-0 right-0 h-full w-full max-w-md bg-[#111118] shadow-2xl animate-fadeIn flex flex-col border-l border-white/[0.06]" onClick={(e) => e.stopPropagation()}>
+      <div className={`absolute top-0 right-0 h-full w-full max-w-md shadow-2xl animate-fadeIn flex flex-col border-l ${useThemeStore.getState().theme === 'light' ? 'bg-white border-black/[0.06]' : 'bg-[#111118] border-white/[0.06]'}`} onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
           <h2 className="text-lg font-bold text-white flex items-center gap-2.5">
             <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center">
