@@ -156,7 +156,7 @@ export default function LivePage() {
               return (
                 <div key={i} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-center">
                   <Icon size={16} className={`mx-auto mb-1.5 ${s.color}`} />
-                  <p className="text-sm font-bold text-white">{s.value}</p>
+                  <p className="text-sm font-bold text-text-primary">{s.value}</p>
                   <p className="text-[10px] text-text-muted mt-0.5">{t(s.labelKey)}</p>
                 </div>
               );
@@ -165,7 +165,7 @@ export default function LivePage() {
 
           {/* 直播预告 */}
           <div className="mt-8">
-            <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <CalendarDays size={18} className="text-primary" /> {t('live.upcomingTitle')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -199,7 +199,7 @@ export default function LivePage() {
         {/* 右侧：聊天区 */}
         <div className="lg:w-[340px] shrink-0 flex flex-col rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden h-[650px] lg:h-auto">
           <div className="px-4 py-3.5 border-b border-white/[0.06] flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
               <MessageSquare size={14} className="text-primary" /> {t('live.chat')}
             </h3>
             <div className="flex items-center gap-2">
@@ -258,7 +258,7 @@ export default function LivePage() {
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder={user ? t('live.chatPlaceholder') : t('live.chatPlaceholderLogin')}
               disabled={!user}
-              className="flex-1 bg-white/[0.05] text-white px-3.5 py-2.5 rounded-xl outline-none text-sm placeholder:text-text-muted disabled:opacity-40 border border-white/[0.06] focus:border-primary transition-colors" />
+              className="flex-1 bg-white/[0.05] text-text-primary px-3.5 py-2.5 rounded-xl outline-none text-sm placeholder:text-text-muted disabled:opacity-40 border border-white/[0.06] focus:border-primary transition-colors" />
             <button onClick={handleSend} disabled={!user || !inputMsg.trim()}
               className="w-9 h-9 bg-primary text-black rounded-xl flex items-center justify-center disabled:opacity-30 hover:bg-primary-hover transition-all">
               <Send size={15} />

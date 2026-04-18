@@ -46,8 +46,8 @@ function NewPostModal({ onClose, onSubmit, t }) {
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-surface-light rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-fadeIn" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-5 border-b border-surface-lighter shrink-0">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2"><Sparkles size={20} className="text-primary" /> {t('forum.newPostTitle')}</h2>
-          <button onClick={onClose} className="text-text-muted hover:text-white"><X size={22} /></button>
+          <h2 className="text-xl font-bold text-text-primary flex items-center gap-2"><Sparkles size={20} className="text-primary" /> {t('forum.newPostTitle')}</h2>
+          <button onClick={onClose} className="text-text-muted hover:text-text-primary"><X size={22} /></button>
         </div>
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
           {/* 分类与标签 */}
@@ -55,7 +55,7 @@ function NewPostModal({ onClose, onSubmit, t }) {
             <div className="flex-1">
               <label className="text-sm text-text-secondary block mb-1.5">{t('forum.category')}</label>
               <select value={category} onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-surface-lighter text-white px-4 py-2.5 rounded-xl outline-none border border-transparent focus:border-primary text-[15px]">
+                className="w-full bg-surface-lighter text-text-primary px-4 py-2.5 rounded-xl outline-none border border-transparent focus:border-primary text-[15px]">
                 {forumCategories.filter((c) => c.id !== 'all').map((c) => <option key={c.id} value={c.id}>{c.icon} {t(c.nameKey)}</option>)}
               </select>
             </div>
@@ -66,7 +66,7 @@ function NewPostModal({ onClose, onSubmit, t }) {
             <div className="flex flex-wrap gap-2">
               {postTags.map((tag) => (
                 <button key={tag.id} type="button" onClick={() => toggleTag(tag.id)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${selectedTags.includes(tag.id) ? tag.color + ' ring-1 ring-white/20' : 'bg-surface-lighter text-text-muted hover:text-white'}`}>
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${selectedTags.includes(tag.id) ? tag.color + ' ring-1 ring-white/20' : 'bg-surface-lighter text-text-muted hover:text-text-primary'}`}>
                   {tag.name}
                 </button>
               ))}
@@ -76,14 +76,14 @@ function NewPostModal({ onClose, onSubmit, t }) {
           <div>
             <label className="text-sm text-text-secondary block mb-1.5">{t('forum.titleLabel')}</label>
             <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('forum.titlePlaceholder')} maxLength={100}
-              className="w-full bg-surface-lighter text-white px-4 py-3 rounded-xl outline-none border border-transparent focus:border-primary text-base placeholder:text-text-muted" />
+              className="w-full bg-surface-lighter text-text-primary px-4 py-3 rounded-xl outline-none border border-transparent focus:border-primary text-base placeholder:text-text-muted" />
             <p className="text-xs text-text-muted mt-1 text-right">{title.length}/100</p>
           </div>
           {/* 内容 */}
           <div>
             <label className="text-sm text-text-secondary block mb-1.5">{t('forum.contentLabel')}</label>
             <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={8} placeholder={t('forum.contentPlaceholder')}
-              className="w-full bg-surface-lighter text-white px-4 py-3 rounded-xl outline-none border border-transparent focus:border-primary text-[15px] placeholder:text-text-muted resize-none leading-relaxed" />
+              className="w-full bg-surface-lighter text-text-primary px-4 py-3 rounded-xl outline-none border border-transparent focus:border-primary text-[15px] placeholder:text-text-muted resize-none leading-relaxed" />
           </div>
           {/* 媒体附件 */}
           <div>
@@ -115,7 +115,7 @@ function NewPostModal({ onClose, onSubmit, t }) {
           </div>
           {/* 操作按钮 */}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 py-3 border border-surface-lighter text-text-secondary rounded-full hover:text-white transition-colors">{t('forum.cancel')}</button>
+            <button type="button" onClick={onClose} className="flex-1 py-3 border border-surface-lighter text-text-secondary rounded-full hover:text-text-primary transition-colors">{t('forum.cancel')}</button>
             <button type="submit" className="flex-1 py-3 bg-primary hover:bg-primary-hover text-black font-bold rounded-full transition-all">{t('forum.submit')}</button>
           </div>
         </form>
@@ -213,7 +213,7 @@ export default function ForumPage() {
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-xs font-medium text-white/80 mb-3">
               <Sparkles size={12} /> {t('forum.badge')}
             </span>
-            <h1 className="text-3xl lg:text-4xl font-black text-white mb-2 tracking-tight">{t('forum.heading')}</h1>
+            <h1 className="text-3xl lg:text-4xl font-black text-text-primary mb-2 tracking-tight">{t('forum.heading')}</h1>
             <p className="text-text-secondary text-sm max-w-md">{t('forum.desc')}</p>
             <div className="flex items-center gap-4 mt-4 text-sm text-text-muted">
               <span className="flex items-center gap-1"><MessageSquare size={14} /> {t('forum.statPosts', { count: posts.length })}</span>
@@ -237,7 +237,7 @@ export default function ForumPage() {
               <h3 className="text-[10px] font-semibold text-text-muted uppercase tracking-widest px-3 mb-2">{t('forum.categoryTitle')}</h3>
               {forumCategories.map((c) => (
                 <button key={c.id} onClick={() => { setActiveCategory(c.id); handleFilterChange(c.id, sortBy, searchQ); }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${activeCategory === c.id ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-secondary hover:text-white hover:bg-white/[0.04] border border-transparent'}`}>
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left ${activeCategory === c.id ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-secondary hover:text-text-primary hover:bg-white/[0.04] border border-transparent'}`}>
                   <span className="text-base">{c.icon}</span>
                   <span className="flex-1">{t(c.nameKey)}</span>
                   <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${activeCategory === c.id ? 'bg-primary/20 text-primary' : 'bg-white/[0.05] text-text-muted'}`}>{c.count}</span>
@@ -247,7 +247,7 @@ export default function ForumPage() {
 
             {/* 热帖排行 */}
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-1.5"><TrendingUp size={14} className="text-red-400" /> {t('forum.hotRanking')}</h3>
+              <h3 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-1.5"><TrendingUp size={14} className="text-red-400" /> {t('forum.hotRanking')}</h3>
               <div className="space-y-3">
                 {[...posts].sort((a, b) => (b.likes ?? b.like_count ?? 0) - (a.likes ?? a.like_count ?? 0)).slice(0, 5).map((p, i) => (
                   <div key={p.id} onClick={() => navigate(`/forum/${p.id}`)}
@@ -264,7 +264,7 @@ export default function ForumPage() {
 
             {/* 标签云 */}
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <h3 className="text-sm font-bold text-white mb-3">{t('forum.hotTags')}</h3>
+              <h3 className="text-sm font-bold text-text-primary mb-3">{t('forum.hotTags')}</h3>
               <div className="flex flex-wrap gap-1.5">
                 {postTags.map((tag) => (
                   <span key={tag.id} className={`px-2.5 py-1 rounded-lg text-[11px] font-medium ${tag.color} hover:scale-105 transition-transform cursor-pointer`}>{t(tag.nameKey)}</span>

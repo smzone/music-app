@@ -289,7 +289,7 @@ export default function VideosPage() {
           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 backdrop-blur-sm rounded-full text-xs font-medium text-white/80 mb-3">
             <Film size={12} /> {t('videos.badge')}
           </span>
-          <h1 className="text-3xl lg:text-4xl font-black text-white mb-2 tracking-tight">{t('videos.heading')}</h1>
+          <h1 className="text-3xl lg:text-4xl font-black text-text-primary mb-2 tracking-tight">{t('videos.heading')}</h1>
           <p className="text-text-secondary text-sm max-w-md">{t('videos.desc')}</p>
           <div className="flex items-center gap-5 mt-5 text-sm text-text-muted">
             <span className="flex items-center gap-1"><Film size={14} /> {t('videos.videoCount', { count: videosData.length })}</span>

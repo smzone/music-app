@@ -64,7 +64,7 @@ function ReleaseCard({ item, t }) {
       {/* 内容 */}
       <div className="p-4">
         {/* 标题 */}
-        <h3 className="text-[15px] font-bold text-white group-hover:text-primary transition-colors truncate">{item.title}</h3>
+        <h3 className="text-[15px] font-bold text-text-primary group-hover:text-primary transition-colors truncate">{item.title}</h3>
         <p className="text-xs text-text-muted mt-0.5 truncate">{item.subtitle}</p>
 
         {/* 平台 */}
@@ -156,7 +156,7 @@ export default function ReleasesPage() {
           <div className="flex items-center gap-3 mb-3">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg">🎮</div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-black text-white">{t('releases.title')}</h1>
+              <h1 className="text-2xl md:text-3xl font-black text-text-primary">{t('releases.title')}</h1>
               <p className="text-sm text-text-muted mt-0.5">{t('releases.subtitle')}</p>
             </div>
           </div>
@@ -164,17 +164,17 @@ export default function ReleasesPage() {
           <div className="flex items-center gap-6 mt-5 flex-wrap">
             <div className="flex items-center gap-2">
               <Package size={16} className="text-primary" />
-              <span className="text-sm text-white font-semibold">{initialReleases.length}</span>
+              <span className="text-sm text-text-primary font-semibold">{initialReleases.length}</span>
               <span className="text-xs text-text-muted">{t('releases.statProjects')}</span>
             </div>
             <div className="flex items-center gap-2">
               <Download size={16} className="text-blue-400" />
-              <span className="text-sm text-white font-semibold">{(totalDownloads / 1000).toFixed(1)}k</span>
+              <span className="text-sm text-text-primary font-semibold">{(totalDownloads / 1000).toFixed(1)}k</span>
               <span className="text-xs text-text-muted">{t('releases.statDownloads')}</span>
             </div>
             <div className="flex items-center gap-2">
               <Heart size={16} className="text-red-400" />
-              <span className="text-sm text-white font-semibold">{(totalLikes / 1000).toFixed(1)}k</span>
+              <span className="text-sm text-text-primary font-semibold">{(totalLikes / 1000).toFixed(1)}k</span>
               <span className="text-xs text-text-muted">{t('releases.statLikes')}</span>
             </div>
           </div>
@@ -187,10 +187,10 @@ export default function ReleasesPage() {
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
           <input type="text" value={searchQ} onChange={(e) => setSearchQ(e.target.value)}
             placeholder={t('releases.searchPH')}
-            className="w-full bg-white/[0.04] text-white pl-11 pr-4 py-3 rounded-xl outline-none border border-white/[0.08] focus:border-primary focus:shadow-[0_0_0_3px_rgba(29,185,84,0.1)] text-[14px] placeholder:text-text-muted transition-all" />
+            className="w-full bg-white/[0.04] text-text-primary pl-11 pr-4 py-3 rounded-xl outline-none border border-white/[0.08] focus:border-primary focus:shadow-[0_0_0_3px_rgba(29,185,84,0.1)] text-[14px] placeholder:text-text-muted transition-all" />
         </div>
         <button onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all text-sm font-medium ${showFilters ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-white/[0.04] border-white/[0.08] text-text-muted hover:text-white'}`}>
+          className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all text-sm font-medium ${showFilters ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-white/[0.04] border-white/[0.08] text-text-muted hover:text-text-primary'}`}>
           <Filter size={15} /> {t('releases.filter')}
           <ChevronDown size={13} className={`transition-transform ${showFilters ? 'rotate-180' : ''}`} />
         </button>
@@ -205,7 +205,7 @@ export default function ReleasesPage() {
             <div className="flex flex-wrap gap-1.5">
               {releaseCategories.map((cat) => (
                 <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activeCategory === cat.id ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-white/[0.04] text-text-muted hover:text-white border border-transparent'}`}>
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activeCategory === cat.id ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-white/[0.04] text-text-muted hover:text-text-primary border border-transparent'}`}>
                   {cat.icon} {t(cat.nameKey)}
                 </button>
               ))}
@@ -216,12 +216,12 @@ export default function ReleasesPage() {
             <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">{t('releases.filterPlatform')}</p>
             <div className="flex flex-wrap gap-1.5">
               <button onClick={() => setActivePlatform('all')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activePlatform === 'all' ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-white/[0.04] text-text-muted hover:text-white border border-transparent'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activePlatform === 'all' ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-white/[0.04] text-text-muted hover:text-text-primary border border-transparent'}`}>
                 {t('releases.allPlatforms')}
               </button>
               {platformTags.map((p) => (
                 <button key={p.id} onClick={() => setActivePlatform(p.id)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activePlatform === p.id ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-white/[0.04] text-text-muted hover:text-white border border-transparent'}`}>
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activePlatform === p.id ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-white/[0.04] text-text-muted hover:text-text-primary border border-transparent'}`}>
                   {p.icon} {p.label}
                 </button>
               ))}
@@ -233,7 +233,7 @@ export default function ReleasesPage() {
             <div className="flex flex-wrap gap-1.5">
               {releaseSortOptions.map((s) => (
                 <button key={s.id} onClick={() => setSortBy(s.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${sortBy === s.id ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-white/[0.04] text-text-muted hover:text-white border border-transparent'}`}>
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${sortBy === s.id ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-white/[0.04] text-text-muted hover:text-text-primary border border-transparent'}`}>
                   {t(s.nameKey)}
                 </button>
               ))}
@@ -246,7 +246,7 @@ export default function ReleasesPage() {
       <div className="flex items-center gap-1.5 mb-6 overflow-x-auto pb-1 scrollbar-hide">
         {releaseCategories.map((cat) => (
           <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-medium whitespace-nowrap transition-all ${activeCategory === cat.id ? 'bg-primary/15 text-primary shadow-[0_0_10px_rgba(29,185,84,0.08)]' : 'bg-white/[0.03] text-text-muted hover:text-white hover:bg-white/[0.06]'}`}>
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-medium whitespace-nowrap transition-all ${activeCategory === cat.id ? 'bg-primary/15 text-primary shadow-[0_0_10px_rgba(29,185,84,0.08)]' : 'bg-white/[0.03] text-text-muted hover:text-text-primary hover:bg-white/[0.06]'}`}>
             {cat.icon} {t(cat.nameKey)}
           </button>
         ))}
