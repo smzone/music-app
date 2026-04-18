@@ -31,7 +31,7 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4 relative overflow-hidden">
+        <div className="min-h-screen bg-surface flex items-center justify-center px-4 relative overflow-hidden">
           {/* 背景光效 */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute w-[400px] h-[400px] top-1/3 left-1/4 rounded-full bg-gradient-to-br from-red-500/10 to-orange-500/5 blur-3xl animate-glow" />
