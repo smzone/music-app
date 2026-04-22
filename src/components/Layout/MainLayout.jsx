@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell, Sun, Moon, ShoppingCart, Package, Search, Command } from 'lucide-react';
+import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell, Sun, Moon, ShoppingCart, Package, Search, Command, Clock } from 'lucide-react';
 import useAuthStore, { hasRole, ROLES } from '../../store/useAuthStore';
 import useNotificationStore from '../../store/useNotificationStore';
 import MusicPlayer from '../Player/MusicPlayer';
@@ -168,6 +168,9 @@ export default function MainLayout() {
                       </Link>
                       <Link to="/orders" className={`flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary transition-colors mx-1 rounded-lg ${theme === 'light' ? 'hover:text-gray-900 hover:bg-black/[0.04]' : 'hover:text-white hover:bg-white/[0.04]'}`}>
                         <Package size={15} /> {t('nav.orders')}
+                      </Link>
+                      <Link to="/history" onClick={() => setUserMenuOpen(false)} className={`flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary transition-colors mx-1 rounded-lg ${theme === 'light' ? 'hover:text-gray-900 hover:bg-black/[0.04]' : 'hover:text-white hover:bg-white/[0.04]'}`}>
+                        <Clock size={15} /> {t('history.title')}
                       </Link>
                       <div className={`border-t my-1 ${theme === 'light' ? 'border-black/[0.06]' : 'border-white/[0.06]'}`} />
                       <button onClick={() => { logout(); setUserMenuOpen(false); }}
