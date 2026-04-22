@@ -1,8 +1,9 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { songsData } from '../data/songs';
 
-// 播放器状态管理
-const usePlayerStore = create((set, get) => ({
+// 播放器状态管理（volume / isMuted / playMode 持久化到 localStorage）
+const usePlayerStore = create(persist((set, get) => ({
   // 当前播放列表
   playlist: songsData,
   // 当前播放歌曲索引
@@ -84,6 +85,16 @@ const usePlayerStore = create((set, get) => ({
     const nextMode = modes[(currentModeIndex + 1) % modes.length];
     return { playMode: nextMode };
   }),
+}), {
+  name: 'music-app-player',
+  storage: createJSONStorage(() => localStorage),
+  // 仅持久化用户偏好设置，不持久化当前播放状态/列表
+  partialize: (state) => ({
+    volume: state.volume,
+    isMuted: state.isMuted,
+    playMode: state.playMode,
+  }),
+  version: 1,
 }));
 
 export default usePlayerStore;
