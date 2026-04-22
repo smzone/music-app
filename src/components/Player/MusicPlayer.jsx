@@ -7,6 +7,7 @@ import {
 import usePlayerStore from '../../store/usePlayerStore';
 import useSongStore from '../../store/useSongStore';
 import useAuthStore from '../../store/useAuthStore';
+import useHistoryStore from '../../store/useHistoryStore';
 import { formatDuration } from '../../data/songs';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -57,12 +58,13 @@ export default function MusicPlayer() {
     return idx;
   }, [currentTime, lyricsData]);
 
-  // 切歌时自动计数播放量
+  // 切歌时自动计数播放量 + 记录到最近播放历史
   const prevSongIdRef = useRef(null);
   useEffect(() => {
     if (song && song.id !== prevSongIdRef.current) {
       prevSongIdRef.current = song.id;
       useSongStore.getState().incrementPlay(song.id);
+      useHistoryStore.getState().addToHistory(song);
     }
   }, [song]);
 

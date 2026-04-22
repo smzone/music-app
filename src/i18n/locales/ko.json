@@ -31,7 +31,8 @@
     "defaultMsg": "님이 메시지를 보냈습니다"
   },
   "sidebar": {
-    "favorites": "즐겨찾기"
+    "favorites": "즐겨찾기",
+    "recentlyPlayed": "최근 재생"
   },
   "home": {
     "title": "홈",

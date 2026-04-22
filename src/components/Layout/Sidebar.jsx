@@ -1,8 +1,9 @@
-import { Home, Search, Library, Heart, X, Bell, Play, Pause, SkipForward } from 'lucide-react';
+import { Home, Search, Library, Heart, X, Bell, Play, Pause, SkipForward, Clock } from 'lucide-react';
 import useSongStore from '../../store/useSongStore';
 import useAuthStore from '../../store/useAuthStore';
 import useNotificationStore from '../../store/useNotificationStore';
 import usePlayerStore from '../../store/usePlayerStore';
+import useHistoryStore from '../../store/useHistoryStore';
 import useThemeStore from '../../store/useThemeStore';
 import { useTranslation } from 'react-i18next';
 
@@ -19,8 +20,9 @@ export default function Sidebar({ isOpen, onClose }) {
   const { activePage, setActivePage, favorites } = useSongStore();
   const { user, openAuth, logout } = useAuthStore();
   const unreadCount = useNotificationStore((s) => s.unreadCount);
-  const { playlist, currentIndex, isPlaying, togglePlay, nextSong, showPlayer } = usePlayerStore();
+  const { playlist, currentIndex, isPlaying, togglePlay, nextSong, showPlayer, playSong } = usePlayerStore();
   const currentSong = playlist[currentIndex];
+  const recentHistory = useHistoryStore((s) => s.history);
   const theme = useThemeStore((s) => s.theme);
   const isLight = theme === 'light';
   const badgeValues = { favCount: favorites.length, unreadCount };
@@ -94,6 +96,57 @@ export default function Sidebar({ isOpen, onClose }) {
             );
           })}
         </nav>
+
+        {/* 最近播放 — 显示最近 5 首 */}
+        {recentHistory.length > 0 && (
+          <div className="mx-4 mb-3">
+            <div className={`flex items-center justify-between mb-2 px-1`}>
+              <div className="flex items-center gap-1.5">
+                <Clock size={12} className="text-text-muted" />
+                <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider">{t('sidebar.recentlyPlayed')}</span>
+              </div>
+            </div>
+            <div className="space-y-0.5 max-h-[180px] overflow-y-auto scrollbar-none">
+              {recentHistory.slice(0, 5).map((hSong) => {
+                const inPlaylist = playlist.find((p) => p.id === hSong.id);
+                const handlePlay = () => {
+                  if (inPlaylist) {
+                    playSong(inPlaylist);
+                  } else {
+                    playSong(hSong);
+                  }
+                };
+                const isCurrentlyPlaying = currentSong?.id === hSong.id && isPlaying;
+                return (
+                  <button
+                    key={hSong.id}
+                    onClick={handlePlay}
+                    className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-all group ${
+                      isLight ? 'hover:bg-black/[0.04]' : 'hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    <div className="relative shrink-0">
+                      <img src={hSong.cover} alt={hSong.title} className="w-8 h-8 rounded-md object-cover" />
+                      <div className={`absolute inset-0 rounded-md flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity ${isCurrentlyPlaying ? 'opacity-100' : ''}`}>
+                        {isCurrentlyPlaying ? (
+                          <Pause size={11} className="text-white" />
+                        ) : (
+                          <Play size={11} className="text-white ml-0.5" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className={`text-[12px] font-medium truncate ${
+                        isCurrentlyPlaying ? 'text-primary' : isLight ? 'text-gray-900' : 'text-white'
+                      }`}>{hSong.title}</p>
+                      <p className="text-[10px] text-text-muted truncate">{hSong.artist}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* 正在播放 mini widget */}
         {showPlayer && currentSong && (

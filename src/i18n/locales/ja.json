@@ -31,7 +31,8 @@
     "defaultMsg": "からメッセージが届きました"
   },
   "sidebar": {
-    "favorites": "お気に入り"
+    "favorites": "お気に入り",
+    "recentlyPlayed": "最近再生"
   },
   "home": {
     "title": "ホーム",

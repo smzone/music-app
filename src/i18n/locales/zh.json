@@ -31,7 +31,8 @@
     "defaultMsg": "给你发了一条消息"
   },
   "sidebar": {
-    "favorites": "收藏"
+    "favorites": "收藏",
+    "recentlyPlayed": "最近播放"
   },
   "home": {
     "title": "首页",

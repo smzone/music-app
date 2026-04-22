@@ -31,7 +31,8 @@
     "defaultMsg": "sent you a message"
   },
   "sidebar": {
-    "favorites": "Favorites"
+    "favorites": "Favorites",
+    "recentlyPlayed": "Recently Played"
   },
   "home": {
     "title": "Home",
