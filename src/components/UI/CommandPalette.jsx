@@ -1,10 +1,33 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Music, Film, MessageSquare, User, Home, ShoppingBag, Radio, Target, Gamepad2, Crown, Command } from 'lucide-react';
+import { Search, Music, Film, MessageSquare, User, Home, ShoppingBag, Radio, Target, Gamepad2, Crown, Command, Clock, X } from 'lucide-react';
 import useSongStore from '../../store/useSongStore';
 import usePlayerStore from '../../store/usePlayerStore';
 import useThemeStore from '../../store/useThemeStore';
 import { useTranslation } from 'react-i18next';
+
+// 搜索历史 localStorage 键
+const SEARCH_HISTORY_KEY = 'music-app-search-history';
+const MAX_HISTORY = 8;
+
+// 读取搜索历史
+const loadHistory = () => {
+  try {
+    const raw = localStorage.getItem(SEARCH_HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+// 写入搜索历史
+const saveHistory = (list) => {
+  try {
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(list));
+  } catch {
+    // ignore
+  }
+};
 
 // 快捷导航页面列表
 const NAV_PAGES = [
@@ -30,8 +53,35 @@ export default function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [selectedIdx, setSelectedIdx] = useState(0);
+  const [history, setHistory] = useState(() => loadHistory());
   const inputRef = useRef(null);
   const listRef = useRef(null);
+
+  // 追加到搜索历史（去重 + 限长）
+  const pushHistory = useCallback((term) => {
+    const trimmed = (term || '').trim();
+    if (!trimmed) return;
+    setHistory((prev) => {
+      const next = [trimmed, ...prev.filter((x) => x !== trimmed)].slice(0, MAX_HISTORY);
+      saveHistory(next);
+      return next;
+    });
+  }, []);
+
+  // 移除单条
+  const removeHistoryItem = useCallback((term) => {
+    setHistory((prev) => {
+      const next = prev.filter((x) => x !== term);
+      saveHistory(next);
+      return next;
+    });
+  }, []);
+
+  // 清空全部
+  const clearHistory = useCallback(() => {
+    saveHistory([]);
+    setHistory([]);
+  }, []);
 
   // 打开/关闭快捷键
   useEffect(() => {
@@ -59,10 +109,17 @@ export default function CommandPalette() {
     }
   }, [open]);
 
-  // 搜索结果 — 页面 + 歌曲
+  // 搜索结果 — 历史 + 页面 + 歌曲
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     const items = [];
+
+    // 搜索历史：只有在 query 为空时显示
+    if (!q && history.length > 0) {
+      history.slice(0, MAX_HISTORY).forEach((term) => {
+        items.push({ type: 'history', id: `history-${term}`, icon: Clock, label: term, desc: t('commandPalette.historyHint') || '最近搜索', term });
+      });
+    }
 
     // 搜索页面
     const matchedPages = NAV_PAGES.filter((p) => {
@@ -87,7 +144,7 @@ export default function CommandPalette() {
     }
 
     return items;
-  }, [query, songs, t]);
+  }, [query, songs, t, history]);
 
   // 选中项变化时滚动
   useEffect(() => {
@@ -96,13 +153,19 @@ export default function CommandPalette() {
 
   // 执行选中项操作
   const executeItem = useCallback((item) => {
+    // 命中结果时，若用户有输入 query，记录到历史
+    if (query.trim()) pushHistory(query);
     setOpen(false);
     if (item.type === 'page') {
       navigate(item.path);
     } else if (item.type === 'song') {
       playSong(item.song);
+    } else if (item.type === 'history') {
+      // 点击历史条目 → 把它填回输入框继续搜索
+      setQuery(item.term);
+      setTimeout(() => inputRef.current?.focus(), 30);
     }
-  }, [navigate, playSong]);
+  }, [navigate, playSong, query, pushHistory]);
 
   // 键盘导航
   const handleKeyDown = (e) => {
@@ -174,19 +237,32 @@ export default function CommandPalette() {
               </div>
             )}
 
+            {/* 历史区标题 + 清空按钮 */}
+            {!query && history.length > 0 && (
+              <div className="flex items-center justify-between px-3 py-1.5 mb-0.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-text-muted">{t('commandPalette.historyTitle') || '最近搜索'}</span>
+                <button
+                  onClick={clearHistory}
+                  className="text-[11px] text-text-muted hover:text-red-400 transition-colors"
+                >
+                  {t('commandPalette.clearHistory') || '清空'}
+                </button>
+              </div>
+            )}
+
             {results.map((item, idx) => {
               const Icon = item.icon;
               const isActive = idx === selectedIdx;
               return (
-                <button
+                <div
                   key={item.id}
-                  onClick={() => executeItem(item)}
-                  onMouseEnter={() => setSelectedIdx(idx)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
+                  className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors cursor-pointer ${
                     isActive
                       ? isLight ? 'bg-black/[0.04]' : 'bg-white/[0.06]'
                       : 'hover:bg-white/[0.03]'
                   }`}
+                  onClick={() => executeItem(item)}
+                  onMouseEnter={() => setSelectedIdx(idx)}
                 >
                   {/* 图标/封面 */}
                   {item.cover ? (
@@ -195,7 +271,10 @@ export default function CommandPalette() {
                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
                       isLight ? 'bg-primary/10' : 'bg-white/[0.06]'
                     }`}>
-                      <Icon size={16} className={item.type === 'page' ? 'text-primary' : 'text-text-muted'} />
+                      <Icon size={16} className={
+                        item.type === 'page' ? 'text-primary' :
+                        item.type === 'history' ? 'text-text-muted' : 'text-text-muted'
+                      } />
                     </div>
                   )}
                   {/* 文字 */}
@@ -203,15 +282,30 @@ export default function CommandPalette() {
                     <p className={`text-sm font-medium truncate ${isLight ? 'text-gray-900' : 'text-white'}`}>{item.label}</p>
                     <p className="text-xs text-text-muted truncate">{item.desc}</p>
                   </div>
+                  {/* 历史条目：显示单独删除按钮，避免事件冒泡 */}
+                  {item.type === 'history' && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); removeHistoryItem(item.term); }}
+                      className={`shrink-0 w-6 h-6 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all ${
+                        isLight ? 'hover:bg-black/[0.08] text-gray-500 hover:text-red-500' : 'hover:bg-white/[0.08] text-text-muted hover:text-red-400'
+                      }`}
+                      aria-label="remove"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
                   {/* 类型标签 */}
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0 ${
                     item.type === 'song'
                       ? 'bg-primary/10 text-primary'
-                      : isLight ? 'bg-black/[0.04] text-gray-500' : 'bg-white/[0.06] text-text-muted'
+                      : item.type === 'history'
+                        ? isLight ? 'bg-black/[0.04] text-gray-400' : 'bg-white/[0.04] text-text-muted'
+                        : isLight ? 'bg-black/[0.04] text-gray-500' : 'bg-white/[0.06] text-text-muted'
                   }`}>
-                    {item.type === 'song' ? '♫' : '→'}
+                    {item.type === 'song' ? '♫' : item.type === 'history' ? '↺' : '→'}
                   </span>
-                </button>
+                </div>
               );
             })}
           </div>

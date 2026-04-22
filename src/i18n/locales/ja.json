@@ -1048,6 +1048,9 @@
     "placeholder": "曲やページを検索...",
     "noResults": "該当する結果が見つかりません",
     "navigate": "移動",
+    "historyTitle": "最近の検索",
+    "historyHint": "クリックして再検索",
+    "clearHistory": "クリア",
     "select": "選択"
   },
   "network": {

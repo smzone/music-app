@@ -1048,6 +1048,9 @@
     "placeholder": "노래, 페이지 검색...",
     "noResults": "일치하는 결과가 없습니다",
     "navigate": "이동",
+    "historyTitle": "최근 검색",
+    "historyHint": "클릭하여 다시 검색",
+    "clearHistory": "지우기",
     "select": "선택"
   },
   "network": {

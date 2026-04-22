@@ -1048,6 +1048,9 @@
     "placeholder": "Search songs, pages...",
     "noResults": "No matching results found",
     "navigate": "Navigate",
+    "historyTitle": "Recent Searches",
+    "historyHint": "Click to search again",
+    "clearHistory": "Clear",
     "select": "Select"
   },
   "network": {

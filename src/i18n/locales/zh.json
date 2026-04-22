@@ -1048,7 +1048,10 @@
     "placeholder": "搜索歌曲、页面...",
     "noResults": "没有找到匹配结果",
     "navigate": "导航",
-    "select": "选择"
+    "select": "选择",
+    "historyTitle": "最近搜索",
+    "historyHint": "点击重新搜索",
+    "clearHistory": "清空"
   },
   "network": {
     "offline": "网络连接已断开，部分功能可能不可用",
