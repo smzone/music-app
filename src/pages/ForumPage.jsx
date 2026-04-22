@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { forumCategories, initialPosts as dataInitialPosts, postTags, sortOptions, formatTime, formatNum, getLevelStyle } from '../data/forum';
 import { useTranslation } from 'react-i18next';
+import LazyImage from '../components/UI/LazyImage';
 
 // 富文本发帖弹窗 — 支持图片/视频/标签
 function NewPostModal({ onClose, onSubmit, t }) {
@@ -102,7 +103,7 @@ function NewPostModal({ onClose, onSubmit, t }) {
               <div className="grid grid-cols-3 gap-2">
                 {mediaFiles.map((m) => (
                   <div key={m.id} className="relative aspect-video rounded-lg overflow-hidden group">
-                    <img src={m.url} alt="" className="w-full h-full object-cover" />
+                    <LazyImage src={m.url} alt="" wrapperClassName="w-full h-full absolute inset-0" className="w-full h-full object-cover" />
                     {m.type === 'video' && <div className="absolute inset-0 flex items-center justify-center"><Film size={20} className="text-white/80" /></div>}
                     <button type="button" onClick={() => removeMedia(m.id)}
                       className="absolute top-1 right-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -350,7 +351,7 @@ export default function ForumPage() {
                         <div className="flex gap-2 mt-2.5">
                           {post.media.slice(0, 3).map((m, i) => (
                             <div key={i} className="relative w-20 h-14 rounded-lg overflow-hidden bg-white/[0.05]">
-                              <img src={m.thumbnail || m.url} alt="" className="w-full h-full object-cover" />
+                              <LazyImage src={m.thumbnail || m.url} alt="" wrapperClassName="w-full h-full absolute inset-0" className="w-full h-full object-cover" />
                               {m.type === 'video' && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                                   <Film size={14} className="text-white" />

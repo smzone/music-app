@@ -4,6 +4,7 @@ import useAuthStore from '../store/useAuthStore';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
+import LazyImage from '../components/UI/LazyImage';
 
 // 模拟视频数据 — 抖音风格竖版封面（9:16比例）
 const videosData = [
@@ -137,7 +138,7 @@ function VideoPlayerModal({ video, videos, onClose, onLike, onSwitch, t }) {
 
         {/* 视频画面 — 带切换动画 */}
         <div className={`relative w-full aspect-[9/16] max-h-[90vh] bg-black rounded-2xl overflow-hidden mx-auto transition-all duration-300 ease-out ${animClass}`}>
-          <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover" />
+          <LazyImage src={video.thumbnail} alt={video.title} wrapperClassName="w-full h-full absolute inset-0" className="w-full h-full object-cover" />
 
           {/* 播放按钮 */}
           <div className="absolute inset-0 flex items-center justify-center">
@@ -237,7 +238,8 @@ export default function VideosPage() {
   const VideoCard = ({ video, tall }) => (
     <div className="group cursor-pointer mb-3.5" onClick={() => setPlayingVideo(video)}>
       <div className={`relative ${tall ? 'aspect-[9/14]' : 'aspect-[9/12]'} rounded-2xl overflow-hidden border border-white/[0.06] hover:border-primary/20 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.3)]`}>
-        <img src={video.thumbnail} alt={video.title}
+        <LazyImage src={video.thumbnail} alt={video.title}
+          wrapperClassName="w-full h-full absolute inset-0"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
         {/* 渐变遮罩 */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
@@ -317,7 +319,7 @@ export default function VideosPage() {
           <div className="grid grid-cols-2 gap-3">
             {videosData.sort((a, b) => b.views - a.views).slice(0, 2).map((video) => (
               <div key={video.id} className="group cursor-pointer relative aspect-[16/10] rounded-2xl overflow-hidden border border-white/[0.06] hover:border-primary/20 transition-all duration-500" onClick={() => setPlayingVideo(video)}>
-                <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <LazyImage src={video.thumbnail} alt={video.title} wrapperClassName="w-full h-full absolute inset-0" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 {video.isPremium && (
                   <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[10px] font-bold rounded-md"><Crown size={9} /> VIP</div>

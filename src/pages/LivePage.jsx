@@ -4,6 +4,7 @@ import useAuthStore from '../store/useAuthStore';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
+import LazyImage from '../components/UI/LazyImage';
 
 // 模拟聊天消息
 const initialMessages = [
@@ -92,8 +93,10 @@ export default function LivePage() {
         <div className="flex-1 min-w-0">
           {/* 直播画面 */}
           <div className="relative aspect-video bg-black rounded-2xl overflow-hidden group">
-            <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&h=675&fit=crop"
-              alt="直播画面" className="w-full h-full object-cover" />
+            <LazyImage src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&h=675&fit=crop"
+              alt="直播画面"
+              wrapperClassName="w-full h-full absolute inset-0"
+              className="w-full h-full object-cover" />
             {/* 顶部渐变 */}
             <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/60 to-transparent" />
             {/* 底部渐变 */}
@@ -172,7 +175,7 @@ export default function LivePage() {
               {upcomingStreams.map((stream) => (
                 <div key={stream.id} className="rounded-2xl overflow-hidden border border-white/[0.06] bg-white/[0.02] hover:border-primary/20 transition-all duration-500 hover:-translate-y-1 group">
                   <div className="aspect-video overflow-hidden relative">
-                    <img src={stream.image} alt={stream.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <LazyImage src={stream.image} alt={stream.title} wrapperClassName="w-full h-full absolute inset-0" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <span className="absolute top-2 left-2 px-2 py-0.5 bg-primary text-black text-[10px] font-bold rounded-md">{t(stream.tagKey)}</span>
                     <div className="absolute bottom-2 left-2 right-2">

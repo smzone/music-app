@@ -4,6 +4,7 @@ import { Search, Download, Star, Eye, Heart, Filter, ChevronDown, Package } from
 import { initialReleases, releaseCategories, releaseSortOptions, platformTags } from '../data/releases';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
+import LazyImage from '../components/UI/LazyImage';
 
 // 评分星星组件
 function RatingStars({ rating, count }) {
@@ -40,7 +41,8 @@ function ReleaseCard({ item, t }) {
       className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden hover:border-white/[0.12] hover:-translate-y-1 transition-all duration-300">
       {/* 封面图 */}
       <div className="relative aspect-video overflow-hidden bg-surface-light">
-        <img src={item.screenshots[0]} alt={item.title}
+        <LazyImage src={item.screenshots[0]} alt={item.title}
+          wrapperClassName="w-full h-full absolute inset-0"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         {/* 顶部角标 */}
         <div className="absolute top-3 left-3 flex items-center gap-1.5">
