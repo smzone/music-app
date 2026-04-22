@@ -188,7 +188,7 @@ export default function CheckoutPage() {
     setPendingOrder(order);
   };
 
-  // 支付成功
+  // 支付成功 → 跳转独立成功页
   const handlePaid = (channel) => {
     if (!pendingOrder) return;
     markPaid(pendingOrder.id, channel);
@@ -196,7 +196,7 @@ export default function CheckoutPage() {
     const orderId = pendingOrder.id;
     setPendingOrder(null);
     toast.success(t('checkout.paySuccess'));
-    navigate(`/orders?id=${orderId}&paid=1`, { replace: true });
+    navigate(`/checkout/success?id=${orderId}`, { replace: true });
   };
 
   // 关闭支付弹窗 → 取消订单

@@ -3,8 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Package, ChevronLeft, Clock, CreditCard, ShoppingBag, Check, Truck,
   ChevronDown, ChevronUp, X as XIcon, RefreshCw, Copy, MapPin, PackageCheck,
-  Ban, AlertCircle, Sparkles,
+  Ban, AlertCircle, Sparkles, Search, FileText, ChevronRight,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import useCartStore from '../store/useCartStore';
 import useOrderStore from '../store/useOrderStore';
 import useThemeStore from '../store/useThemeStore';
@@ -84,8 +85,22 @@ function TraceTimeline({ trace, isLight }) {
   );
 }
 
+// 高亮匹配的搜索关键词
+function highlight(text, q) {
+  if (!q) return text;
+  const idx = String(text).toLowerCase().indexOf(q.toLowerCase());
+  if (idx < 0) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="bg-primary/30 text-primary rounded px-0.5">{text.slice(idx, idx + q.length)}</mark>
+      {text.slice(idx + q.length)}
+    </>
+  );
+}
+
 // 单个订单卡片
-function OrderCard({ order, t, isLight, onPay, onCancel, onConfirm, onBuyAgain }) {
+function OrderCard({ order, t, isLight, onPay, onCancel, onConfirm, onBuyAgain, searchQ = '' }) {
   const [expanded, setExpanded] = useState(false);
   const st = statusMap[order.status] || statusMap.paid;
   const StatusIcon = st.icon;
@@ -105,7 +120,9 @@ function OrderCard({ order, t, isLight, onPay, onCancel, onConfirm, onBuyAgain }
       <div className={`flex flex-wrap items-center gap-3 px-5 py-3.5 border-b ${isLight ? 'border-black/[0.04] bg-gray-50/50' : 'border-white/[0.04] bg-white/[0.01]'}`}>
         <div className="flex items-center gap-1.5">
           <span className="text-[11px] text-text-muted">{t('orders.orderId') || '订单号'}:</span>
-          <span className="text-xs text-text-primary font-mono">{order.id}</span>
+          <Link to={`/orders/${order.id}`} className="text-xs text-text-primary font-mono hover:text-primary transition-colors">
+            {highlight(order.id, searchQ)}
+          </Link>
           <button onClick={copyOrderId} className="w-6 h-6 rounded hover:bg-white/[0.06] flex items-center justify-center text-text-muted hover:text-primary" title={t('orders.copyId') || '复制'}>
             <Copy size={11} />
           </button>
@@ -129,18 +146,18 @@ function OrderCard({ order, t, isLight, onPay, onCancel, onConfirm, onBuyAgain }
       )}
 
       {/* 商品列表 */}
-      <div className={`divide-y ${isLight ? 'divide-black/[0.04]' : 'divide-white/[0.03]'}`}>
+      <Link to={`/orders/${order.id}`} className={`block divide-y ${isLight ? 'divide-black/[0.04]' : 'divide-white/[0.03]'}`}>
         {order.items.map((item) => (
-          <div key={item.id} className="flex items-center gap-4 px-5 py-3">
+          <div key={item.id} className="flex items-center gap-4 px-5 py-3 hover:bg-white/[0.01] transition-colors">
             <img src={item.image} alt={item.name} className="w-14 h-14 rounded-xl object-cover shrink-0 border border-white/[0.06]" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-text-primary truncate">{item.name}</p>
+              <p className="text-sm font-medium text-text-primary truncate">{highlight(item.name, searchQ)}</p>
               <p className="text-xs text-text-muted">x{item.qty} · ¥{item.price}</p>
             </div>
             <span className="text-sm font-semibold text-text-primary shrink-0">¥{(item.price * item.qty).toFixed(2)}</span>
           </div>
         ))}
-      </div>
+      </Link>
 
       {/* 底部信息 + 操作 */}
       <div className={`flex flex-wrap items-center gap-3 px-5 py-3.5 border-t ${isLight ? 'border-black/[0.04] bg-gray-50/50' : 'border-white/[0.04] bg-white/[0.01]'}`}>
@@ -170,6 +187,11 @@ function OrderCard({ order, t, isLight, onPay, onCancel, onConfirm, onBuyAgain }
           {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           {expanded ? (t('orders.collapse') || '收起') : (t('orders.viewTrace') || '查看物流')}
         </button>
+
+        <Link to={`/orders/${order.id}`}
+          className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-full border transition-colors ${isLight ? 'border-black/[0.08] text-gray-600 hover:border-primary hover:text-primary' : 'border-white/[0.08] text-text-secondary hover:border-primary hover:text-primary'}`}>
+          <FileText size={12} /> {t('orders.detail') || '详情'} <ChevronRight size={10} />
+        </Link>
 
         <div className="flex gap-2 ml-auto">
           {canBuyAgain && (
@@ -233,6 +255,7 @@ export default function OrdersPage() {
   const { orders, cancelOrder, confirmReceive, markPaid, sweepExpired, getOrder } = useOrderStore();
 
   const [filter, setFilter] = useState('all');
+  const [searchQ, setSearchQ] = useState('');
   const [payingOrder, setPayingOrder] = useState(null);
 
   // 清理过期订单
@@ -254,13 +277,23 @@ export default function OrdersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 筛选
+  // 筛选 + 搜索（订单号 / 商品名 / 快递单号）
   const filtered = useMemo(() => {
-    if (filter === 'all') return orders;
-    if (filter === 'shipping') return orders.filter((o) => ['shipping', 'delivered'].includes(o.status));
-    if (filter === 'cancelled') return orders.filter((o) => ['cancelled', 'expired'].includes(o.status));
-    return orders.filter((o) => o.status === filter);
-  }, [orders, filter]);
+    let list = orders;
+    if (filter === 'shipping') list = list.filter((o) => ['shipping', 'delivered'].includes(o.status));
+    else if (filter === 'cancelled') list = list.filter((o) => ['cancelled', 'expired'].includes(o.status));
+    else if (filter !== 'all') list = list.filter((o) => o.status === filter);
+
+    const q = searchQ.trim().toLowerCase();
+    if (q) {
+      list = list.filter((o) =>
+        o.id.toLowerCase().includes(q) ||
+        (o.trackingNo && o.trackingNo.toLowerCase().includes(q)) ||
+        o.items.some((it) => it.name.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [orders, filter, searchQ]);
 
   // 各状态数量（用于 tab 角标）
   const counts = useMemo(() => ({
@@ -345,6 +378,22 @@ export default function OrdersPage() {
         )}
       </div>
 
+      {/* 搜索框 */}
+      <div className={`relative mb-4 rounded-xl border transition-colors ${isLight ? 'border-black/[0.08] bg-white focus-within:border-primary' : 'border-white/[0.08] bg-white/[0.02] focus-within:border-primary'}`}>
+        <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+        <input
+          value={searchQ}
+          onChange={(e) => setSearchQ(e.target.value)}
+          placeholder={t('orders.searchPH') || '搜索订单号、商品名、快递单号'}
+          className={`w-full pl-10 pr-10 py-2.5 bg-transparent outline-none text-sm ${isLight ? 'text-gray-900 placeholder:text-gray-400' : 'text-white placeholder:text-text-muted'}`}
+        />
+        {searchQ && (
+          <button onClick={() => setSearchQ('')} className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full hover:bg-white/[0.06] flex items-center justify-center text-text-muted hover:text-text-primary">
+            <XIcon size={12} />
+          </button>
+        )}
+      </div>
+
       {/* 筛选 tabs */}
       <div className={`flex gap-1 overflow-x-auto mb-6 p-1 rounded-xl scrollbar-none ${isLight ? 'bg-black/[0.04]' : 'bg-white/[0.04]'}`}>
         {FILTERS.map((f) => {
@@ -385,6 +434,7 @@ export default function OrdersPage() {
               order={order}
               t={t}
               isLight={isLight}
+              searchQ={searchQ}
               onPay={handlePay}
               onCancel={handleCancel}
               onConfirm={handleConfirm}

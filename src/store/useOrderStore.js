@@ -29,6 +29,10 @@ export const FREE_SHIPPING_THRESHOLD = 99;
 export const SHIPPING_FEE = 12;
 // 订单支付超时（毫秒）
 export const ORDER_EXPIRE_MS = 15 * 60 * 1000;
+// 模拟：支付后多久自动发货（演示用 20 秒）
+export const AUTO_SHIP_MS = 20 * 1000;
+// 模拟：发货后多久自动送达（演示用 30 秒）
+export const AUTO_DELIVER_MS = 30 * 1000;
 
 // 生成 22 位订单号：yyyymmddhhmmss + 6 位随机
 const genOrderId = () => {
@@ -229,6 +233,52 @@ const useOrderStore = create(persist((set, get) => ({
         }
         return o;
       }),
+    }));
+  },
+
+  // 自动推进发货/送达状态（演示用，App 根部每 5s 轮询）
+  autoAdvance: () => {
+    const now = Date.now();
+    set((s) => ({
+      orders: s.orders.map((o) => {
+        // paid 超过 AUTO_SHIP_MS → shipping
+        if (o.status === 'paid' && o.paidAt && now - new Date(o.paidAt).getTime() > AUTO_SHIP_MS) {
+          const trackingNo = 'SF' + Math.floor(Math.random() * 1e10);
+          const shippedAt = new Date().toISOString();
+          return {
+            ...o,
+            status: 'shipping',
+            shippedAt,
+            trackingNo,
+            trace: [...o.trace, { time: shippedAt, title: '已发货', desc: `快递单号：${trackingNo}` }],
+          };
+        }
+        // shipping 超过 AUTO_DELIVER_MS → delivered
+        if (o.status === 'shipping' && o.shippedAt && now - new Date(o.shippedAt).getTime() > AUTO_DELIVER_MS) {
+          const deliveredAt = new Date().toISOString();
+          return {
+            ...o,
+            status: 'delivered',
+            deliveredAt,
+            trace: [...o.trace, { time: deliveredAt, title: '已送达', desc: '快递已投递至指定地址，请注意查收' }],
+          };
+        }
+        return o;
+      }),
+    }));
+  },
+
+  // 申请退款（paid/shipping/delivered/completed 可申请）
+  requestRefund: (orderId, reason) => {
+    const now = new Date().toISOString();
+    set((s) => ({
+      orders: s.orders.map((o) => ['paid', 'shipping', 'delivered', 'completed'].includes(o.status) && o.id === orderId ? {
+        ...o,
+        status: 'refunded',
+        refundedAt: now,
+        refundReason: reason || '用户申请退款',
+        trace: [...o.trace, { time: now, title: '退款成功', desc: `原因：${reason || '用户申请退款'}` }],
+      } : o),
     }));
   },
 

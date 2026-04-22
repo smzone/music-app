@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import useAuthStore, { hasRole, ROLES } from './store/useAuthStore';
 import useThemeStore from './store/useThemeStore';
+import useOrderStore from './store/useOrderStore';
 import SongDetail from './components/Song/SongDetail';
 import ScrollToTop from './components/Layout/ScrollToTop';
 import PageLoader from './components/Layout/PageLoader';
@@ -30,6 +31,8 @@ const ReleaseDetailPage = lazy(() => import('./pages/ReleaseDetailPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const OrdersPage = lazy(() => import('./pages/OrdersPage'));
+const OrderDetailPage = lazy(() => import('./pages/OrderDetailPage'));
+const CheckoutSuccessPage = lazy(() => import('./pages/CheckoutSuccessPage'));
 const HistoryPage = lazy(() => import('./pages/HistoryPage'));
 
 // 管理后台 — 按需加载
@@ -66,6 +69,18 @@ function App() {
   const initTheme = useThemeStore((s) => s.initTheme);
   const theme = useThemeStore((s) => s.theme);
   useEffect(() => { initTheme(); }, [initTheme]);
+
+  // 全局订单状态机轮询器：每 5 秒检查一次
+  // - 过期的 pending 订单 → expired
+  // - paid 订单超过 20s → shipping（模拟商家自动发货）
+  // - shipping 订单超过 30s → delivered（模拟物流送达）
+  useEffect(() => {
+    const { sweepExpired, autoAdvance } = useOrderStore.getState();
+    const tick = () => { sweepExpired(); autoAdvance(); };
+    tick(); // 立即执行一次
+    const timer = setInterval(tick, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Toaster 随主题变化
   const toastStyle = theme === 'light'
@@ -104,6 +119,8 @@ function App() {
             <Route path="/notifications" element={<AuthGuard><NotificationsPage /></AuthGuard>} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/orders" element={<AuthGuard><OrdersPage /></AuthGuard>} />
+            <Route path="/orders/:id" element={<AuthGuard><OrderDetailPage /></AuthGuard>} />
+            <Route path="/checkout/success" element={<AuthGuard><CheckoutSuccessPage /></AuthGuard>} />
             <Route path="/history" element={<HistoryPage />} />
           </Route>
 
