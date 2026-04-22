@@ -32,7 +32,22 @@
   },
   "sidebar": {
     "favorites": "收藏",
-    "recentlyPlayed": "最近播放"
+    "recentlyPlayed": "最近播放",
+    "viewAll": "全部"
+  },
+  "history": {
+    "title": "最近播放",
+    "subtitle": "共 {{count}} 首",
+    "back": "返回",
+    "clearAll": "清空历史",
+    "confirmClear": "确定要清空所有播放历史吗？",
+    "empty": "暂无播放历史",
+    "emptyDesc": "开始听音乐，你的最近播放记录将会显示在这里",
+    "goMusic": "去听音乐",
+    "justNow": "刚刚",
+    "minAgo": "分钟前",
+    "hrAgo": "小时前",
+    "dayAgo": "天前"
   },
   "home": {
     "title": "首页",

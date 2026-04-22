@@ -32,7 +32,22 @@
   },
   "sidebar": {
     "favorites": "お気に入り",
-    "recentlyPlayed": "最近再生"
+    "recentlyPlayed": "最近再生",
+    "viewAll": "すべて"
+  },
+  "history": {
+    "title": "最近再生",
+    "subtitle": "{{count}} 曲",
+    "back": "戻る",
+    "clearAll": "履歴をクリア",
+    "confirmClear": "すべての再生履歴をクリアしますか？",
+    "empty": "再生履歴はまだありません",
+    "emptyDesc": "音楽を聞き始めると、最近の再生がここに表示されます",
+    "goMusic": "音楽を見つける",
+    "justNow": "たった今",
+    "minAgo": "分前",
+    "hrAgo": "時間前",
+    "dayAgo": "日前"
   },
   "home": {
     "title": "ホーム",

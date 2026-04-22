@@ -30,6 +30,7 @@ const ReleaseDetailPage = lazy(() => import('./pages/ReleaseDetailPage'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const OrdersPage = lazy(() => import('./pages/OrdersPage'));
+const HistoryPage = lazy(() => import('./pages/HistoryPage'));
 
 // 管理后台 — 按需加载
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -103,6 +104,7 @@ function App() {
             <Route path="/notifications" element={<AuthGuard><NotificationsPage /></AuthGuard>} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/orders" element={<AuthGuard><OrdersPage /></AuthGuard>} />
+            <Route path="/history" element={<HistoryPage />} />
           </Route>
 
           {/* 独立页面（无顶部导航） */}

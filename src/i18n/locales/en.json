@@ -32,7 +32,22 @@
   },
   "sidebar": {
     "favorites": "Favorites",
-    "recentlyPlayed": "Recently Played"
+    "recentlyPlayed": "Recently Played",
+    "viewAll": "View all"
+  },
+  "history": {
+    "title": "Recently Played",
+    "subtitle": "{{count}} tracks",
+    "back": "Back",
+    "clearAll": "Clear history",
+    "confirmClear": "Clear all play history?",
+    "empty": "No play history yet",
+    "emptyDesc": "Start listening — your recently played tracks will appear here",
+    "goMusic": "Discover music",
+    "justNow": "Just now",
+    "minAgo": "min ago",
+    "hrAgo": "h ago",
+    "dayAgo": "d ago"
   },
   "home": {
     "title": "Home",

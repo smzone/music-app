@@ -32,7 +32,22 @@
   },
   "sidebar": {
     "favorites": "즐겨찾기",
-    "recentlyPlayed": "최근 재생"
+    "recentlyPlayed": "최근 재생",
+    "viewAll": "전체"
+  },
+  "history": {
+    "title": "최근 재생",
+    "subtitle": "{{count}}곡",
+    "back": "뒤로",
+    "clearAll": "기록 지우기",
+    "confirmClear": "모든 재생 기록을 지우시겠습니까?",
+    "empty": "재생 기록이 없습니다",
+    "emptyDesc": "음악을 듣기 시작하면 최근 재생이 여기에 표시됩니다",
+    "goMusic": "음악 보러가기",
+    "justNow": "방금",
+    "minAgo": "분 전",
+    "hrAgo": "시간 전",
+    "dayAgo": "일 전"
   },
   "home": {
     "title": "홈",

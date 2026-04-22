@@ -1,4 +1,5 @@
 import { Home, Search, Library, Heart, X, Bell, Play, Pause, SkipForward, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import useSongStore from '../../store/useSongStore';
 import useAuthStore from '../../store/useAuthStore';
 import useNotificationStore from '../../store/useNotificationStore';
@@ -105,6 +106,13 @@ export default function Sidebar({ isOpen, onClose }) {
                 <Clock size={12} className="text-text-muted" />
                 <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider">{t('sidebar.recentlyPlayed')}</span>
               </div>
+              <Link
+                to="/history"
+                onClick={onClose}
+                className="text-[10px] text-text-muted hover:text-primary transition-colors"
+              >
+                {t('sidebar.viewAll') || '全部'}
+              </Link>
             </div>
             <div className="space-y-0.5 max-h-[180px] overflow-y-auto scrollbar-none">
               {recentHistory.slice(0, 5).map((hSong) => {
