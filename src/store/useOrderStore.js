@@ -285,6 +285,70 @@ const useOrderStore = create(persist((set, get) => ({
   // 获取单个订单
   getOrder: (orderId) => get().orders.find((o) => o.id === orderId),
 
+  // 添加/更新商品评价（completed 订单可评价）
+  addReview: (orderId, productId, { rating, content }) => {
+    const now = new Date().toISOString();
+    set((s) => ({
+      orders: s.orders.map((o) => o.id === orderId ? {
+        ...o,
+        reviews: {
+          ...(o.reviews || {}),
+          [productId]: { rating, content, createdAt: now },
+        },
+      } : o),
+    }));
+  },
+
+  // 批量评价（一次性提交订单下所有商品）
+  submitOrderReviews: (orderId, reviewsMap) => {
+    const now = new Date().toISOString();
+    const reviews = Object.fromEntries(
+      Object.entries(reviewsMap).map(([pid, r]) => [pid, { ...r, createdAt: now }])
+    );
+    set((s) => ({
+      orders: s.orders.map((o) => o.id === orderId ? {
+        ...o,
+        reviews: { ...(o.reviews || {}), ...reviews },
+        reviewedAt: now,
+        trace: [...o.trace, { time: now, title: '商品已评价', desc: `提交 ${Object.keys(reviews).length} 条评价` }],
+      } : o),
+    }));
+  },
+
+  // 管理员：手动发货（跳过自动发货计时）
+  adminShipOrder: (orderId, trackingNo) => {
+    const now = new Date().toISOString();
+    const tn = trackingNo || 'SF' + Math.floor(Math.random() * 1e10);
+    set((s) => ({
+      orders: s.orders.map((o) => o.status === 'paid' && o.id === orderId ? {
+        ...o,
+        status: 'shipping',
+        shippedAt: now,
+        trackingNo: tn,
+        trace: [...o.trace, { time: now, title: '已发货（管理员）', desc: `快递单号：${tn}` }],
+      } : o),
+    }));
+  },
+
+  // 获取所有订单的评价汇总（按商品ID聚合）：用于 ShopPage 商品卡片显示评分
+  getReviewsByProduct: () => {
+    const map = {};
+    get().orders.forEach((o) => {
+      if (!o.reviews) return;
+      Object.entries(o.reviews).forEach(([pid, r]) => {
+        if (!map[pid]) map[pid] = [];
+        map[pid].push(r);
+      });
+    });
+    // 计算平均分与数量
+    const result = {};
+    Object.entries(map).forEach(([pid, list]) => {
+      const avg = list.reduce((s, r) => s + r.rating, 0) / list.length;
+      result[pid] = { avg, count: list.length, list };
+    });
+    return result;
+  },
+
   // 已支付订单总金额统计
   getTotalSpent: () => get().orders
     .filter((o) => ['paid', 'shipping', 'delivered', 'completed'].includes(o.status))

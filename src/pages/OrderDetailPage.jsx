@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Package, ChevronLeft, Clock, CreditCard, Check, Truck, X as XIcon, RefreshCw, Copy,
-  MapPin, PackageCheck, Ban, AlertCircle, ShieldCheck, FileText,
+  MapPin, PackageCheck, Ban, AlertCircle, ShieldCheck, FileText, Star, MessageSquare,
 } from 'lucide-react';
 import useOrderStore from '../store/useOrderStore';
 import useCartStore from '../store/useCartStore';
 import useThemeStore from '../store/useThemeStore';
 import PaymentModal from '../components/Payment/PaymentModal';
+import ReviewModal from '../components/Payment/ReviewModal';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
@@ -53,7 +54,7 @@ export default function OrderDetailPage() {
   const theme = useThemeStore((s) => s.theme);
   const isLight = theme === 'light';
 
-  const { markPaid, cancelOrder, confirmReceive, requestRefund } = useOrderStore();
+  const { markPaid, cancelOrder, confirmReceive, requestRefund, submitOrderReviews } = useOrderStore();
   const { addToCart } = useCartStore();
   // 订阅 orders 以便子状态变化时重渲染
   const orders = useOrderStore((s) => s.orders);
@@ -64,6 +65,7 @@ export default function OrderDetailPage() {
   const [payingOrder, setPayingOrder] = useState(null);
   const [refundModal, setRefundModal] = useState(false);
   const [refundReason, setRefundReason] = useState('');
+  const [reviewModal, setReviewModal] = useState(false);
 
   const countdownMs = useCountdown(order?.status === 'pending' ? order?.expiresAt : null);
 
@@ -92,6 +94,10 @@ export default function OrderDetailPage() {
   const canConfirm = ['shipping', 'delivered'].includes(order.status);
   const canRefund = ['paid', 'shipping', 'delivered', 'completed'].includes(order.status);
   const canBuyAgain = true;
+  // 可评价：completed 订单，且未全部评价完
+  const reviewedCount = Object.keys(order.reviews || {}).length;
+  const canReview = order.status === 'completed' && reviewedCount < order.items.length;
+  const alreadyReviewed = order.status === 'completed' && reviewedCount >= order.items.length && reviewedCount > 0;
 
   // 当前激活步骤 index
   const activeStep = ['refunded', 'cancelled', 'expired'].includes(order.status)
@@ -130,6 +136,13 @@ export default function OrderDetailPage() {
     setRefundModal(false);
     setRefundReason('');
     toast.success(t('orderDetail.refundOk') || '退款申请已提交');
+  };
+
+  // 提交评价
+  const handleSubmitReviews = (reviewsMap) => {
+    submitOrderReviews(order.id, reviewsMap);
+    setReviewModal(false);
+    toast.success(t('review.submitOk') || '评价已提交，感谢您的反馈！');
   };
 
   const handlePaid = (channel) => {
@@ -396,6 +409,20 @@ export default function OrderDetailPage() {
               </button>
             )}
 
+            {canReview && (
+              <button onClick={() => setReviewModal(true)}
+                className="w-full py-2.5 bg-yellow-500/15 text-yellow-400 rounded-full text-sm font-bold hover:bg-yellow-500/25 flex items-center justify-center gap-2">
+                <Star size={14} fill="currentColor" /> {t('review.cta') || '评价商品'} ({reviewedCount}/{order.items.length})
+              </button>
+            )}
+
+            {alreadyReviewed && (
+              <button onClick={() => setReviewModal(true)}
+                className={`w-full py-2.5 rounded-full text-sm font-medium border flex items-center justify-center gap-2 ${isLight ? 'border-black/[0.08] text-gray-700 hover:border-yellow-400 hover:text-yellow-400' : 'border-white/[0.08] text-text-secondary hover:border-yellow-400 hover:text-yellow-400'}`}>
+                <MessageSquare size={14} /> {t('review.viewEdit') || '查看/修改评价'}
+              </button>
+            )}
+
             {canBuyAgain && (
               <button onClick={handleBuyAgain}
                 className={`w-full py-2.5 rounded-full text-sm font-medium border flex items-center justify-center gap-2 ${isLight ? 'border-black/[0.08] text-gray-700 hover:border-primary hover:text-primary' : 'border-white/[0.08] text-text-secondary hover:border-primary hover:text-primary'}`}>
@@ -423,6 +450,11 @@ export default function OrderDetailPage() {
       {/* 支付弹窗 */}
       {payingOrder && (
         <PaymentModal order={payingOrder} onPaid={handlePaid} onClose={() => { setPayingOrder(null); toast(t('orders.payCancel'), { icon: '⚠️' }); }} />
+      )}
+
+      {/* 评价弹窗 */}
+      {reviewModal && (
+        <ReviewModal order={order} onSubmit={handleSubmitReviews} onClose={() => setReviewModal(false)} />
       )}
 
       {/* 退款弹窗 */}

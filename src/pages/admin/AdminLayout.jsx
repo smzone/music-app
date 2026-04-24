@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import {
-  LayoutDashboard, Music, User, ListMusic, Settings, LogOut, Menu, X, GripVertical, MessageSquare, Users, ExternalLink, Shield
+  LayoutDashboard, Music, User, ListMusic, Settings, LogOut, Menu, X, GripVertical, MessageSquare, Users, ExternalLink, Shield, Package
 } from 'lucide-react';
 import useAuthStore, { hasRole, ROLES, hasPermission, PERMISSIONS } from '../../store/useAuthStore';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ const adminNav = [
   { to: '/admin/profile', icon: User, labelKey: 'admin.nav.profile' },
   { to: '/admin/sections', icon: GripVertical, labelKey: 'admin.nav.sections', minRole: ROLES.ADMIN },
   { to: '/admin/playlists', icon: ListMusic, labelKey: 'admin.nav.playlists' },
+  { to: '/admin/orders', icon: Package, labelKey: 'admin.nav.orders' },
   { to: '/admin/settings', icon: Settings, labelKey: 'admin.nav.settings', permission: PERMISSIONS.MANAGE_SETTINGS },
 ];
 

@@ -45,6 +45,7 @@ const ProfileEditPage = lazy(() => import('./pages/admin/ProfileEditPage'));
 const SectionsPage = lazy(() => import('./pages/admin/SectionsPage'));
 const PlaylistsPage = lazy(() => import('./pages/admin/PlaylistsPage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
+const OrdersManagePage = lazy(() => import('./pages/admin/OrdersManagePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AccessDeniedPage = lazy(() => import('./pages/AccessDeniedPage'));
 
@@ -140,6 +141,7 @@ function App() {
             <Route path="profile" element={<ProfileEditPage />} />
             <Route path="sections" element={<RoleGuard minRole={ROLES.ADMIN}><SectionsPage /></RoleGuard>} />
             <Route path="playlists" element={<PlaylistsPage />} />
+            <Route path="orders" element={<OrdersManagePage />} />
             <Route path="settings" element={<RoleGuard minRole={ROLES.ADMIN}><SettingsPage /></RoleGuard>} />
           </Route>
 
