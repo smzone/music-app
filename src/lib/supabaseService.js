@@ -586,6 +586,118 @@ export async function fetchProductCategories() {
 }
 
 // ============================================================================
+// 优惠券 / 积分 / 签到 —— Rewards 系统
+// ============================================================================
+
+// 拉取可领取的优惠券（公开）
+export async function fetchCoupons() {
+  if (!isSupabaseConfigured) return [];
+  const nowIso = new Date().toISOString();
+  const { data, error } = await supabase
+    .from('coupons')
+    .select('*')
+    .eq('is_active', true)
+    .gte('end_at', nowIso)
+    .order('created_at', { ascending: false });
+  if (error) { console.error('获取优惠券失败:', error); return []; }
+  return data || [];
+}
+
+// 拉取我的优惠券
+export async function fetchMyCoupons(userId) {
+  if (!isSupabaseConfigured || !userId) return [];
+  const { data, error } = await supabase
+    .from('user_coupons')
+    .select('*, coupon:coupons(*)')
+    .eq('user_id', userId)
+    .order('claimed_at', { ascending: false });
+  if (error) { console.error('获取我的优惠券失败:', error); return []; }
+  return data || [];
+}
+
+// 领取优惠券
+export async function claimCoupon(userId, couponId) {
+  if (!isSupabaseConfigured) return { error: { message: 'Supabase 未配置' } };
+  const { data, error } = await supabase
+    .from('user_coupons')
+    .insert({ user_id: userId, coupon_id: couponId })
+    .select('*, coupon:coupons(*)')
+    .single();
+  return { data, error };
+}
+
+// 使用优惠券（标记 used + 关联 order）
+export async function markCouponUsed(userCouponId, orderId) {
+  if (!isSupabaseConfigured) return { error: { message: 'Supabase 未配置' } };
+  const { error } = await supabase
+    .from('user_coupons')
+    .update({ status: 'used', order_id: orderId, used_at: new Date().toISOString() })
+    .eq('id', userCouponId);
+  return { error };
+}
+
+// 拉取积分汇总
+export async function fetchUserPoints(userId) {
+  if (!isSupabaseConfigured || !userId) return null;
+  const { data, error } = await supabase
+    .from('user_points')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) { console.error('获取积分失败:', error); return null; }
+  return data;
+}
+
+// 拉取积分流水
+export async function fetchPointsLogs(userId, limit = 50) {
+  if (!isSupabaseConfigured || !userId) return [];
+  const { data, error } = await supabase
+    .from('points_logs')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) { console.error('获取积分流水失败:', error); return []; }
+  return data || [];
+}
+
+// 写入积分流水（正/负）
+export async function insertPointsLog(userId, delta, reason, description = '', refId = null) {
+  if (!isSupabaseConfigured) return { error: { message: 'Supabase 未配置' } };
+  const { data, error } = await supabase
+    .from('points_logs')
+    .insert({ user_id: userId, delta, reason, description, ref_id: refId })
+    .select()
+    .single();
+  return { data, error };
+}
+
+// 拉取签到记录（最近 N 天）
+export async function fetchCheckins(userId, daysBack = 45) {
+  if (!isSupabaseConfigured || !userId) return [];
+  const since = new Date(Date.now() - daysBack * 86400000).toISOString().slice(0, 10);
+  const { data, error } = await supabase
+    .from('checkins')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('checkin_date', since)
+    .order('checkin_date', { ascending: false });
+  if (error) { console.error('获取签到失败:', error); return []; }
+  return data || [];
+}
+
+// 执行签到（由 store 计算 streak/points，传入即可）
+export async function insertCheckin(userId, checkinDate, streak, points) {
+  if (!isSupabaseConfigured) return { error: { message: 'Supabase 未配置' } };
+  const { data, error } = await supabase
+    .from('checkins')
+    .insert({ user_id: userId, checkin_date: checkinDate, streak, points })
+    .select()
+    .single();
+  return { data, error };
+}
+
+// ============================================================================
 // Supabase Storage 通用工具
 // ============================================================================
 

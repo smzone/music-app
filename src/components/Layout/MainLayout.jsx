@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell, Sun, Moon, ShoppingCart, Package, Search, Command, Clock, Heart } from 'lucide-react';
+import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell, Sun, Moon, ShoppingCart, Package, Search, Command, Clock, Heart, Coins, Sparkles, Ticket } from 'lucide-react';
 import useAuthStore, { hasRole, ROLES } from '../../store/useAuthStore';
 import useNotificationStore from '../../store/useNotificationStore';
 import MusicPlayer from '../Player/MusicPlayer';
@@ -12,6 +12,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 import useThemeStore from '../../store/useThemeStore';
 import useCartStore from '../../store/useCartStore';
 import useWishlistStore from '../../store/useWishlistStore';
+import useRewardsStore from '../../store/useRewardsStore';
 import CommandPalette from '../UI/CommandPalette';
 import NetworkBanner from '../UI/NetworkBanner';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +41,8 @@ export default function MainLayout() {
   const { theme, toggleTheme } = useThemeStore();
   const wishCount = useWishlistStore((s) => s.items.length);
   const cartCount = useCartStore((s) => s.getCartCount());
+  const userPoints = useRewardsStore((s) => s.points);
+  const checkedToday = useRewardsStore((s) => s.hasCheckedInToday());
 
   // 路由变化时关闭菜单
   useEffect(() => { setMenuOpen(false); setUserMenuOpen(false); }, [location.pathname]);
@@ -110,6 +113,24 @@ export default function MainLayout() {
                 <Command size={9} />K
               </kbd>
             </button>
+
+            {/* 积分/签到入口（登录用户） */}
+            {user && (
+              <Link
+                to={checkedToday ? '/coupons' : '/checkin'}
+                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${theme === 'light' ? 'bg-white border-black/[0.06] hover:border-primary' : 'bg-white/[0.04] border-white/[0.08] hover:border-primary'}`}
+                aria-label={checkedToday ? (t('coupons.title') || '优惠券') : (t('checkin.title') || '签到')}
+                title={checkedToday ? (t('coupons.title') || '优惠券中心') : (t('checkin.todayAction') || '今日签到')}
+              >
+                {checkedToday ? (
+                  <Ticket size={13} className="text-primary" />
+                ) : (
+                  <Sparkles size={13} className="text-yellow-400 animate-pulse" />
+                )}
+                <Coins size={12} className="text-yellow-400" />
+                <span className={theme === 'light' ? 'text-gray-800' : 'text-white'}>{userPoints}</span>
+              </Link>
+            )}
 
             {/* 心愿单入口 */}
             <Link to="/wishlist" className={`relative p-2 rounded-xl transition-colors ${theme === 'light' ? 'hover:bg-black/[0.04]' : 'hover:bg-white/[0.05]'}`} aria-label={t('wishlist.title') || '心愿单'}>

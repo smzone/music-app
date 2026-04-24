@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Package, ChevronLeft, Clock, CreditCard, Check, Truck, X as XIcon, RefreshCw, Copy,
   MapPin, PackageCheck, Ban, AlertCircle, ShieldCheck, FileText, Star, MessageSquare,
@@ -298,6 +298,29 @@ export default function OrderDetailPage() {
               ))}
             </div>
           </section>
+
+          {/* 物流追踪入口（付款后可见） */}
+          {['paid','shipping','delivered','completed'].includes(order.status) && (
+            <Link
+              to={`/orders/${order.id}/track`}
+              className={`flex items-center justify-between w-full px-5 py-3 rounded-2xl border hover:border-primary hover:shadow-lg hover:shadow-primary/10 transition-all group ${isLight ? 'border-black/[0.06] bg-gradient-to-r from-white to-primary/5' : 'border-white/[0.06] bg-gradient-to-r from-white/[0.02] to-primary/10'}`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center">
+                  <Truck size={16} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-text-primary">
+                    {t('orderDetail.viewTracking') || '查看物流追踪'}
+                  </p>
+                  <p className="text-[11px] text-text-muted">
+                    {t('orderDetail.trackingHint') || '实时时间线 · 预计送达 · 虚拟轨迹'}
+                  </p>
+                </div>
+              </div>
+              <span className="text-primary text-sm font-bold group-hover:translate-x-1 transition-transform">→</span>
+            </Link>
+          )}
 
           {/* 物流轨迹 */}
           {order.trace && order.trace.length > 0 && (

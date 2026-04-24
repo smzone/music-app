@@ -47,6 +47,7 @@ const SectionsPage = lazy(() => import('./pages/admin/SectionsPage'));
 const PlaylistsPage = lazy(() => import('./pages/admin/PlaylistsPage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 const OrdersManagePage = lazy(() => import('./pages/admin/OrdersManagePage'));
+const ProductsManagePage = lazy(() => import('./pages/admin/ProductsManagePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AccessDeniedPage = lazy(() => import('./pages/AccessDeniedPage'));
 
@@ -125,6 +126,9 @@ function App() {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/orders" element={<AuthGuard><OrdersPage /></AuthGuard>} />
             <Route path="/orders/:id" element={<AuthGuard><OrderDetailPage /></AuthGuard>} />
+            <Route path="/orders/:id/track" element={<AuthGuard><OrderTrackingPage /></AuthGuard>} />
+            <Route path="/coupons" element={<AuthGuard><CouponsCenterPage /></AuthGuard>} />
+            <Route path="/checkin" element={<AuthGuard><CheckinPage /></AuthGuard>} />
             <Route path="/checkout/success" element={<AuthGuard><CheckoutSuccessPage /></AuthGuard>} />
             <Route path="/history" element={<HistoryPage />} />
           </Route>

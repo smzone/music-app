@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Music, Heart, MessageSquare, Calendar, Shield, Crown, Edit3, Save, X, Headphones, Users, Award, Loader2, Package, ShoppingBag, ArrowRight, Clock } from 'lucide-react';
+import { User, Mail, Music, Heart, MessageSquare, Calendar, Shield, Crown, Edit3, Save, X, Headphones, Users, Award, Loader2, Package, ShoppingBag, ArrowRight, Clock, Coins, Ticket } from 'lucide-react';
 import useWishlistStore from '../store/useWishlistStore';
+import useRewardsStore from '../store/useRewardsStore';
 import useHistoryStore from '../store/useHistoryStore';
+import useOrderStore from '../store/useOrderStore';
 import useAuthStore, { ROLES } from '../store/useAuthStore';
 import useSongStore from '../store/useSongStore';
 import useForumStore from '../store/useForumStore';
@@ -38,6 +40,8 @@ export default function UserProfilePage() {
   const wishCount = useWishlistStore((s) => s.items.length);
   const historyCount = useHistoryStore((s) => s.history.length);
   const orderCount = useOrderStore((s) => s.orders.length);
+  const userPoints = useRewardsStore((s) => s.points);
+  const unusedCoupons = useRewardsStore((s) => s.myCoupons.filter((c) => c.status === 'unused').length);
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
   const [followLoading, setFollowLoading] = useState(false);
 
@@ -222,6 +226,28 @@ export default function UserProfilePage() {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-text-primary truncate">{t('nav.shop')}</p>
             <p className="text-xs text-text-muted truncate">{t('userProfile.goShopping')}</p>
+          </div>
+          <ArrowRight size={14} className="text-text-muted group-hover:text-primary transition-colors shrink-0" />
+        </Link>
+
+        <Link to="/checkin" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 hover:border-yellow-400/30 transition-all flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-yellow-400/10 flex items-center justify-center shrink-0">
+            <Coins size={18} className="text-yellow-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-text-primary truncate">{t('checkin.myPoints') || '我的积分'}</p>
+            <p className="text-xs text-text-muted truncate">{userPoints} {t('coupons.points') || '积分'} · {t('checkin.actionBtn') || '签到'}</p>
+          </div>
+          <ArrowRight size={14} className="text-text-muted group-hover:text-yellow-400 transition-colors shrink-0" />
+        </Link>
+
+        <Link to="/coupons" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 hover:border-primary/30 transition-all flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Ticket size={18} className="text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-text-primary truncate">{t('coupons.title') || '优惠券'}</p>
+            <p className="text-xs text-text-muted truncate">{unusedCoupons} {t('coupons.unusedCount') || '张可用'}</p>
           </div>
           <ArrowRight size={14} className="text-text-muted group-hover:text-primary transition-colors shrink-0" />
         </Link>

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import useAuthStore from '../store/useAuthStore';
 import useOrderStore from '../store/useOrderStore';
 import useWishlistStore from '../store/useWishlistStore';
+import useRewardsStore from '../store/useRewardsStore';
 import { isSupabaseConfigured } from '../lib/supabase';
 
 // ============================================================================
@@ -16,6 +17,8 @@ export default function AuthSyncGate() {
   const resetOrders = useOrderStore((s) => s.resetRemoteLocal);
   const syncWishlist = useWishlistStore((s) => s.syncFromSupabase);
   const resetWishlist = useWishlistStore((s) => s.resetLocal);
+  const syncRewards = useRewardsStore((s) => s.syncAll);
+  const resetRewards = useRewardsStore((s) => s.resetRemoteLocal);
   const lastUidRef = useRef(null);
 
   useEffect(() => {
@@ -27,14 +30,16 @@ export default function AuthSyncGate() {
       // 并发 pull
       syncOrders(currentUid);
       syncWishlist(currentUid);
+      syncRewards();
     }
     // 退出登录
     if (!currentUid && lastUidRef.current) {
       lastUidRef.current = null;
       resetOrders();
       resetWishlist();
+      resetRewards();
     }
-  }, [user?.id, syncOrders, syncWishlist, resetOrders, resetWishlist]);
+  }, [user?.id, syncOrders, syncWishlist, syncRewards, resetOrders, resetWishlist, resetRewards]);
 
   return null;
 }
