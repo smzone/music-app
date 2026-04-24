@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Music, Heart, MessageSquare, Calendar, Shield, Crown, Edit3, Save, X, Headphones, Users, Award, Loader2, Package, ShoppingBag, ArrowRight } from 'lucide-react';
+import { User, Mail, Music, Heart, MessageSquare, Calendar, Shield, Crown, Edit3, Save, X, Headphones, Users, Award, Loader2, Package, ShoppingBag, ArrowRight, Clock } from 'lucide-react';
+import useWishlistStore from '../store/useWishlistStore';
+import useHistoryStore from '../store/useHistoryStore';
 import useAuthStore, { ROLES } from '../store/useAuthStore';
 import useSongStore from '../store/useSongStore';
 import useForumStore from '../store/useForumStore';
@@ -33,6 +35,9 @@ export default function UserProfilePage() {
   // 从各 store 读取实时统计（hooks 必须在 early return 之前）
   const favCount = useSongStore((s) => s.favorites.length);
   const forumPosts = useForumStore((s) => s.posts);
+  const wishCount = useWishlistStore((s) => s.items.length);
+  const historyCount = useHistoryStore((s) => s.history.length);
+  const orderCount = useOrderStore((s) => s.orders.length);
   const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 });
   const [followLoading, setFollowLoading] = useState(false);
 
@@ -176,36 +181,60 @@ export default function UserProfilePage() {
       </div>
 
       {/* 快捷入口 */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-        <Link to="/orders" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 hover:border-primary/30 transition-all flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <Package size={20} className="text-primary" />
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-6">
+        <Link to="/orders" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 hover:border-primary/30 transition-all flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Package size={18} className="text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-text-primary">{t('nav.orders')}</p>
-            <p className="text-xs text-text-muted">{t('userProfile.viewOrders')}</p>
+            <p className="text-sm font-semibold text-text-primary truncate">{t('nav.orders')}</p>
+            <p className="text-xs text-text-muted truncate">{orderCount} {t('userProfile.orderCount') || '个订单'}</p>
           </div>
-          <ArrowRight size={16} className="text-text-muted group-hover:text-primary transition-colors shrink-0" />
+          <ArrowRight size={14} className="text-text-muted group-hover:text-primary transition-colors shrink-0" />
         </Link>
-        <Link to="/shop" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 hover:border-primary/30 transition-all flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
-            <ShoppingBag size={20} className="text-orange-400" />
+
+        <Link to="/wishlist" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 hover:border-red-400/30 transition-all flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+            <Heart size={18} className="text-red-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-text-primary">{t('nav.shop')}</p>
-            <p className="text-xs text-text-muted">{t('userProfile.goShopping')}</p>
+            <p className="text-sm font-semibold text-text-primary truncate">{t('wishlist.title') || '心愿单'}</p>
+            <p className="text-xs text-text-muted truncate">{wishCount} {t('userProfile.itemCount') || '件商品'}</p>
           </div>
-          <ArrowRight size={16} className="text-text-muted group-hover:text-primary transition-colors shrink-0" />
+          <ArrowRight size={14} className="text-text-muted group-hover:text-red-400 transition-colors shrink-0" />
         </Link>
-        <Link to="/membership" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 hover:border-yellow-500/30 transition-all flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-yellow-500/10 flex items-center justify-center shrink-0">
-            <Crown size={20} className="text-yellow-400" />
+
+        <Link to="/history" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 hover:border-blue-400/30 transition-all flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+            <Clock size={18} className="text-blue-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-text-primary">{t('nav.membership')}</p>
-            <p className="text-xs text-text-muted">{t('userProfile.manageMembership')}</p>
+            <p className="text-sm font-semibold text-text-primary truncate">{t('nav.history') || '播放历史'}</p>
+            <p className="text-xs text-text-muted truncate">{historyCount} {t('userProfile.trackCount') || '首'}</p>
           </div>
-          <ArrowRight size={16} className="text-text-muted group-hover:text-yellow-400 transition-colors shrink-0" />
+          <ArrowRight size={14} className="text-text-muted group-hover:text-blue-400 transition-colors shrink-0" />
+        </Link>
+
+        <Link to="/shop" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 hover:border-primary/30 transition-all flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+            <ShoppingBag size={18} className="text-orange-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-text-primary truncate">{t('nav.shop')}</p>
+            <p className="text-xs text-text-muted truncate">{t('userProfile.goShopping')}</p>
+          </div>
+          <ArrowRight size={14} className="text-text-muted group-hover:text-primary transition-colors shrink-0" />
+        </Link>
+
+        <Link to="/membership" className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 hover:border-yellow-500/30 transition-all flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center shrink-0">
+            <Crown size={18} className="text-yellow-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-text-primary truncate">{t('nav.membership')}</p>
+            <p className="text-xs text-text-muted truncate">{t('userProfile.manageMembership')}</p>
+          </div>
+          <ArrowRight size={14} className="text-text-muted group-hover:text-yellow-400 transition-colors shrink-0" />
         </Link>
       </div>
 
