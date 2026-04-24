@@ -543,3 +543,247 @@ export function subscribeNotifications(userId, callback) {
     .subscribe();
   return { unsubscribe: () => supabase.removeChannel(channel) };
 }
+
+// ============================================================================
+// 商城 / 订单 / 心愿单 / 地址 / 评价
+// ============================================================================
+
+// ---------- 收货地址 ----------
+
+// 获取当前用户的所有收货地址（默认地址优先）
+export async function fetchAddresses(userId) {
+  if (!isSupabaseConfigured || !userId) return [];
+  const { data, error } = await supabase
+    .from('shipping_addresses')
+    .select('*')
+    .eq('user_id', userId)
+    .order('is_default', { ascending: false })
+    .order('created_at', { ascending: false });
+  if (error) { console.error('获取地址失败:', error); return []; }
+  return data || [];
+}
+
+// 新增收货地址
+export async function createAddress(userId, addr) {
+  if (!isSupabaseConfigured || !userId) return { error: 'Supabase 未配置' };
+  const payload = {
+    user_id: userId,
+    recipient: addr.recipient || addr.name || '',
+    phone: addr.phone || '',
+    province: addr.province || '',
+    city: addr.city || '',
+    district: addr.district || '',
+    address: addr.address || addr.detail || '',
+    postal_code: addr.postal_code || addr.postalCode || '',
+    is_default: !!addr.is_default || !!addr.isDefault,
+  };
+  const { data, error } = await supabase
+    .from('shipping_addresses')
+    .insert(payload)
+    .select()
+    .single();
+  return { data, error };
+}
+
+// 更新地址
+export async function updateAddress(addressId, patch) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { data, error } = await supabase
+    .from('shipping_addresses')
+    .update(patch)
+    .eq('id', addressId)
+    .select()
+    .single();
+  return { data, error };
+}
+
+// 删除地址
+export async function deleteAddress(addressId) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { error } = await supabase
+    .from('shipping_addresses')
+    .delete()
+    .eq('id', addressId);
+  return { error };
+}
+
+// ---------- 订单 ----------
+
+// 创建订单（事务式：先插 orders，再批量插 order_items）
+export async function createOrder(userId, orderPayload, items) {
+  if (!isSupabaseConfigured || !userId) return { error: 'Supabase 未配置' };
+  const orderInsert = {
+    order_no: orderPayload.orderNo || orderPayload.order_no,
+    user_id: userId,
+    subtotal: orderPayload.subtotal || 0,
+    shipping_fee: orderPayload.shippingFee ?? orderPayload.shipping_fee ?? 0,
+    discount: orderPayload.discount || 0,
+    total: orderPayload.total || 0,
+    status: orderPayload.status || 'paid',
+    address_snapshot: orderPayload.address || orderPayload.address_snapshot || {},
+    payment_method: orderPayload.paymentMethod || orderPayload.payment_method || 'mock',
+    paid_at: orderPayload.paidAt || orderPayload.paid_at || new Date().toISOString(),
+    note: orderPayload.note || '',
+  };
+  const { data: order, error } = await supabase
+    .from('orders')
+    .insert(orderInsert)
+    .select()
+    .single();
+  if (error) return { error };
+
+  // 批量写入明细
+  const itemsInsert = (items || []).map((it) => ({
+    order_id: order.id,
+    product_id: Number(it.id || it.product_id),
+    product_name: it.name || it.product_name || '',
+    product_image: it.image || it.product_image || '',
+    category: it.category || '',
+    unit_price: it.price ?? it.unit_price ?? 0,
+    original_price: it.originalPrice ?? it.original_price ?? it.price ?? 0,
+    quantity: it.qty ?? it.quantity ?? 1,
+    subtotal: (it.price ?? it.unit_price ?? 0) * (it.qty ?? it.quantity ?? 1),
+  }));
+  if (itemsInsert.length) {
+    const { error: itemsErr } = await supabase.from('order_items').insert(itemsInsert);
+    if (itemsErr) {
+      console.error('订单明细写入失败:', itemsErr);
+      return { data: order, error: itemsErr };
+    }
+  }
+  return { data: order };
+}
+
+// 获取当前用户订单（含明细 + 评价聚合）
+export async function fetchUserOrders(userId) {
+  if (!isSupabaseConfigured || !userId) return [];
+  const { data, error } = await supabase
+    .from('orders')
+    .select(`
+      *,
+      items:order_items(*),
+      reviews:product_reviews(*)
+    `)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) { console.error('获取订单失败:', error); return []; }
+  return data || [];
+}
+
+// 管理员：获取全部订单
+export async function fetchAllOrders() {
+  if (!isSupabaseConfigured) return [];
+  const { data, error } = await supabase
+    .from('orders')
+    .select(`
+      *,
+      items:order_items(*),
+      reviews:product_reviews(*)
+    `)
+    .order('created_at', { ascending: false });
+  if (error) { console.error('获取全部订单失败:', error); return []; }
+  return data || [];
+}
+
+// 更新订单状态 / 物流信息
+export async function updateOrderStatus(orderId, patch) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const now = new Date().toISOString();
+  const up = { ...patch };
+  // 状态变更时自动打时间戳
+  if (patch.status === 'shipped' && !patch.shipped_at) up.shipped_at = now;
+  if (patch.status === 'delivered' && !patch.delivered_at) up.delivered_at = now;
+  if (patch.status === 'completed' && !patch.completed_at) up.completed_at = now;
+  if (patch.status === 'cancelled' && !patch.cancelled_at) up.cancelled_at = now;
+  if (patch.status === 'refunded' && !patch.refunded_at) up.refunded_at = now;
+  const { data, error } = await supabase
+    .from('orders')
+    .update(up)
+    .eq('id', orderId)
+    .select()
+    .single();
+  return { data, error };
+}
+
+// ---------- 商品评价 ----------
+
+// 提交/更新订单内某商品的评价（upsert by unique(order_id,product_id)）
+export async function upsertProductReview(userId, orderId, productId, review) {
+  if (!isSupabaseConfigured || !userId) return { error: 'Supabase 未配置' };
+  const payload = {
+    order_id: orderId,
+    user_id: userId,
+    product_id: Number(productId),
+    rating: review.rating ?? 5,
+    content: review.content || '',
+    tags: review.tags || [],
+    images: review.images || [],
+  };
+  const { data, error } = await supabase
+    .from('product_reviews')
+    .upsert(payload, { onConflict: 'order_id,product_id' })
+    .select()
+    .single();
+  return { data, error };
+}
+
+// 获取某商品的所有评价
+export async function fetchProductReviews(productId) {
+  if (!isSupabaseConfigured) return [];
+  const { data, error } = await supabase
+    .from('product_reviews')
+    .select(`
+      *,
+      profiles:user_id(username, avatar_url)
+    `)
+    .eq('product_id', Number(productId))
+    .order('created_at', { ascending: false });
+  if (error) { console.error('获取评价失败:', error); return []; }
+  return data || [];
+}
+
+// ---------- 心愿单 ----------
+
+// 获取心愿单
+export async function fetchWishlist(userId) {
+  if (!isSupabaseConfigured || !userId) return [];
+  const { data, error } = await supabase
+    .from('wishlist_items')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) { console.error('获取心愿单失败:', error); return []; }
+  return data || [];
+}
+
+// 加入心愿单（幂等）
+export async function addToWishlist(userId, productId) {
+  if (!isSupabaseConfigured || !userId) return { error: 'Supabase 未配置' };
+  const { data, error } = await supabase
+    .from('wishlist_items')
+    .upsert({ user_id: userId, product_id: Number(productId) }, { onConflict: 'user_id,product_id' })
+    .select()
+    .single();
+  return { data, error };
+}
+
+// 从心愿单移除
+export async function removeFromWishlist(userId, productId) {
+  if (!isSupabaseConfigured || !userId) return { error: 'Supabase 未配置' };
+  const { error } = await supabase
+    .from('wishlist_items')
+    .delete()
+    .eq('user_id', userId)
+    .eq('product_id', Number(productId));
+  return { error };
+}
+
+// 清空心愿单
+export async function clearWishlist(userId) {
+  if (!isSupabaseConfigured || !userId) return { error: 'Supabase 未配置' };
+  const { error } = await supabase
+    .from('wishlist_items')
+    .delete()
+    .eq('user_id', userId);
+  return { error };
+}

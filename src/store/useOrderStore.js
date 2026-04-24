@@ -1,5 +1,49 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { isSupabaseConfigured } from '../lib/supabase';
+import {
+  createOrder as createOrderRemote,
+  fetchUserOrders,
+  updateOrderStatus,
+  upsertProductReview,
+} from '../lib/supabaseService';
+
+// -------------- Supabase 同步辅助 --------------
+
+// 获取当前用户 ID（避免循环依赖 useAuthStore，直接读 persist）
+function getCurrentUserId() {
+  try {
+    const raw = localStorage.getItem('myspace-auth');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.state?.user?.id || null;
+  } catch {
+    return null;
+  }
+}
+
+// 异步推送到远端（失败仅打日志，不影响本地）
+function pushRemote(fn) {
+  if (!isSupabaseConfigured) return;
+  const uid = getCurrentUserId();
+  if (!uid) return;
+  Promise.resolve(fn(uid)).catch((e) => console.error('[orders] Supabase 同步失败:', e));
+}
+
+// Supabase 状态 → 本地状态
+function mapRemoteToLocalStatus(s) {
+  const m = {
+    pending: 'pending',
+    paid: 'paid',
+    shipped: 'shipping',
+    delivered: 'delivered',
+    completed: 'completed',
+    cancelled: 'cancelled',
+    refunded: 'refunded',
+    refunding: 'refunding',
+  };
+  return m[s] || s;
+}
 
 // ============================================================================
 // 订单 + 地址 + 优惠券 统一 Store
@@ -164,29 +208,56 @@ const useOrderStore = create(persist((set, get) => ({
   // 标记已付款（支付成功回调）
   markPaid: (orderId, paymentMethod) => {
     const now = new Date().toISOString();
+    let updated = null;
     set((s) => ({
-      orders: s.orders.map((o) => o.id === orderId ? {
-        ...o,
-        status: 'paid',
-        paidAt: now,
-        paymentMethod: paymentMethod || o.paymentMethod,
-        trace: [...o.trace, { time: now, title: '支付成功', desc: `使用${paymentMethod || o.paymentMethod}支付` }],
-      } : o),
+      orders: s.orders.map((o) => {
+        if (o.id !== orderId) return o;
+        updated = {
+          ...o,
+          status: 'paid',
+          paidAt: now,
+          paymentMethod: paymentMethod || o.paymentMethod,
+          trace: [...o.trace, { time: now, title: '支付成功', desc: `使用${paymentMethod || o.paymentMethod}支付` }],
+        };
+        return updated;
+      }),
     }));
+    // 付款后写入 Supabase（创建远端订单）
+    if (updated && !updated.remoteId) {
+      pushRemote(async (uid) => {
+        const { data, error } = await createOrderRemote(uid, {
+          orderNo: updated.id,
+          subtotal: updated.subtotal,
+          shippingFee: updated.shipping,
+          discount: updated.discount,
+          total: updated.total,
+          status: 'paid',
+          address: updated.address,
+          paymentMethod: updated.paymentMethod,
+          paidAt: updated.paidAt,
+          note: updated.remark,
+        }, updated.items);
+        if (error) { console.error('[orders] 远端创建失败:', error); return; }
+        // 回写 remoteId
+        set((s) => ({ orders: s.orders.map((o) => o.id === orderId ? { ...o, remoteId: data.id } : o) }));
+      });
+    }
   },
 
   // 取消订单（pending/paid 可取消）
   cancelOrder: (orderId, reason = '用户取消') => {
     const now = new Date().toISOString();
+    let target = null;
     set((s) => ({
-      orders: s.orders.map((o) => ['pending', 'paid'].includes(o.status) && o.id === orderId ? {
-        ...o,
-        status: 'cancelled',
-        cancelledAt: now,
-        cancelReason: reason,
-        trace: [...o.trace, { time: now, title: '订单取消', desc: reason }],
-      } : o),
+      orders: s.orders.map((o) => {
+        if (!['pending', 'paid'].includes(o.status) || o.id !== orderId) return o;
+        target = { ...o, status: 'cancelled', cancelledAt: now, cancelReason: reason, trace: [...o.trace, { time: now, title: '订单取消', desc: reason }] };
+        return target;
+      }),
     }));
+    if (target?.remoteId) {
+      pushRemote(() => updateOrderStatus(target.remoteId, { status: 'cancelled' }));
+    }
   },
 
   // 模拟商家发货
@@ -207,15 +278,17 @@ const useOrderStore = create(persist((set, get) => ({
   // 确认收货
   confirmReceive: (orderId) => {
     const now = new Date().toISOString();
+    let target = null;
     set((s) => ({
-      orders: s.orders.map((o) => o.status === 'shipping' && o.id === orderId ? {
-        ...o,
-        status: 'completed',
-        deliveredAt: now,
-        completedAt: now,
-        trace: [...o.trace, { time: now, title: '确认收货', desc: '订单已完成' }],
-      } : o),
+      orders: s.orders.map((o) => {
+        if (o.status !== 'shipping' || o.id !== orderId) return o;
+        target = { ...o, status: 'completed', deliveredAt: now, completedAt: now, trace: [...o.trace, { time: now, title: '确认收货', desc: '订单已完成' }] };
+        return target;
+      }),
     }));
+    if (target?.remoteId) {
+      pushRemote(() => updateOrderStatus(target.remoteId, { status: 'completed' }));
+    }
   },
 
   // 清扫过期订单（每次打开订单页或 checkout 时调用）
@@ -271,15 +344,17 @@ const useOrderStore = create(persist((set, get) => ({
   // 申请退款（paid/shipping/delivered/completed 可申请）
   requestRefund: (orderId, reason) => {
     const now = new Date().toISOString();
+    let target = null;
     set((s) => ({
-      orders: s.orders.map((o) => ['paid', 'shipping', 'delivered', 'completed'].includes(o.status) && o.id === orderId ? {
-        ...o,
-        status: 'refunded',
-        refundedAt: now,
-        refundReason: reason || '用户申请退款',
-        trace: [...o.trace, { time: now, title: '退款成功', desc: `原因：${reason || '用户申请退款'}` }],
-      } : o),
+      orders: s.orders.map((o) => {
+        if (!['paid', 'shipping', 'delivered', 'completed'].includes(o.status) || o.id !== orderId) return o;
+        target = { ...o, status: 'refunded', refundedAt: now, refundReason: reason || '用户申请退款', trace: [...o.trace, { time: now, title: '退款成功', desc: `原因：${reason || '用户申请退款'}` }] };
+        return target;
+      }),
     }));
+    if (target?.remoteId) {
+      pushRemote(() => updateOrderStatus(target.remoteId, { status: 'refunded' }));
+    }
   },
 
   // 获取单个订单
@@ -305,29 +380,39 @@ const useOrderStore = create(persist((set, get) => ({
     const reviews = Object.fromEntries(
       Object.entries(reviewsMap).map(([pid, r]) => [pid, { ...r, createdAt: now }])
     );
+    let target = null;
     set((s) => ({
-      orders: s.orders.map((o) => o.id === orderId ? {
-        ...o,
-        reviews: { ...(o.reviews || {}), ...reviews },
-        reviewedAt: now,
-        trace: [...o.trace, { time: now, title: '商品已评价', desc: `提交 ${Object.keys(reviews).length} 条评价` }],
-      } : o),
+      orders: s.orders.map((o) => {
+        if (o.id !== orderId) return o;
+        target = { ...o, reviews: { ...(o.reviews || {}), ...reviews }, reviewedAt: now, trace: [...o.trace, { time: now, title: '商品已评价', desc: `提交 ${Object.keys(reviews).length} 条评价` }] };
+        return target;
+      }),
     }));
+    // 逐条上传评价到远端
+    if (target?.remoteId) {
+      pushRemote(async (uid) => {
+        for (const [pid, r] of Object.entries(reviews)) {
+          await upsertProductReview(uid, target.remoteId, pid, r);
+        }
+      });
+    }
   },
 
   // 管理员：手动发货（跳过自动发货计时）
   adminShipOrder: (orderId, trackingNo) => {
     const now = new Date().toISOString();
     const tn = trackingNo || 'SF' + Math.floor(Math.random() * 1e10);
+    let target = null;
     set((s) => ({
-      orders: s.orders.map((o) => o.status === 'paid' && o.id === orderId ? {
-        ...o,
-        status: 'shipping',
-        shippedAt: now,
-        trackingNo: tn,
-        trace: [...o.trace, { time: now, title: '已发货（管理员）', desc: `快递单号：${tn}` }],
-      } : o),
+      orders: s.orders.map((o) => {
+        if (o.status !== 'paid' || o.id !== orderId) return o;
+        target = { ...o, status: 'shipping', shippedAt: now, trackingNo: tn, trace: [...o.trace, { time: now, title: '已发货（管理员）', desc: `快递单号：${tn}` }] };
+        return target;
+      }),
     }));
+    if (target?.remoteId) {
+      pushRemote(() => updateOrderStatus(target.remoteId, { status: 'shipped', tracking_no: tn }));
+    }
   },
 
   // 获取所有订单的评价汇总（按商品ID聚合）：用于 ShopPage 商品卡片显示评分
@@ -353,6 +438,81 @@ const useOrderStore = create(persist((set, get) => ({
   getTotalSpent: () => get().orders
     .filter((o) => ['paid', 'shipping', 'delivered', 'completed'].includes(o.status))
     .reduce((sum, o) => sum + o.total, 0),
+
+  // 同步状态
+  syncing: false,
+  lastSyncedAt: null,
+
+  // 从 Supabase 拉取订单并合并本地（以 order_no 为主键）
+  syncFromSupabase: async (userId) => {
+    if (!isSupabaseConfigured || !userId) return;
+    set({ syncing: true });
+    try {
+      const remote = await fetchUserOrders(userId);
+      const localMap = new Map(get().orders.map((o) => [o.id, o]));
+      // 远端订单规范化
+      const remoteOrders = (remote || []).map((r) => {
+        const local = localMap.get(r.order_no);
+        // 合并评价
+        const reviewsMap = {};
+        (r.reviews || []).forEach((rv) => {
+          reviewsMap[rv.product_id] = {
+            rating: rv.rating,
+            content: rv.content,
+            tags: rv.tags || [],
+            createdAt: rv.created_at,
+          };
+        });
+        return {
+          id: r.order_no,
+          remoteId: r.id,
+          items: (r.items || []).map((it) => ({
+            id: it.product_id,
+            name: it.product_name,
+            image: it.product_image,
+            price: Number(it.unit_price),
+            qty: it.quantity,
+          })),
+          address: r.address_snapshot || {},
+          couponCode: null,
+          subtotal: Number(r.subtotal),
+          discount: Number(r.discount),
+          shipping: Number(r.shipping_fee),
+          total: Number(r.total),
+          paymentMethod: r.payment_method,
+          remark: r.note || '',
+          status: mapRemoteToLocalStatus(r.status),
+          createdAt: r.created_at,
+          paidAt: r.paid_at,
+          shippedAt: r.shipped_at,
+          deliveredAt: r.delivered_at,
+          completedAt: r.completed_at,
+          cancelledAt: r.cancelled_at,
+          refundedAt: r.refunded_at,
+          trackingNo: r.tracking_no,
+          trace: local?.trace || [{ time: r.created_at, title: '订单创建', desc: '订单已提交' }],
+          reviews: Object.keys(reviewsMap).length ? reviewsMap : (local?.reviews || undefined),
+        };
+      });
+      // 合并：远端优先，本地独有（如未同步的 pending 订单）保留
+      const remoteIds = new Set(remoteOrders.map((o) => o.id));
+      const localOnly = get().orders.filter((o) => !remoteIds.has(o.id));
+      const merged = [...remoteOrders, ...localOnly].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      set({ orders: merged, syncing: false, lastSyncedAt: new Date().toISOString() });
+    } catch (e) {
+      console.error('[orders] 同步失败:', e);
+      set({ syncing: false });
+    }
+  },
+
+  // 退出登录时清理本地缓存中的远端订单
+  resetRemoteLocal: () => set((s) => ({
+    orders: s.orders.filter((o) => !o.remoteId),
+    syncing: false,
+    lastSyncedAt: null,
+  })),
 }), {
   name: 'music-app-orders',
   storage: createJSONStorage(() => localStorage),

@@ -12,6 +12,7 @@ import CursorGlow from './components/Effects/CursorGlow';
 
 // 主布局（非懒加载，保证导航即时可见）
 import MainLayout from './components/Layout/MainLayout';
+import AuthSyncGate from './components/AuthSyncGate';
 
 // 前台页面 — React.lazy 路由级代码分割，按需加载
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -93,6 +94,7 @@ function App() {
     <CursorGlow />
     <BrowserRouter>
       <ScrollToTop />
+      <AuthSyncGate />
       <Toaster
         position="top-center"
         toastOptions={{
