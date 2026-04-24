@@ -146,6 +146,7 @@ function App() {
             <Route path="sections" element={<RoleGuard minRole={ROLES.ADMIN}><SectionsPage /></RoleGuard>} />
             <Route path="playlists" element={<PlaylistsPage />} />
             <Route path="orders" element={<OrdersManagePage />} />
+            <Route path="products" element={<RoleGuard minRole={ROLES.ADMIN}><ProductsManagePage /></RoleGuard>} />
             <Route path="settings" element={<RoleGuard minRole={ROLES.ADMIN}><SettingsPage /></RoleGuard>} />
           </Route>
 

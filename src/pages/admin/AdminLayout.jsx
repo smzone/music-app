@@ -17,6 +17,7 @@ const adminNav = [
   { to: '/admin/sections', icon: GripVertical, labelKey: 'admin.nav.sections', minRole: ROLES.ADMIN },
   { to: '/admin/playlists', icon: ListMusic, labelKey: 'admin.nav.playlists' },
   { to: '/admin/orders', icon: Package, labelKey: 'admin.nav.orders' },
+  { to: '/admin/products', icon: ShoppingBag, labelKey: 'admin.nav.products', minRole: ROLES.ADMIN },
   { to: '/admin/settings', icon: Settings, labelKey: 'admin.nav.settings', permission: PERMISSIONS.MANAGE_SETTINGS },
 ];
 

@@ -585,6 +585,65 @@ export async function fetchProductCategories() {
   return data || [];
 }
 
+// 管理员：获取全部商品（含下架）
+export async function fetchProductsAdmin() {
+  if (!isSupabaseConfigured) return [];
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('id', { ascending: true });
+  if (error) { console.error('获取全部商品失败:', error); return []; }
+  return data || [];
+}
+
+// 管理员：新增或更新商品（upsert by id）
+export async function upsertProduct(product) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const payload = {
+    id: Number(product.id),
+    name: product.name,
+    description: product.description || product.desc || '',
+    price: Number(product.price || 0),
+    original_price: Number(product.original_price ?? product.originalPrice ?? product.price ?? 0),
+    image: product.image || '',
+    images: product.images || [],
+    category_slug: product.category_slug || product.categorySlug || null,
+    category_name: product.category_name || product.category || '',
+    tags: product.tags || [],
+    stock: Number(product.stock ?? 9999),
+    is_active: product.is_active ?? product.isActive ?? true,
+    is_featured: product.is_featured ?? product.isFeatured ?? false,
+  };
+  const { data, error } = await supabase
+    .from('products')
+    .upsert(payload, { onConflict: 'id' })
+    .select()
+    .single();
+  return { data, error };
+}
+
+// 管理员：删除商品
+export async function deleteProduct(productId) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', Number(productId));
+  return { error };
+}
+
+// 管理员：快速切换商品字段（如 is_active / is_featured / stock）
+export async function patchProduct(productId, patch) {
+  if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+  const { data, error } = await supabase
+    .from('products')
+    .update(patch)
+    .eq('id', Number(productId))
+    .select()
+    .single();
+  return { data, error };
+}
+
 // 订阅某商品评价实时更新
 export function subscribeProductReviews(productId, callback) {
   if (!isSupabaseConfigured) return { unsubscribe: () => {} };
