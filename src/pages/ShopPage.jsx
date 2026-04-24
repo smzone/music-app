@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Star, Heart, X, Plus, Minus, Trash2, Search, Tag, TrendingUp, Package, Sparkles, ShoppingBag, Check } from 'lucide-react';
 import useCartStore from '../store/useCartStore';
+import useOrderStore from '../store/useOrderStore';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
@@ -109,8 +110,38 @@ export default function ShopPage() {
   const [searchQ, setSearchQ] = useState('');
   const [sortBy, setSortBy] = useState('default');
 
+  // 订单评分聚合 — 合并真实用户评价到商品卡片
+  const orders = useOrderStore((s) => s.orders);
+  const reviewMap = useMemo(() => {
+    const map = {};
+    orders.forEach((o) => {
+      if (!o.reviews) return;
+      Object.entries(o.reviews).forEach(([pid, r]) => {
+        const key = Number(pid);
+        if (!map[key]) map[key] = { total: 0, count: 0 };
+        map[key].total += r.rating || 0;
+        map[key].count += 1;
+      });
+    });
+    const result = {};
+    Object.entries(map).forEach(([pid, v]) => {
+      result[pid] = { avg: v.count ? v.total / v.count : 0, count: v.count };
+    });
+    return result;
+  }, [orders]);
+
+  // 合并 mock 评分与真实评分（真实评分有则加权：真实 70% + mock 30%）
+  const enriched = useMemo(() => {
+    return productsData.map((p) => {
+      const r = reviewMap[p.id];
+      if (!r || r.count === 0) return { ...p, reviewCount: 0 };
+      const finalRating = Math.round((r.avg * 0.7 + p.rating * 0.3) * 10) / 10;
+      return { ...p, rating: finalRating, reviewCount: r.count };
+    });
+  }, [reviewMap]);
+
   const filtered = useMemo(() => {
-    let result = productsData.filter((p) => {
+    let result = enriched.filter((p) => {
       const catMap = shopCategories.find(c => c.id === activeCategory);
       const matchCat = activeCategory === 'all' || p.category === (catMap?.cat || '');
       const matchSearch = !searchQ || p.name.toLowerCase().includes(searchQ.toLowerCase());
@@ -121,7 +152,7 @@ export default function ShopPage() {
     if (sortBy === 'sales') result = [...result].sort((a, b) => b.sales - a.sales);
     if (sortBy === 'rating') result = [...result].sort((a, b) => b.rating - a.rating);
     return result;
-  }, [activeCategory, searchQ, sortBy]);
+  }, [enriched, activeCategory, searchQ, sortBy]);
 
   const addToCart = (product) => {
     storeAdd(product);
@@ -247,6 +278,9 @@ export default function ShopPage() {
                   ))}
                 </div>
                 <span className="text-[10px] text-star font-medium">{product.rating}</span>
+                {product.reviewCount > 0 && (
+                  <span className="text-[10px] text-primary font-medium">({product.reviewCount})</span>
+                )}
                 <span className="text-[10px] text-text-muted">· {t('shop.sold')}{product.sales}</span>
               </div>
               <div className="flex items-center justify-between">
