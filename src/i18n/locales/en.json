@@ -990,6 +990,10 @@
   "adminOrders": {
     "title": "Orders Management",
     "subtitle": "View and manage all orders. Ship manually and approve refunds.",
+    "syncRemote": "Sync Remote Orders",
+    "syncing": "Syncing...",
+    "syncOk": "Remote orders synced",
+    "lastSynced": "Last synced",
     "all": "All",
     "pending": "Pending",
     "paid": "Paid",

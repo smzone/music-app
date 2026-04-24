@@ -990,6 +990,10 @@
   "adminOrders": {
     "title": "注文管理",
     "subtitle": "すべての注文を閲覧・管理。手動発送・返金承認に対応",
+    "syncRemote": "リモート注文を同期",
+    "syncing": "同期中...",
+    "syncOk": "リモート注文を同期しました",
+    "lastSynced": "最終同期",
     "all": "すべて",
     "pending": "未払い",
     "paid": "支払済み",

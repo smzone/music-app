@@ -990,6 +990,10 @@
   "adminOrders": {
     "title": "订单管理",
     "subtitle": "查看和管理所有订单，支持手动发货、退款审批",
+    "syncRemote": "同步远端订单",
+    "syncing": "同步中...",
+    "syncOk": "已同步远端订单",
+    "lastSynced": "最近同步",
     "all": "全部",
     "pending": "待付款",
     "paid": "已付款",

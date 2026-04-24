@@ -990,6 +990,10 @@
   "adminOrders": {
     "title": "주문 관리",
     "subtitle": "모든 주문 조회 및 관리. 수동 발송·환불 승인 지원",
+    "syncRemote": "원격 주문 동기화",
+    "syncing": "동기화 중...",
+    "syncOk": "원격 주문이 동기화되었습니다",
+    "lastSynced": "마지막 동기화",
     "all": "전체",
     "pending": "결제 대기",
     "paid": "결제 완료",
