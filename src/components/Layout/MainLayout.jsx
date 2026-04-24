@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell, Sun, Moon, ShoppingCart, Package, Search, Command, Clock } from 'lucide-react';
+import { Menu, X, User, Crown, ChevronDown, Home, Music, Film, MessageSquare, ShoppingBag, Radio, LogOut, Settings, Target, Gamepad2, Bell, Sun, Moon, ShoppingCart, Package, Search, Command, Clock, Heart } from 'lucide-react';
 import useAuthStore, { hasRole, ROLES } from '../../store/useAuthStore';
 import useNotificationStore from '../../store/useNotificationStore';
 import MusicPlayer from '../Player/MusicPlayer';
@@ -11,6 +11,7 @@ import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
 import LanguageSwitcher from './LanguageSwitcher';
 import useThemeStore from '../../store/useThemeStore';
 import useCartStore from '../../store/useCartStore';
+import useWishlistStore from '../../store/useWishlistStore';
 import CommandPalette from '../UI/CommandPalette';
 import NetworkBanner from '../UI/NetworkBanner';
 import { useTranslation } from 'react-i18next';
@@ -37,6 +38,7 @@ export default function MainLayout() {
   const unreadCount = useNotificationStore((s) => s.unreadCount);
   const location = useLocation();
   const { theme, toggleTheme } = useThemeStore();
+  const wishCount = useWishlistStore((s) => s.items.length);
   const cartCount = useCartStore((s) => s.getCartCount());
 
   // 路由变化时关闭菜单
@@ -108,6 +110,16 @@ export default function MainLayout() {
                 <Command size={9} />K
               </kbd>
             </button>
+
+            {/* 心愿单入口 */}
+            <Link to="/wishlist" className={`relative p-2 rounded-xl transition-colors ${theme === 'light' ? 'hover:bg-black/[0.04]' : 'hover:bg-white/[0.05]'}`} aria-label={t('wishlist.title') || '心愿单'}>
+              <Heart size={18} className={`transition-colors ${wishCount > 0 ? 'fill-red-400 text-red-400' : 'text-text-muted'} ${theme === 'light' ? 'hover:text-red-500' : 'hover:text-red-400'}`} />
+              {wishCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                  {wishCount > 99 ? '99+' : wishCount}
+                </span>
+              )}
+            </Link>
 
             {/* 购物车徽章 */}
             <Link to="/shop" className={`relative p-2 rounded-xl transition-colors ${theme === 'light' ? 'hover:bg-black/[0.04]' : 'hover:bg-white/[0.05]'}`} aria-label={t('nav.shop')}>
