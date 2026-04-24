@@ -585,6 +585,86 @@ export async function fetchProductCategories() {
   return data || [];
 }
 
+// ============================================================================
+// Supabase Storage 通用工具
+// ============================================================================
+
+// 检查 Storage 可用性
+export function isStorageAvailable() {
+  return isSupabaseConfigured;
+}
+
+// 生成唯一文件名（保留扩展名）
+function genFileName(file, prefix = '') {
+  const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+  const rand = Math.random().toString(36).slice(2, 10);
+  const ts = Date.now();
+  return `${prefix}${ts}_${rand}.${ext}`;
+}
+
+// 上传到指定 Bucket，返回 { url, path, error }
+// - bucket: 'product-images' | 'avatars' | 'review-images'
+// - file: File 对象
+// - folder: 存储相对路径前缀（如 userId 或 productId）
+// - onProgress: 进度回调（0-1）— 注意 supabase-js v2 暂不支持真正的上传进度，此处为预留
+export async function uploadToBucket(bucket, file, folder = '', onProgress = null) {
+  if (!isSupabaseConfigured) return { error: { message: 'Supabase 未配置' } };
+  if (!file) return { error: { message: '无文件' } };
+
+  // 基础校验
+  if (!file.type?.startsWith('image/')) {
+    return { error: { message: '只允许上传图片' } };
+  }
+  const MAX = bucket === 'avatars' ? 2 * 1024 * 1024 : 5 * 1024 * 1024;
+  if (file.size > MAX) {
+    return { error: { message: `文件过大（限制 ${(MAX / 1024 / 1024).toFixed(0)}MB）` } };
+  }
+
+  const fileName = genFileName(file);
+  const path = folder ? `${folder.replace(/^\/+|\/+$/g, '')}/${fileName}` : fileName;
+
+  if (onProgress) onProgress(0.1);
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(path, file, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: file.type,
+    });
+  if (error) {
+    console.error(`[storage] 上传 ${bucket}/${path} 失败:`, error);
+    return { error };
+  }
+  if (onProgress) onProgress(1);
+
+  const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(path);
+  return { url: publicUrl, path, bucket };
+}
+
+// 删除文件（通过完整 path 或 URL 推断）
+export async function deleteFromBucket(bucket, path) {
+  if (!isSupabaseConfigured) return { error: { message: 'Supabase 未配置' } };
+  if (!path) return { error: { message: '无路径' } };
+
+  // 若传入的是完整 URL，提取 bucket 之后的相对路径
+  let relPath = path;
+  const marker = `/object/public/${bucket}/`;
+  const idx = path.indexOf(marker);
+  if (idx >= 0) relPath = path.slice(idx + marker.length);
+
+  const { error } = await supabase.storage.from(bucket).remove([relPath]);
+  if (error) console.error(`[storage] 删除 ${bucket}/${relPath} 失败:`, error);
+  return { error };
+}
+
+// 从公开 URL 推断 bucket + path（便于删除）
+export function parseStorageUrl(url) {
+  if (!url) return null;
+  const m = url.match(/\/object\/public\/([^/]+)\/(.+)$/);
+  if (!m) return null;
+  return { bucket: m[1], path: m[2] };
+}
+
 // 管理员：获取全部商品（含下架）
 export async function fetchProductsAdmin() {
   if (!isSupabaseConfigured) return [];

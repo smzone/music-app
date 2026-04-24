@@ -11,6 +11,8 @@ import {
   fetchProductsAdmin, upsertProduct, deleteProduct, patchProduct, fetchProductCategories,
 } from '../../lib/supabaseService';
 import { productsData as mockProducts, shopCategories as mockCategories } from '../../data/products';
+import ImageUploader from '../../components/UI/ImageUploader';
+import MultiImageUploader from '../../components/UI/MultiImageUploader';
 
 // 空模板
 const EMPTY_PRODUCT = {
@@ -510,22 +512,27 @@ function EditModal({ editing, setEditing, onSave, saving, categories, isLight, i
             </select>
           </div>
 
-          {/* 图片 */}
-          <div>
-            <label className={`text-xs font-semibold block mb-1 ${isLight ? 'text-gray-600' : 'text-text-secondary'}`}>{t('adminProducts.image') || '封面图 URL'}</label>
-            <div className="flex gap-2">
-              <input
-                type="url"
-                value={editing.image || ''}
-                onChange={(e) => update({ image: e.target.value })}
-                className={`flex-1 px-3 py-2 rounded-lg border text-sm outline-none focus:border-primary ${inputBg}`}
-                placeholder="https://..."
-              />
-              {editing.image && (
-                <img src={editing.image} alt="preview" className="w-11 h-11 rounded-lg object-cover shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />
-              )}
-            </div>
-          </div>
+          {/* 封面图 */}
+          <ImageUploader
+            label={t('adminProducts.image') || '封面图'}
+            value={editing.image || ''}
+            onChange={(url) => update({ image: url })}
+            bucket="product-images"
+            folder={`products/${editing.id}`}
+            aspect="video"
+            maxSizeMB={5}
+          />
+
+          {/* 图片画廊（多图） */}
+          <MultiImageUploader
+            label={t('adminProducts.gallery') || '图片画廊（多图）'}
+            value={editing.images || []}
+            onChange={(urls) => update({ images: urls })}
+            bucket="product-images"
+            folder={`products/${editing.id}/gallery`}
+            max={8}
+            maxSizeMB={5}
+          />
 
           {/* 标签 */}
           <div>

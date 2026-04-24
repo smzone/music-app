@@ -7,6 +7,7 @@
 1. **`schema.sql`** — 核心架构（用户/歌曲/评分/论坛/任务等）
 2. **`shop-schema.sql`** — 商城模块（订单/商品评价/心愿单/地址）
 3. **`shop-products-schema.sql`** — 商品主表（products / product_categories）+ 评价触发器 + Seed 8 件 Mock 商品
+4. **`storage-setup.sql`** — Storage 存储桶（product-images / avatars / review-images）+ RLS 策略
 
 ## 执行步骤
 
@@ -15,7 +16,8 @@
 3. 复制 `schema.sql` 全部内容 → 粘贴 → **Run**
 4. 再次新建 query，复制 `shop-schema.sql` 全部内容 → 粘贴 → **Run**
 5. 再次新建 query，复制 `shop-products-schema.sql` 全部内容 → 粘贴 → **Run**
-6. 确认在 **Table Editor** 中能看到新增的表：
+6. 再次新建 query，复制 `storage-setup.sql` 全部内容 → 粘贴 → **Run**（创建 3 个图片 Bucket）
+7. 确认在 **Table Editor** 中能看到新增的表：
    - `shipping_addresses`
    - `orders`
    - `order_items`
@@ -61,6 +63,17 @@ VITE_SUPABASE_ANON_KEY=<your-anon-public-key>
 - `orders` — 订单状态变更推送（可用于物流更新通知）
 - `product_reviews` — 新评价实时推送（`ProductDetailPage` 已订阅）
 - `products` — 商品字段变更（价格/销量/评分）实时生效
+
+## Storage 存储桶
+
+三个公开读取的 Bucket：
+
+- **`product-images`** — 商品图片（管理员/版主写入，所有人读取，5MB 限制）
+- **`avatars`** — 用户头像（仅本人写入自己目录 `<user_id>/...`，2MB 限制）
+- **`review-images`** — 评价图片（登录用户写入自己目录，5MB 限制）
+
+前端通过 `@src/components/UI/ImageUploader.jsx` 与 `@src/components/UI/MultiImageUploader.jsx` 进行拖拽/粘贴/点击上传。
+未配置 Supabase 时自动降级为 DataURL 本地预览，功能不中断。
 
 ## 自动化触发器
 
