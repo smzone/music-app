@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   Shield, ChevronLeft, Package, MapPin, Check, Plus, Tag,
   ChevronRight, Truck, Edit2, Trash2, Star, X, CreditCard,
-  Wallet, Smartphone,
+  Wallet, Smartphone, Ticket, Coins, Sparkles,
 } from 'lucide-react';
 import useCartStore from '../store/useCartStore';
 import useAuthStore from '../store/useAuthStore';
 import useOrderStore, { calcCouponDiscount, calcShipping, COUPONS, FREE_SHIPPING_THRESHOLD } from '../store/useOrderStore';
+import useRewardsStore from '../store/useRewardsStore';
 import useThemeStore from '../store/useThemeStore';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -106,11 +107,22 @@ export default function CheckoutPage() {
   // 清理过期订单
   useEffect(() => { sweepExpired(); }, [sweepExpired]);
 
+  // 奖励系统（rewards 券 + 积分）
+  const myCoupons = useRewardsStore((s) => s.myCoupons);
+  const userPoints = useRewardsStore((s) => s.points);
+  const rewardsCalcDiscount = useRewardsStore((s) => s.calcDiscount);
+  const consumeRewardCoupon = useRewardsStore((s) => s.useCoupon);
+  const spendPoints = useRewardsStore((s) => s.spendPoints);
+
   // 选中的地址 / 支付方式 / 优惠券 / 备注
   const [selectedAddrId, setSelectedAddrId] = useState(() => (getDefaultAddress()?.id) || null);
   const [payMethod, setPayMethod] = useState('alipay');
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
+  // rewards 券（用户券包中选择）
+  const [selectedRewardCouponId, setSelectedRewardCouponId] = useState(null);
+  // 积分抵扣（1 积分 = ¥0.01，上限订单 30%）
+  const [pointsToUse, setPointsToUse] = useState(0);
   const [remark, setRemark] = useState('');
 
   // 地址弹窗
@@ -122,10 +134,39 @@ export default function CheckoutPage() {
   // 金额计算
   const subtotal = getCartTotal();
   const itemCount = cart.reduce((s, i) => s + i.qty, 0);
-  const shipping = calcShipping(subtotal);
+  const baseShipping = calcShipping(subtotal);
+
+  // --- 本地优惠码折扣 ---
   const couponCalc = useMemo(() => calcCouponDiscount(appliedCoupon, subtotal), [appliedCoupon, subtotal]);
-  const discount = couponCalc.valid ? couponCalc.discount : 0;
+  const localDiscount = couponCalc.valid ? couponCalc.discount : 0;
+
+  // --- rewards 券折扣 ---
+  const selectedRewardCoupon = useMemo(
+    () => myCoupons.find((mc) => mc.id === selectedRewardCouponId && mc.status === 'unused'),
+    [myCoupons, selectedRewardCouponId],
+  );
+  const rewardCouponData = selectedRewardCoupon?.coupon || selectedRewardCoupon?.coupons;
+  const rewardDiscount = useMemo(() => {
+    if (!rewardCouponData) return 0;
+    return rewardsCalcDiscount(rewardCouponData, subtotal);
+  }, [rewardCouponData, subtotal, rewardsCalcDiscount]);
+  const isFreeShip = rewardCouponData?.type === 'shipping';
+  const shipping = isFreeShip ? 0 : baseShipping;
+
+  // --- 积分抵扣（1 积分 = ¥0.01，最多抵扣订单 30%） ---
+  const subTotalAfterCoupons = Math.max(0, subtotal - localDiscount - rewardDiscount);
+  const maxPointsAllowed = Math.min(userPoints, Math.floor(subTotalAfterCoupons * 30)); // 30% × 100 = 30
+  const validPointsToUse = Math.min(pointsToUse, maxPointsAllowed);
+  const pointsDiscount = validPointsToUse * 0.01;
+
+  // 总折扣 = 本地券 + rewards 券 + 积分抵扣
+  const discount = localDiscount + rewardDiscount + pointsDiscount;
   const total = Math.max(0, subtotal + shipping - discount);
+
+  // 积分滑条超限自动回落
+  useEffect(() => {
+    if (pointsToUse > maxPointsAllowed) setPointsToUse(maxPointsAllowed);
+  }, [maxPointsAllowed, pointsToUse]);
 
   // 同步选中地址
   useEffect(() => {
@@ -185,15 +226,36 @@ export default function CheckoutPage() {
       paymentMethod: payMethod,
       remark,
     });
+    // 额外挂载 rewards 元信息（在 store 外部追加）
+    order._rewards = {
+      userCouponId: selectedRewardCoupon?.id || null,
+      rewardDiscount,
+      pointsUsed: validPointsToUse,
+      pointsDiscount,
+    };
     setPendingOrder(order);
   };
 
-  // 支付成功 → 跳转独立成功页
-  const handlePaid = (channel) => {
+  // 支付成功 → 消费券 & 扣积分 → 跳转
+  const handlePaid = async (channel) => {
     if (!pendingOrder) return;
     markPaid(pendingOrder.id, channel);
     clearCart();
     const orderId = pendingOrder.id;
+    const rewardsMeta = pendingOrder._rewards || {};
+    // 标记 rewards 券使用
+    if (rewardsMeta.userCouponId) {
+      await consumeRewardCoupon(rewardsMeta.userCouponId, orderId);
+    }
+    // 扣减积分
+    if (rewardsMeta.pointsUsed > 0) {
+      await spendPoints(
+        rewardsMeta.pointsUsed,
+        'order_discount',
+        `${t('checkout.pointsDeductDesc') || '订单积分抵扣'} · ${orderId}`,
+        orderId,
+      );
+    }
     setPendingOrder(null);
     toast.success(t('checkout.paySuccess'));
     navigate(`/checkout/success?id=${orderId}`, { replace: true });
@@ -388,6 +450,146 @@ export default function CheckoutPage() {
             )}
           </section>
 
+          {/* ===== 我的券包（rewards） ===== */}
+          <section className={`rounded-2xl border p-5 ${isLight ? 'border-black/[0.06] bg-white' : 'border-white/[0.06] bg-white/[0.02]'}`}>
+            <header className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
+                <Ticket size={16} className="text-primary" /> {t('checkout.rewardCoupons') || '我的券包'}
+                <span className="text-[10px] font-normal text-text-muted">
+                  ({myCoupons.filter((c) => c.status === 'unused').length} {t('coupons.unusedCount') || '张可用'})
+                </span>
+              </h2>
+              <button
+                type="button"
+                onClick={() => navigate('/coupons')}
+                className="text-xs text-primary hover:text-primary-hover font-bold flex items-center gap-0.5"
+              >
+                {t('checkout.moreCoupons') || '更多'} <ChevronRight size={12} />
+              </button>
+            </header>
+
+            {myCoupons.length === 0 ? (
+              <div className="py-4 text-center text-xs text-text-muted">
+                {t('checkout.noRewardCoupon') || '暂无优惠券，前往领取更多'}
+              </div>
+            ) : (
+              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 custom-scrollbar">
+                {/* 不使用券 */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedRewardCouponId(null)}
+                  className={`shrink-0 w-28 h-20 rounded-xl border-2 flex flex-col items-center justify-center text-[11px] font-bold transition-all ${!selectedRewardCouponId ? 'border-primary bg-primary/10 text-primary' : isLight ? 'border-black/[0.08] text-gray-600 hover:border-black/[0.15]' : 'border-white/[0.08] text-text-muted hover:border-white/[0.15]'}`}
+                >
+                  <X size={14} className="mb-0.5" />
+                  {t('checkout.noCoupon') || '不使用券'}
+                </button>
+                {myCoupons
+                  .filter((c) => c.status === 'unused')
+                  .map((mc) => {
+                    const c = mc.coupon || mc.coupons || {};
+                    const active = selectedRewardCouponId === mc.id;
+                    const usable = subtotal >= (c.min_amount || 0);
+                    const disabled = !usable;
+                    return (
+                      <button
+                        key={mc.id}
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => setSelectedRewardCouponId(active ? null : mc.id)}
+                        className={`shrink-0 w-52 h-20 rounded-xl border-2 relative overflow-hidden px-3 py-2 text-left transition-all
+                          ${active
+                            ? 'border-primary bg-gradient-to-br from-primary/20 to-emerald-400/10 shadow-[0_0_15px_rgba(29,185,84,0.15)]'
+                            : disabled
+                              ? isLight ? 'border-black/[0.05] bg-black/[0.02] opacity-50' : 'border-white/[0.05] bg-white/[0.02] opacity-50'
+                              : isLight ? 'border-black/[0.08] bg-white hover:border-primary/50' : 'border-white/[0.08] bg-white/[0.03] hover:border-primary/50'}`}
+                      >
+                        {/* 左侧价格 */}
+                        <div className="flex items-start justify-between mb-1">
+                          <div>
+                            {c.type === 'fixed' && (
+                              <span className="text-lg font-black text-primary">¥{c.value}</span>
+                            )}
+                            {c.type === 'percent' && (
+                              <span className="text-lg font-black text-primary">{c.value}<span className="text-xs">%</span></span>
+                            )}
+                            {c.type === 'shipping' && (
+                              <span className="text-xs font-black text-blue-400 uppercase">{t('coupons.freeShip') || '免邮'}</span>
+                            )}
+                          </div>
+                          {active && <Check size={14} className="text-primary" />}
+                        </div>
+                        <p className="text-[11px] font-semibold text-text-primary truncate">{c.title}</p>
+                        <p className="text-[9px] text-text-muted mt-0.5 truncate">
+                          {c.min_amount > 0 && `${t('coupons.minAmount') || '满'}¥${c.min_amount}`}
+                          {disabled && ` · ${t('checkout.couponNotUsable') || '不满足条件'}`}
+                        </p>
+                      </button>
+                    );
+                  })}
+              </div>
+            )}
+          </section>
+
+          {/* ===== 积分抵扣 ===== */}
+          {userPoints > 0 && subTotalAfterCoupons > 0 && (
+            <section className={`rounded-2xl border p-5 ${isLight ? 'border-black/[0.06] bg-white' : 'border-white/[0.06] bg-white/[0.02]'}`}>
+              <header className="flex items-center justify-between mb-3">
+                <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
+                  <Coins size={16} className="text-yellow-400" /> {t('checkout.usePoints') || '积分抵扣'}
+                  <span className="text-[10px] font-normal text-text-muted">
+                    ({t('checkout.pointsRate') || '100 积分 = ¥1'})
+                  </span>
+                </h2>
+                <span className="text-[11px] text-text-muted">
+                  {t('checkout.available') || '可用'}: <b className="text-yellow-400">{userPoints}</b>
+                </span>
+              </header>
+
+              <div className="flex items-center gap-3">
+                {/* 滑条 */}
+                <input
+                  type="range"
+                  min={0}
+                  max={maxPointsAllowed}
+                  step={10}
+                  value={validPointsToUse}
+                  onChange={(e) => setPointsToUse(Number(e.target.value))}
+                  className="flex-1 accent-primary h-2"
+                  disabled={maxPointsAllowed === 0}
+                />
+                {/* 输入数字 */}
+                <input
+                  type="number"
+                  min={0}
+                  max={maxPointsAllowed}
+                  step={10}
+                  value={validPointsToUse}
+                  onChange={(e) => setPointsToUse(Math.max(0, Math.min(maxPointsAllowed, Number(e.target.value) || 0)))}
+                  className={`w-20 px-2 py-1.5 rounded-lg text-xs text-center border outline-none font-bold ${isLight ? 'bg-white border-black/[0.08] text-gray-900 focus:border-primary' : 'bg-white/[0.04] border-white/[0.08] text-white focus:border-primary'}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setPointsToUse(maxPointsAllowed)}
+                  className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-primary/15 text-primary hover:bg-primary/25"
+                >
+                  {t('checkout.useMax') || '用满'}
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between mt-3 text-xs">
+                <span className="text-text-muted flex items-center gap-1">
+                  <Sparkles size={11} className="text-yellow-400" />
+                  {t('checkout.pointsCap', { n: maxPointsAllowed }) || `本单最多可用 ${maxPointsAllowed} 积分`}
+                </span>
+                {pointsDiscount > 0 && (
+                  <span className="text-primary font-bold">
+                    -¥{pointsDiscount.toFixed(2)}
+                  </span>
+                )}
+              </div>
+            </section>
+          )}
+
           {/* ===== 支付方式 ===== */}
           <section className={`rounded-2xl border p-5 ${isLight ? 'border-black/[0.06] bg-white' : 'border-white/[0.06] bg-white/[0.02]'}`}>
             <h2 className="text-base font-bold text-text-primary flex items-center gap-2 mb-4">
@@ -448,10 +650,34 @@ export default function CheckoutPage() {
                   {shipping === 0 ? t('checkout.free') : `¥${shipping.toFixed(2)}`}
                 </span>
               </div>
-              {discount > 0 && (
+              {localDiscount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-text-muted">{t('checkout.discount')} {appliedCoupon && <span className="text-[10px] text-primary ml-1">({appliedCoupon})</span>}</span>
-                  <span className="text-red-400 font-medium">-¥{discount.toFixed(2)}</span>
+                  <span className="text-text-muted">{t('checkout.discount')} <span className="text-[10px] text-primary ml-1">({appliedCoupon})</span></span>
+                  <span className="text-red-400 font-medium">-¥{localDiscount.toFixed(2)}</span>
+                </div>
+              )}
+              {rewardDiscount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-muted flex items-center gap-1">
+                    <Ticket size={11} className="text-primary" /> {t('checkout.rewardCouponLabel') || '券包折扣'}
+                  </span>
+                  <span className="text-red-400 font-medium">-¥{rewardDiscount.toFixed(2)}</span>
+                </div>
+              )}
+              {isFreeShip && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-muted flex items-center gap-1">
+                    <Truck size={11} className="text-blue-400" /> {t('coupons.freeShip') || '免邮'}
+                  </span>
+                  <span className="text-blue-400 font-medium">-¥{baseShipping.toFixed(2)}</span>
+                </div>
+              )}
+              {pointsDiscount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-muted flex items-center gap-1">
+                    <Coins size={11} className="text-yellow-400" /> {t('checkout.pointsDeduct') || '积分抵扣'} ({validPointsToUse})
+                  </span>
+                  <span className="text-red-400 font-medium">-¥{pointsDiscount.toFixed(2)}</span>
                 </div>
               )}
             </div>
