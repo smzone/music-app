@@ -4,10 +4,11 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   Package, Search, Truck, ShieldCheck, Eye, X as XIcon,
-  CheckCircle2, Clock, RefreshCw, AlertTriangle, DollarSign, Users,
+  CheckCircle2, Clock, RefreshCw, AlertTriangle, DollarSign, Users, Cloud, Loader2,
 } from 'lucide-react';
 import useOrderStore from '../../store/useOrderStore';
 import useThemeStore from '../../store/useThemeStore';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 // 状态筛选
 const STATUS_TABS = [
@@ -42,6 +43,9 @@ export default function OrdersManagePage() {
   const adminShipOrder = useOrderStore((s) => s.adminShipOrder);
   const requestRefund = useOrderStore((s) => s.requestRefund);
   const cancelOrder = useOrderStore((s) => s.cancelOrder);
+  const syncAllFromSupabase = useOrderStore((s) => s.syncAllFromSupabase);
+  const syncing = useOrderStore((s) => s.syncing);
+  const lastSyncedAt = useOrderStore((s) => s.lastSyncedAt);
 
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -128,13 +132,36 @@ export default function OrdersManagePage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* 头部 */}
-      <div>
-        <h1 className={`text-2xl font-bold mb-1 ${textMain}`}>
-          {t('adminOrders.title') || '订单管理'}
-        </h1>
-        <p className={`text-sm ${textSub}`}>
-          {t('adminOrders.subtitle') || '查看和管理所有订单，支持手动发货、退款审批'}
-        </p>
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h1 className={`text-2xl font-bold mb-1 ${textMain}`}>
+            {t('adminOrders.title') || '订单管理'}
+          </h1>
+          <p className={`text-sm ${textSub}`}>
+            {t('adminOrders.subtitle') || '查看和管理所有订单，支持手动发货、退款审批'}
+          </p>
+        </div>
+        {isSupabaseConfigured && (
+          <div className="flex items-center gap-2">
+            {lastSyncedAt && (
+              <span className={`text-[11px] ${textMuted}`}>
+                {t('adminOrders.lastSynced') || '最近同步'}: {new Date(lastSyncedAt).toLocaleTimeString()}
+              </span>
+            )}
+            <button
+              onClick={async () => {
+                const res = await syncAllFromSupabase();
+                if (res?.error) toast.error(res.error);
+                else toast.success((t('adminOrders.syncOk') || '已同步远端订单') + `：${res?.count ?? 0}`);
+              }}
+              disabled={syncing}
+              className={`px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1.5 transition-colors ${syncing ? 'bg-white/5 text-text-muted cursor-not-allowed' : 'bg-primary text-black hover:bg-primary-hover'}`}
+            >
+              {syncing ? <Loader2 size={14} className="animate-spin" /> : <Cloud size={14} />}
+              {syncing ? (t('adminOrders.syncing') || '同步中...') : (t('adminOrders.syncRemote') || '同步远端订单')}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 统计卡片 */}

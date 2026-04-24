@@ -4,6 +4,7 @@ import { isSupabaseConfigured } from '../lib/supabase';
 import {
   createOrder as createOrderRemote,
   fetchUserOrders,
+  fetchAllOrdersWithUser,
   updateOrderStatus,
   upsertProductReview,
 } from '../lib/supabaseService';
@@ -504,6 +505,71 @@ const useOrderStore = create(persist((set, get) => ({
     } catch (e) {
       console.error('[orders] 同步失败:', e);
       set({ syncing: false });
+    }
+  },
+
+  // 管理员：从 Supabase 拉取全站订单（覆盖合并）
+  syncAllFromSupabase: async () => {
+    if (!isSupabaseConfigured) return { error: 'Supabase 未配置' };
+    set({ syncing: true });
+    try {
+      const remote = await fetchAllOrdersWithUser();
+      const localMap = new Map(get().orders.map((o) => [o.id, o]));
+      const remoteOrders = (remote || []).map((r) => {
+        const local = localMap.get(r.order_no);
+        const reviewsMap = {};
+        (r.reviews || []).forEach((rv) => {
+          reviewsMap[rv.product_id] = {
+            rating: rv.rating,
+            content: rv.content,
+            tags: rv.tags || [],
+            createdAt: rv.created_at,
+          };
+        });
+        return {
+          id: r.order_no,
+          remoteId: r.id,
+          userId: r.user_id,
+          buyerName: r.profile?.username || '',
+          items: (r.items || []).map((it) => ({
+            id: it.product_id,
+            name: it.product_name,
+            image: it.product_image,
+            price: Number(it.unit_price),
+            qty: it.quantity,
+          })),
+          address: r.address_snapshot || {},
+          couponCode: null,
+          subtotal: Number(r.subtotal),
+          discount: Number(r.discount),
+          shipping: Number(r.shipping_fee),
+          total: Number(r.total),
+          paymentMethod: r.payment_method,
+          remark: r.note || '',
+          status: mapRemoteToLocalStatus(r.status),
+          createdAt: r.created_at,
+          paidAt: r.paid_at,
+          shippedAt: r.shipped_at,
+          deliveredAt: r.delivered_at,
+          completedAt: r.completed_at,
+          cancelledAt: r.cancelled_at,
+          refundedAt: r.refunded_at,
+          trackingNo: r.tracking_no,
+          trace: local?.trace || [{ time: r.created_at, title: '订单创建', desc: '订单已提交' }],
+          reviews: Object.keys(reviewsMap).length ? reviewsMap : (local?.reviews || undefined),
+        };
+      });
+      const remoteIds = new Set(remoteOrders.map((o) => o.id));
+      const localOnly = get().orders.filter((o) => !remoteIds.has(o.id));
+      const merged = [...remoteOrders, ...localOnly].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      set({ orders: merged, syncing: false, lastSyncedAt: new Date().toISOString() });
+      return { count: remoteOrders.length };
+    } catch (e) {
+      console.error('[orders] 管理员同步失败:', e);
+      set({ syncing: false });
+      return { error: e?.message || '同步失败' };
     }
   },
 

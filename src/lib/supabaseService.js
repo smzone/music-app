@@ -670,6 +670,22 @@ export async function fetchUserOrders(userId) {
   return data || [];
 }
 
+// 管理员：获取全部订单（附带用户名）
+export async function fetchAllOrdersWithUser() {
+  if (!isSupabaseConfigured) return [];
+  const { data, error } = await supabase
+    .from('orders')
+    .select(`
+      *,
+      items:order_items(*),
+      reviews:product_reviews(*),
+      profile:profiles!user_id(username, avatar_url)
+    `)
+    .order('created_at', { ascending: false });
+  if (error) { console.error('获取全部订单(含用户)失败:', error); return []; }
+  return data || [];
+}
+
 // 管理员：获取全部订单
 export async function fetchAllOrders() {
   if (!isSupabaseConfigured) return [];
