@@ -1031,6 +1031,22 @@
     "viewEdit": "查看/修改评价",
     "submitOk": "评价已提交，感谢您的反馈！"
   },
+  "wishlist": {
+    "title": "我的心愿单",
+    "empty": "你还没有收藏任何商品",
+    "emptyTitle": "心愿单空空如也",
+    "emptyDesc": "发现喜欢的商品时，记得点击 ❤ 按钮收藏它们",
+    "goShop": "去逛逛",
+    "count": "共 {{count}} 件商品",
+    "addAll": "全部加入购物车",
+    "clear": "清空",
+    "allAdded": "已加入心愿单商品到购物车",
+    "confirmClear": "确认清空心愿单？",
+    "cleared": "心愿单已清空",
+    "added": "已加入心愿单",
+    "removed": "已移出心愿单",
+    "addedAt": "加入时间"
+  },
   "productDetail": {
     "notFound": "商品不存在",
     "backToShop": "返回商城",

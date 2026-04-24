@@ -1031,6 +1031,22 @@
     "viewEdit": "View / Edit Reviews",
     "submitOk": "Review submitted. Thank you!"
   },
+  "wishlist": {
+    "title": "My Wishlist",
+    "empty": "You haven't saved any products yet",
+    "emptyTitle": "Wishlist is empty",
+    "emptyDesc": "When you find something you love, tap the ❤ button to save it here",
+    "goShop": "Browse Shop",
+    "count": "{{count}} items",
+    "addAll": "Add All to Cart",
+    "clear": "Clear",
+    "allAdded": "Added to cart",
+    "confirmClear": "Clear your wishlist?",
+    "cleared": "Wishlist cleared",
+    "added": "Added to wishlist",
+    "removed": "Removed from wishlist",
+    "addedAt": "Added"
+  },
   "productDetail": {
     "notFound": "Product not found",
     "backToShop": "Back to Shop",

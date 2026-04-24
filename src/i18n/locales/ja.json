@@ -1031,6 +1031,22 @@
     "viewEdit": "評価を見る/編集",
     "submitOk": "評価を送信しました。ありがとうございます！"
   },
+  "wishlist": {
+    "title": "ウィッシュリスト",
+    "empty": "まだ商品を保存していません",
+    "emptyTitle": "ウィッシュリストは空です",
+    "emptyDesc": "お気に入りの商品を見つけたら ❤ ボタンで保存",
+    "goShop": "ショップへ",
+    "count": "計 {{count}} 点",
+    "addAll": "すべてカートに",
+    "clear": "クリア",
+    "allAdded": "カートに追加しました",
+    "confirmClear": "ウィッシュリストをクリアしますか？",
+    "cleared": "クリアしました",
+    "added": "ウィッシュリストに追加",
+    "removed": "ウィッシュリストから削除",
+    "addedAt": "追加日"
+  },
   "productDetail": {
     "notFound": "商品が見つかりません",
     "backToShop": "ショップに戻る",

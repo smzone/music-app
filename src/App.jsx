@@ -112,6 +112,7 @@ function App() {
             <Route path="/forum/:id" element={<ForumPostPage />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/shop/:id" element={<ProductDetailPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/live" element={<LivePage />} />
             <Route path="/membership" element={<MembershipPage />} />
             <Route path="/tasks" element={<TaskHallPage />} />

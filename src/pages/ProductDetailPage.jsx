@@ -9,6 +9,7 @@ import {
 import { productsData, getProductById } from '../data/products';
 import useCartStore from '../store/useCartStore';
 import useOrderStore from '../store/useOrderStore';
+import useWishlistStore from '../store/useWishlistStore';
 import useThemeStore from '../store/useThemeStore';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import LazyImage from '../components/UI/LazyImage';
@@ -245,7 +246,7 @@ export default function ProductDetailPage() {
                 className="flex-1 py-3 rounded-full bg-primary hover:bg-primary-hover text-black text-sm font-bold flex items-center justify-center gap-2 transition-colors">
                 {t('productDetail.buyNow') || '立即购买'}
               </button>
-              <button onClick={() => setLiked(!liked)}
+              <button onClick={handleToggleLike}
                 className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all ${liked ? 'bg-red-500/15 border-red-500/40 text-red-400' : isLight ? 'border-black/[0.08] text-gray-600 hover:border-red-400 hover:text-red-400' : 'border-white/[0.08] text-text-muted hover:border-red-400 hover:text-red-400'}`}>
                 <Heart size={15} className={liked ? 'fill-current' : ''} />
               </button>

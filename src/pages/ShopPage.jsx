@@ -4,6 +4,7 @@ import { productsData, shopCategories } from '../data/products';
 import { ShoppingCart, Star, Heart, X, Plus, Minus, Trash2, Search, Tag, TrendingUp, Package, Sparkles, ShoppingBag, Check } from 'lucide-react';
 import useCartStore from '../store/useCartStore';
 import useOrderStore from '../store/useOrderStore';
+import useWishlistStore from '../store/useWishlistStore';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
@@ -89,7 +90,9 @@ export default function ShopPage() {
   const [activeCategory, setActiveCategory] = useState('all');
   const { cart, addToCart: storeAdd, updateQty, removeFromCart } = useCartStore();
   const [showCart, setShowCart] = useState(false);
-  const [likedItems, setLikedItems] = useState(new Set());
+  const wishItems = useWishlistStore((s) => s.items);
+  const toggleWish = useWishlistStore((s) => s.toggle);
+  const wishIds = useMemo(() => new Set(wishItems.map((i) => i.id)), [wishItems]);
   const [searchQ, setSearchQ] = useState('');
   const [sortBy, setSortBy] = useState('default');
 
@@ -236,7 +239,7 @@ export default function ShopPage() {
               {/* 收藏 */}
               <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleLike(product.id); }}
                 className="absolute top-2.5 right-2.5 w-8 h-8 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110">
-                <Heart size={15} className={likedItems.has(product.id) ? 'fill-red-400 text-red-400' : 'text-white'} />
+                <Heart size={15} className={wishIds.has(product.id) ? 'fill-red-400 text-red-400' : 'text-white'} />
               </button>
               {/* 折扣 */}
               {product.originalPrice > product.price && (
