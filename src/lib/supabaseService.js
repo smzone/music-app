@@ -548,6 +548,59 @@ export function subscribeNotifications(userId, callback) {
 // 商城 / 订单 / 心愿单 / 地址 / 评价
 // ============================================================================
 
+// ---------- 商品 ----------
+
+// 获取所有启用商品
+export async function fetchProducts() {
+  if (!isSupabaseConfigured) return [];
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('is_active', true)
+    .order('id', { ascending: true });
+  if (error) { console.error('获取商品失败:', error); return []; }
+  return data || [];
+}
+
+// 获取单个商品
+export async function fetchProductById(id) {
+  if (!isSupabaseConfigured) return null;
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', Number(id))
+    .maybeSingle();
+  if (error) { console.error('获取商品失败:', error); return null; }
+  return data;
+}
+
+// 获取商品分类
+export async function fetchProductCategories() {
+  if (!isSupabaseConfigured) return [];
+  const { data, error } = await supabase
+    .from('product_categories')
+    .select('*')
+    .order('sort_order', { ascending: true });
+  if (error) { console.error('获取分类失败:', error); return []; }
+  return data || [];
+}
+
+// 订阅某商品评价实时更新
+export function subscribeProductReviews(productId, callback) {
+  if (!isSupabaseConfigured) return { unsubscribe: () => {} };
+  const channel = supabase
+    .channel(`reviews:p:${productId}`)
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'product_reviews',
+      filter: `product_id=eq.${Number(productId)}`,
+    }, (payload) => callback(payload))
+    .subscribe();
+  return { unsubscribe: () => supabase.removeChannel(channel) };
+}
+
+
 // ---------- 收货地址 ----------
 
 // 获取当前用户的所有收货地址（默认地址优先）

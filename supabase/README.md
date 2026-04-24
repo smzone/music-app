@@ -6,6 +6,7 @@
 
 1. **`schema.sql`** — 核心架构（用户/歌曲/评分/论坛/任务等）
 2. **`shop-schema.sql`** — 商城模块（订单/商品评价/心愿单/地址）
+3. **`shop-products-schema.sql`** — 商品主表（products / product_categories）+ 评价触发器 + Seed 8 件 Mock 商品
 
 ## 执行步骤
 
@@ -13,12 +14,15 @@
 2. 打开目标项目 → **SQL Editor** → **New query**
 3. 复制 `schema.sql` 全部内容 → 粘贴 → **Run**
 4. 再次新建 query，复制 `shop-schema.sql` 全部内容 → 粘贴 → **Run**
-5. 确认在 **Table Editor** 中能看到新增的表：
+5. 再次新建 query，复制 `shop-products-schema.sql` 全部内容 → 粘贴 → **Run**
+6. 确认在 **Table Editor** 中能看到新增的表：
    - `shipping_addresses`
    - `orders`
    - `order_items`
    - `product_reviews`
    - `wishlist_items`
+   - `product_categories`
+   - `products`（含 8 条 seed 数据）
 
 ## 环境变量配置
 
@@ -55,7 +59,15 @@ VITE_SUPABASE_ANON_KEY=<your-anon-public-key>
 
 已为以下表开启 Realtime 发布：
 - `orders` — 订单状态变更推送（可用于物流更新通知）
-- `product_reviews` — 新评价实时推送
+- `product_reviews` — 新评价实时推送（`ProductDetailPage` 已订阅）
+- `products` — 商品字段变更（价格/销量/评分）实时生效
+
+## 自动化触发器
+
+- **评价变更** → 自动更新 `products.rating_avg` / `rating_count`
+- **订单 status 变为 paid** → 自动累加对应商品 `products.sales`
+- **地址默认变更** → 自动取消同用户其他默认地址
+- **updated_at** → 所有主表自动维护
 
 ## 字段快速参考
 

@@ -67,7 +67,8 @@ export default function ProductDetailPage() {
   const theme = useThemeStore((s) => s.theme);
   const isLight = theme === 'light';
 
-  const product = getProductById(id);
+  const { product, loading } = useProduct(id);
+  const { products: allProducts } = useProducts();
   useDocumentTitle(product ? product.name : t('productDetail.notFound') || '商品不存在');
 
   const [qty, setQty] = useState(1);
@@ -77,8 +78,8 @@ export default function ProductDetailPage() {
   const addToCart = useCartStore((s) => s.addToCart);
   const orders = useOrderStore((s) => s.orders);
 
-  // 从所有订单聚合当前商品评价
-  const reviews = useMemo(() => {
+  // 本地订单中的评价（未配置 Supabase 时使用）
+  const localReviews = useMemo(() => {
     const list = [];
     orders.forEach((o) => {
       if (!o.reviews || !o.reviews[id]) return;
@@ -91,15 +92,54 @@ export default function ProductDetailPage() {
     return list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }, [orders, id]);
 
+  // Supabase 远端评价（含用户信息）+ Realtime 订阅
+  const [remoteReviews, setRemoteReviews] = useState([]);
+  useEffect(() => {
+    if (!isSupabaseConfigured || !id) return;
+    let alive = true;
+    const load = async () => {
+      const data = await fetchProductReviews(id);
+      if (!alive) return;
+      setRemoteReviews(
+        (data || []).map((r) => ({
+          rating: r.rating,
+          content: r.content,
+          tags: r.tags || [],
+          createdAt: r.created_at,
+          buyer: r.profiles?.username || '匿名用户',
+          avatar: r.profiles?.avatar_url || '',
+        })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      );
+    };
+    load();
+    // Realtime：任意 INSERT/UPDATE/DELETE 都重新拉取（简单且安全）
+    const sub = subscribeProductReviews(id, () => load());
+    return () => { alive = false; sub.unsubscribe?.(); };
+  }, [id]);
+
+  // 合并：优先用远端，缺失则用本地
+  const reviews = useMemo(() => {
+    if (isSupabaseConfigured && remoteReviews.length) return remoteReviews;
+    return localReviews;
+  }, [remoteReviews, localReviews]);
+
   const avgRating = reviews.length
     ? Math.round((reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) * 10) / 10
     : product?.rating || 0;
 
   // 相关推荐（同分类，排除当前）
   const related = useMemo(() => {
-    if (!product) return [];
-    return productsData.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
-  }, [product]);
+    if (!product || !allProducts?.length) return [];
+    return allProducts.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
+  }, [product, allProducts]);
+
+  if (loading && !product) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${isLight ? 'bg-gray-50' : 'bg-[#0a0a0f]'}`}>
+        <div className="animate-pulse text-text-muted">{t('common.loading') || '加载中...'}</div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

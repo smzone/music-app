@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { productsData, shopCategories } from '../data/products';
+import { useProducts, useProductCategories } from '../hooks/useProducts';
 import { ShoppingCart, Star, Heart, X, Plus, Minus, Trash2, Search, Tag, TrendingUp, Package, Sparkles, ShoppingBag, Check } from 'lucide-react';
 import useCartStore from '../store/useCartStore';
 import useOrderStore from '../store/useOrderStore';
@@ -96,6 +96,10 @@ export default function ShopPage() {
   const [searchQ, setSearchQ] = useState('');
   const [sortBy, setSortBy] = useState('default');
 
+  // 商品数据源（Supabase 优先，未配置时退化 Mock）
+  const { products: productsData } = useProducts();
+  const { categories: shopCategories } = useProductCategories();
+
   // 订单评分聚合 — 合并真实用户评价到商品卡片
   const orders = useOrderStore((s) => s.orders);
   const reviewMap = useMemo(() => {
@@ -120,11 +124,11 @@ export default function ShopPage() {
   const enriched = useMemo(() => {
     return productsData.map((p) => {
       const r = reviewMap[p.id];
-      if (!r || r.count === 0) return { ...p, reviewCount: 0 };
-      const finalRating = Math.round((r.avg * 0.7 + p.rating * 0.3) * 10) / 10;
+      if (!r || r.count === 0) return { ...p, reviewCount: p.reviewCount ?? 0 };
+      const finalRating = Math.round((r.avg * 0.7 + (p.rating || 0) * 0.3) * 10) / 10;
       return { ...p, rating: finalRating, reviewCount: r.count };
     });
-  }, [reviewMap]);
+  }, [reviewMap, productsData]);
 
   const filtered = useMemo(() => {
     let result = enriched.filter((p) => {
