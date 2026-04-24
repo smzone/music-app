@@ -28,3 +28,7 @@ storybook-static
 
 # Local Netlify folder
 .netlify
+
+# Vite 临时文件
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
