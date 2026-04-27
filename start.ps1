@@ -1,302 +1,573 @@
 # =====================================================================
-# MySpace Music App - One-Click Launcher (PowerShell)
-# 功能：
-#   1. 自动检测 Node.js / npm 环境，缺失时给出明确安装指引
-#   2. 自动校验 package.json、node_modules 完整性
-#   3. 自动配置 npm 镜像源（npmmirror）避免网络超时
-#   4. 依赖缺失/损坏时自动 npm install，失败后自动深度清理 (清缓存+删lock+重装) 重试
-#   5. 自动释放 Vite 端口占用（含兄弟端口）
-#   6. 后台延时 3s 打开浏览器，前台启动 Vite Dev Server
+# MySpace Music App - GUI Launcher (PowerShell + WinForms)
 # 特性：
-#   - 全流程流式日志，带时间戳与颜色，不阻塞交互
-#   - 自动修复：两级重试（常规 install → 深度清理 + install）
-#   - 非交互：失败时打印清晰原因并以非 0 退出，由 start.bat 延时展示
+#   - WinForms 图形界面，不会闪退
+#   - 6 步状态指示（彩色 ○ ⟳ ✓ ✗）
+#   - 实时日志（文件中转，避免 UI 跨线程问题）
+#   - 启动 / 停止 / 浏览器 / 目录 / 清空日志 / 退出 按钮
+#   - 自动镜像 / 自动修复依赖（两级重试）/ 自动释放端口
+#   - 关闭窗口自动 kill vite 进程
 # =====================================================================
 
-$ErrorActionPreference = 'Continue'
-
-# 统一使用 UTF-8 输出，避免中文日志乱码
+# --- UTF-8 输出，避免中文乱码 ---
 try {
     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-    $OutputEncoding = [System.Text.Encoding]::UTF8
+    $OutputEncoding            = [System.Text.Encoding]::UTF8
 } catch {}
 
-$ProjectRoot    = Split-Path -Parent $MyInvocation.MyCommand.Path
-Set-Location $ProjectRoot
-
-# ==================== 可配置参数 ====================
-$VitePort        = 5174
-$MirrorRegistry  = 'https://registry.npmmirror.com'
-$FetchTimeoutMs  = 600000   # 10 分钟单次下载超时
-$FetchRetries    = 5        # 下载重试次数
-# ====================================================
-
-# -------- 日志辅助函数（带时间戳 + 颜色） --------
-function Write-Log {
-    param(
-        [string]$Message,
-        [string]$Tag    = 'INFO',
-        [ConsoleColor]$Color = 'Cyan'
-    )
-    $ts = Get-Date -Format 'HH:mm:ss'
-    Write-Host ("[{0}] " -f $ts) -NoNewline -ForegroundColor DarkGray
-    Write-Host ("[{0,-4}] " -f $Tag) -NoNewline -ForegroundColor $Color
-    Write-Host $Message
-}
-function Log-Step { param([string]$m) Write-Log -Message $m -Tag '>'   -Color Cyan }
-function Log-Ok   { param([string]$m) Write-Log -Message $m -Tag 'OK'  -Color Green }
-function Log-Warn { param([string]$m) Write-Log -Message $m -Tag '!'   -Color Yellow }
-function Log-Err  { param([string]$m) Write-Log -Message $m -Tag 'X'   -Color Red }
-
-# -------- Banner --------
-Write-Host ''
-Write-Host '  ============================================================' -ForegroundColor Cyan
-Write-Host '    MySpace Music App  ·  One-Click Launcher' -ForegroundColor Cyan
-Write-Host ('    项目目录: {0}' -f $ProjectRoot) -ForegroundColor DarkGray
-Write-Host ('    启动端口: {0}' -f $VitePort) -ForegroundColor DarkGray
-Write-Host '  ============================================================' -ForegroundColor Cyan
-Write-Host ''
-
-# =====================================================================
-# 步骤 1/6 · 检测 Node.js / npm
-# =====================================================================
-Log-Step '步骤 1/6 · 检测 Node.js / npm 运行环境'
-$nodeVer = $null; $npmVer = $null
-try { $nodeVer = (& node --version) 2>$null } catch {}
-try { $npmVer  = (& npm  --version) 2>$null } catch {}
-
-if (-not $nodeVer) {
-    Log-Err '未检测到 Node.js！请先安装 Node.js 18 LTS 或更高版本'
-    Write-Host '        官网:  https://nodejs.org/' -ForegroundColor Yellow
-    Write-Host '        推荐:  winget install OpenJS.NodeJS.LTS' -ForegroundColor Yellow
-    Write-Host '              或使用 nvm-windows 管理多版本' -ForegroundColor Yellow
-    exit 10
-}
-if (-not $npmVer) {
-    Log-Err 'Node.js 已安装，但 npm 不可用。请重装 Node.js（包含 npm）'
-    exit 11
-}
-# 简单校验 Node 版本（建议 >= 18）
-$major = 0
-if ($nodeVer -match 'v(\d+)\.') { $major = [int]$Matches[1] }
-if ($major -gt 0 -and $major -lt 18) {
-    Log-Warn ("Node 版本过低 ({0})，建议升级到 18+ 以获得最佳兼容性" -f $nodeVer)
-}
-Log-Ok ("Node {0}  ·  npm {1}" -f $nodeVer, $npmVer)
-
-# =====================================================================
-# 步骤 2/6 · 校验项目文件
-# =====================================================================
-Log-Step '步骤 2/6 · 校验项目结构'
-if (-not (Test-Path 'package.json')) {
-    Log-Err ("当前目录不存在 package.json: {0}" -f $ProjectRoot)
-    Log-Err '请将 start.bat / start.ps1 放在项目根目录内再运行'
+# --- 加载 WinForms ---
+try {
+    Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop
+    Add-Type -AssemblyName System.Drawing       -ErrorAction Stop
+    [System.Windows.Forms.Application]::EnableVisualStyles()
+    [System.Windows.Forms.Application]::SetCompatibleTextRenderingDefault($false)
+} catch {
+    Write-Host "[X] WinForms 加载失败: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "    请确认系统已安装 .NET Framework 4.6+"          -ForegroundColor Yellow
     exit 20
 }
-$pkg = $null
-try { $pkg = Get-Content 'package.json' -Raw | ConvertFrom-Json } catch {
-    Log-Err "package.json 解析失败: $_"
-    exit 21
+
+# =====================================================================
+# 全局配置
+# =====================================================================
+$script:ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+Set-Location $script:ProjectRoot
+
+$script:VitePort   = 5174
+$script:Registry   = 'https://registry.npmmirror.com'
+$script:Url        = "http://localhost:$($script:VitePort)/"
+$script:LogFile    = Join-Path $script:ProjectRoot 'start.log'
+$script:ViteProc   = $null
+$script:IsRunning  = $false
+$script:LogTail    = 0
+
+# 重置日志文件
+$bootHeader = "==== MySpace Music App · Launcher · $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ===="
+$bootHeader | Out-File -FilePath $script:LogFile -Encoding UTF8 -Force
+
+# =====================================================================
+# 颜色 / 字体
+# =====================================================================
+$ColBg       = [System.Drawing.Color]::FromArgb(22,22,26)
+$ColPanelBg  = [System.Drawing.Color]::FromArgb(30,30,36)
+$ColLogBg    = [System.Drawing.Color]::FromArgb(12,12,16)
+$ColAccent   = [System.Drawing.Color]::FromArgb(29,185,84)
+$ColAccentHv = [System.Drawing.Color]::FromArgb(40,200,100)
+$ColTextDim  = [System.Drawing.Color]::FromArgb(170,170,180)
+$ColTextLine = [System.Drawing.Color]::FromArgb(220,220,225)
+$ColWarn     = [System.Drawing.Color]::FromArgb(255,200,0)
+$ColErr      = [System.Drawing.Color]::FromArgb(255,90,90)
+$ColBtnGray  = [System.Drawing.Color]::FromArgb(55,55,62)
+$ColBtnRed   = [System.Drawing.Color]::FromArgb(200,60,60)
+
+$FontUI      = New-Object System.Drawing.Font('Microsoft YaHei UI', 9)
+$FontUIBold  = New-Object System.Drawing.Font('Microsoft YaHei UI', 10, [System.Drawing.FontStyle]::Bold)
+$FontTitle   = New-Object System.Drawing.Font('Microsoft YaHei UI', 15, [System.Drawing.FontStyle]::Bold)
+$FontStep    = New-Object System.Drawing.Font('Microsoft YaHei UI', 10)
+$FontMono    = New-Object System.Drawing.Font('Consolas', 9)
+$FontMonoSm  = New-Object System.Drawing.Font('Consolas', 8.5)
+
+# =====================================================================
+# 主窗体
+# =====================================================================
+$form = New-Object System.Windows.Forms.Form
+$form.Text          = 'MySpace Music App · 一键启动器'
+$form.StartPosition = 'CenterScreen'
+$form.ClientSize    = New-Object System.Drawing.Size(820, 560)
+$form.MinimumSize   = New-Object System.Drawing.Size(760, 520)
+$form.BackColor     = $ColBg
+$form.ForeColor     = [System.Drawing.Color]::White
+$form.Font          = $FontUI
+
+# Banner
+$banner = New-Object System.Windows.Forms.Label
+$banner.Text      = "MySpace Music App  ·  One-Click Launcher"
+$banner.Font      = $FontTitle
+$banner.ForeColor = $ColAccent
+$banner.Location  = New-Object System.Drawing.Point(18, 14)
+$banner.AutoSize  = $true
+$form.Controls.Add($banner)
+
+$pathLabel = New-Object System.Windows.Forms.Label
+$pathLabel.Text      = "Project: $($script:ProjectRoot)"
+$pathLabel.Font      = $FontMonoSm
+$pathLabel.ForeColor = $ColTextDim
+$pathLabel.Location  = New-Object System.Drawing.Point(20, 50)
+$pathLabel.AutoSize  = $true
+$form.Controls.Add($pathLabel)
+
+$sep = New-Object System.Windows.Forms.Panel
+$sep.BackColor = [System.Drawing.Color]::FromArgb(60,60,70)
+$sep.Location  = New-Object System.Drawing.Point(16, 76)
+$sep.Size      = New-Object System.Drawing.Size(788, 1)
+$sep.Anchor    = 'Top,Left,Right'
+$form.Controls.Add($sep)
+
+# ---- 步骤面板（左） ----
+$stepsBox = New-Object System.Windows.Forms.GroupBox
+$stepsBox.Text      = ' 启动步骤 '
+$stepsBox.ForeColor = $ColAccent
+$stepsBox.Font      = $FontUIBold
+$stepsBox.Location  = New-Object System.Drawing.Point(16, 86)
+$stepsBox.Size      = New-Object System.Drawing.Size(310, 380)
+$stepsBox.Anchor    = 'Top,Bottom,Left'
+$form.Controls.Add($stepsBox)
+
+$stepDefs = @(
+    @{ key='node'; text='Node.js / npm 环境' }
+    @{ key='pkg';  text='项目文件校验'      }
+    @{ key='reg';  text='npm 镜像配置'      }
+    @{ key='deps'; text='依赖完整性检查'    }
+    @{ key='port'; text='端口 5174 释放'    }
+    @{ key='vite'; text='Vite Dev Server'   }
+)
+$script:StepLabels = @{}
+$yy = 30
+foreach ($s in $stepDefs) {
+    $l = New-Object System.Windows.Forms.Label
+    $l.Text      = "  ○   $($s.text)"
+    $l.Font      = $FontStep
+    $l.ForeColor = $ColTextLine
+    $l.Location  = New-Object System.Drawing.Point(14, $yy)
+    $l.Size      = New-Object System.Drawing.Size(282, 28)
+    $stepsBox.Controls.Add($l)
+    $script:StepLabels[$s.key] = $l
+    $yy += 32
 }
-Log-Ok ("project = {0}  ·  scripts.dev = {1}" -f $pkg.name, $pkg.scripts.dev)
 
-# =====================================================================
-# 步骤 3/6 · 配置 npm 镜像源
-# =====================================================================
-Log-Step '步骤 3/6 · 配置 npm 镜像源（加速国内下载）'
-try {
-    $currentReg = (& npm config get registry) 2>$null
-    if ($currentReg -ne $MirrorRegistry) {
-        & npm config set registry $MirrorRegistry 2>&1 | Out-Null
-        Log-Ok ("registry 已切换: {0}" -f $MirrorRegistry)
-    } else {
-        Log-Ok ("registry = {0}" -f $MirrorRegistry)
-    }
-} catch {
-    Log-Warn "无法设置 npm 镜像（可忽略）: $_"
-}
+# 状态栏
+$statusLabel = New-Object System.Windows.Forms.Label
+$statusLabel.Text      = '就绪。点击 [启动] 开始'
+$statusLabel.Font      = $FontUIBold
+$statusLabel.ForeColor = $ColTextDim
+$statusLabel.Location  = New-Object System.Drawing.Point(14, 240)
+$statusLabel.Size      = New-Object System.Drawing.Size(282, 24)
+$stepsBox.Controls.Add($statusLabel)
 
-# =====================================================================
-# 步骤 4/6 · 检查 / 安装 依赖
-# =====================================================================
-Log-Step '步骤 4/6 · 检查依赖 node_modules'
+# URL 链接
+$urlLabel = New-Object System.Windows.Forms.LinkLabel
+$urlLabel.Text          = $script:Url
+$urlLabel.Font          = New-Object System.Drawing.Font('Consolas', 11, [System.Drawing.FontStyle]::Bold)
+$urlLabel.LinkColor     = $ColAccent
+$urlLabel.ActiveLinkColor = $ColAccentHv
+$urlLabel.Location      = New-Object System.Drawing.Point(14, 270)
+$urlLabel.Size          = New-Object System.Drawing.Size(282, 24)
+$urlLabel.Visible       = $false
+$urlLabel.Add_LinkClicked({ try { Start-Process $script:Url } catch {} })
+$stepsBox.Controls.Add($urlLabel)
 
-function Test-DepsHealthy {
-    if (-not (Test-Path 'node_modules')) { return $false }
-    # 关键二进制必须存在
-    $viteBin = Join-Path 'node_modules' '.bin\vite.cmd'
-    $vitePkg = Join-Path 'node_modules' 'vite\package.json'
-    if (-not (Test-Path $viteBin) -and -not (Test-Path $vitePkg)) { return $false }
-    # React 必须存在
-    if (-not (Test-Path (Join-Path 'node_modules' 'react\package.json'))) { return $false }
-    return $true
-}
+$tipLabel = New-Object System.Windows.Forms.Label
+$tipLabel.Text      = "提示：首次启动会自动安装依赖`r`n失败可点击 [重试]，会自动深度清理重装"
+$tipLabel.Font      = $FontUI
+$tipLabel.ForeColor = $ColTextDim
+$tipLabel.Location  = New-Object System.Drawing.Point(14, 320)
+$tipLabel.Size      = New-Object System.Drawing.Size(282, 50)
+$stepsBox.Controls.Add($tipLabel)
 
-function Invoke-NpmInstall {
-    param([switch]$DeepClean)
+# ---- 日志面板（右） ----
+$logBox = New-Object System.Windows.Forms.RichTextBox
+$logBox.Location    = New-Object System.Drawing.Point(338, 86)
+$logBox.Size        = New-Object System.Drawing.Size(466, 380)
+$logBox.BackColor   = $ColLogBg
+$logBox.ForeColor   = [System.Drawing.Color]::FromArgb(220,220,220)
+$logBox.Font        = $FontMono
+$logBox.ReadOnly    = $true
+$logBox.DetectUrls  = $false
+$logBox.BorderStyle = 'FixedSingle'
+$logBox.WordWrap    = $false
+$logBox.ScrollBars  = 'Both'
+$logBox.Anchor      = 'Top,Bottom,Left,Right'
+$form.Controls.Add($logBox)
 
-    if ($DeepClean) {
-        Log-Warn '执行深度清理：node_modules / package-lock.json / npm cache'
-        if (Test-Path 'node_modules') {
-            Remove-Item 'node_modules' -Recurse -Force -ErrorAction SilentlyContinue
-        }
-        if (Test-Path 'package-lock.json') {
-            Remove-Item 'package-lock.json' -Force -ErrorAction SilentlyContinue
-        }
-        & npm cache clean --force 2>&1 | Out-Null
-        Log-Ok '清理完成'
-    }
+# ---- 按钮栏 ----
+$btnY = 484
 
-    $npmArgs = @(
-        'install',
-        '--registry', $MirrorRegistry,
-        ("--fetch-timeout={0}"         -f $FetchTimeoutMs),
-        ("--fetch-retries={0}"         -f $FetchRetries),
-        '--fetch-retry-maxtimeout=120000',
-        '--loglevel=info',
-        '--no-audit',
-        '--no-fund',
-        '--progress=true'
+function New-FlatButton {
+    param(
+        [string]$Text, [int]$X, [int]$W,
+        [System.Drawing.Color]$Bg, [System.Drawing.Color]$Fg,
+        [bool]$Bold = $false
     )
-
-    Log-Step ('npm {0}' -f ($npmArgs -join ' '))
-    Write-Host ('  ─── npm install 流式日志开始 ───') -ForegroundColor DarkGray
-
-    # 直接运行，流式输出到当前终端
-    & npm @npmArgs
-    $code = $LASTEXITCODE
-
-    Write-Host ('  ─── npm install 流式日志结束（exit={0}） ───' -f $code) -ForegroundColor DarkGray
-    return $code
+    $b = New-Object System.Windows.Forms.Button
+    $b.Text                       = $Text
+    $b.Location                   = New-Object System.Drawing.Point($X, $btnY)
+    $b.Size                       = New-Object System.Drawing.Size($W, 40)
+    $b.BackColor                  = $Bg
+    $b.ForeColor                  = $Fg
+    $b.FlatStyle                  = 'Flat'
+    $b.FlatAppearance.BorderSize  = 0
+    $b.Font = if ($Bold) { New-Object System.Drawing.Font('Microsoft YaHei UI', 10, [System.Drawing.FontStyle]::Bold) }
+              else       { New-Object System.Drawing.Font('Microsoft YaHei UI', 10) }
+    $b.Cursor                     = 'Hand'
+    return $b
 }
 
-$depsHealthy = Test-DepsHealthy
-if ($depsHealthy) {
-    Log-Ok 'node_modules 完整（vite / react 已就位），跳过安装'
-} else {
-    if (Test-Path 'node_modules') {
-        Log-Warn 'node_modules 存在但不完整，将重新安装'
-    } else {
-        Log-Warn 'node_modules 不存在，执行首次安装'
-    }
+$btnStart   = New-FlatButton '▶ 启动'      16  120 $ColAccent  ([System.Drawing.Color]::Black) $true
+$btnStop    = New-FlatButton '■ 停止'      144 100 $ColBtnGray ([System.Drawing.Color]::White) $false
+$btnOpen    = New-FlatButton '🌐 浏览器'    254 110 $ColBtnGray ([System.Drawing.Color]::White) $false
+$btnFolder  = New-FlatButton '📂 项目目录'  374 110 $ColBtnGray ([System.Drawing.Color]::White) $false
+$btnClear   = New-FlatButton '🗑 清空日志'  494 110 $ColBtnGray ([System.Drawing.Color]::White) $false
+$btnExit    = New-FlatButton '✕ 退出'      688 116 $ColBtnRed  ([System.Drawing.Color]::White) $true
 
-    # 第一次：常规安装
-    $code = Invoke-NpmInstall
-    if ($code -ne 0) {
-        Log-Warn ("首次 npm install 失败（code={0}），触发自动修复流程" -f $code)
-        # 第二次：深度清理后重装
-        $code = Invoke-NpmInstall -DeepClean
-    }
+$btnStop.Enabled = $false
+$btnStart.Anchor  = 'Bottom,Left'
+$btnStop.Anchor   = 'Bottom,Left'
+$btnOpen.Anchor   = 'Bottom,Left'
+$btnFolder.Anchor = 'Bottom,Left'
+$btnClear.Anchor  = 'Bottom,Left'
+$btnExit.Anchor   = 'Bottom,Right'
 
-    if ($code -ne 0) {
-        Log-Err '依赖安装失败（已重试 2 轮）'
-        Write-Host '排查建议：' -ForegroundColor Yellow
-        Write-Host '  1. 检查网络（能否访问 https://registry.npmmirror.com）' -ForegroundColor Yellow
-        Write-Host '  2. 检查磁盘剩余空间（建议 >2GB）'                          -ForegroundColor Yellow
-        Write-Host '  3. 关闭杀软/防火墙对 node.exe 的拦截'                      -ForegroundColor Yellow
-        Write-Host '  4. 尝试手动执行：npm install --verbose'                     -ForegroundColor Yellow
-        exit 40
-    }
+$form.Controls.AddRange(@($btnStart,$btnStop,$btnOpen,$btnFolder,$btnClear,$btnExit))
 
-    if (-not (Test-DepsHealthy)) {
-        Log-Err 'npm install 已完成但关键依赖仍缺失，请手动排查'
-        exit 41
-    }
-    Log-Ok '依赖安装完成且完整'
+# =====================================================================
+# 辅助函数
+# =====================================================================
+function Write-Log {
+    param([string]$Line, [string]$Level = 'INFO')
+    $ts  = Get-Date -Format 'HH:mm:ss'
+    $row = "[$ts] [$Level] $Line"
+    try { Add-Content -Path $script:LogFile -Value $row -Encoding UTF8 -ErrorAction SilentlyContinue } catch {}
 }
 
-# =====================================================================
-# 步骤 5/6 · 释放端口占用
-# =====================================================================
-Log-Step ('步骤 5/6 · 检查并释放端口 {0}' -f $VitePort)
+function Set-Step {
+    param([string]$Key, [string]$Status, [string]$Detail = '')
+    $prefix = switch ($Status) {
+        'pending' { '  ○   ' }
+        'running' { '  ⟳   ' }
+        'ok'      { '  ✓   ' }
+        'fail'    { '  ✗   ' }
+        default   { '  ·   ' }
+    }
+    $color = switch ($Status) {
+        'pending' { $ColTextLine }
+        'running' { $ColWarn }
+        'ok'      { $ColAccent }
+        'fail'    { $ColErr }
+        default   { [System.Drawing.Color]::White }
+    }
+    $def  = $stepDefs | Where-Object { $_.key -eq $Key } | Select-Object -First 1
+    $text = "$prefix$($def.text)"
+    if ($Detail) { $text += "  ·  $Detail" }
+    $script:StepLabels[$Key].Text      = $text
+    $script:StepLabels[$Key].ForeColor = $color
+}
 
+function Set-Status {
+    param([string]$Text, [System.Drawing.Color]$Color = $ColTextDim)
+    $statusLabel.Text      = $Text
+    $statusLabel.ForeColor = $Color
+}
+
+# 子进程执行器（异步事件 + DoEvents 防 UI 卡死）
+function Invoke-Exe {
+    param(
+        [string]$Exe,
+        [string[]]$ArgList,
+        [switch]$Background
+    )
+    $argStr = ($ArgList | ForEach-Object {
+        if ($_ -match '[\s"]') { '"' + ($_ -replace '"','\"') + '"' } else { $_ }
+    }) -join ' '
+
+    Write-Log ">> $Exe $argStr" 'CMD'
+
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName              = $Exe
+    $psi.Arguments             = $argStr
+    $psi.UseShellExecute       = $false
+    $psi.CreateNoWindow        = $true
+    $psi.RedirectStandardOutput= $true
+    $psi.RedirectStandardError = $true
+    $psi.WorkingDirectory      = $script:ProjectRoot
+    try {
+        $psi.StandardOutputEncoding = [System.Text.Encoding]::UTF8
+        $psi.StandardErrorEncoding  = [System.Text.Encoding]::UTF8
+    } catch {}
+
+    $p = New-Object System.Diagnostics.Process
+    $p.StartInfo = $psi
+
+    $handler = {
+        param($s, $e)
+        if ($null -ne $e -and $null -ne $e.Data) {
+            try { Add-Content -Path $script:LogFile -Value $e.Data -Encoding UTF8 -ErrorAction SilentlyContinue } catch {}
+        }
+    }
+    $p.add_OutputDataReceived($handler)
+    $p.add_ErrorDataReceived($handler)
+
+    try {
+        [void]$p.Start()
+        $p.BeginOutputReadLine()
+        $p.BeginErrorReadLine()
+    } catch {
+        Write-Log "进程启动失败: $($_.Exception.Message)" 'ERR'
+        return -1
+    }
+
+    if ($Background) { return $p }
+
+    while (-not $p.HasExited) {
+        [System.Windows.Forms.Application]::DoEvents()
+        Start-Sleep -Milliseconds 40
+    }
+    return $p.ExitCode
+}
+
+# 端口释放
 function Clear-Port {
     param([int]$Port)
-    $killed = @()
+    $count = 0
     try {
         $conns = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
-    } catch { $conns = $null }
-
-    if ($null -ne $conns -and $conns.Count -gt 0) {
         foreach ($c in $conns) {
-            $procId = $c.OwningProcess
-            if ($procId -eq 0 -or $procId -eq $PID) { continue }
-            try {
-                $procInfo = Get-Process -Id $procId -ErrorAction Stop
-                Log-Warn ("端口 {0} 被占用 → PID={1} · {2}，正在终止" -f $Port, $procId, $procInfo.ProcessName)
-                Stop-Process -Id $procId -Force -ErrorAction Stop
-                $killed += $procId
-                Start-Sleep -Milliseconds 400
-            } catch {
-                Log-Warn ("无法结束 PID {0}: {1}" -f $procId, $_.Exception.Message)
+            $procPid = $c.OwningProcess
+            if ($procPid -and $procPid -gt 0) {
+                try {
+                    Stop-Process -Id $procPid -Force -ErrorAction Stop
+                    Write-Log "结束进程 PID=$procPid" 'PORT'
+                    $count++
+                } catch {
+                    Write-Log "结束 PID=$procPid 失败: $($_.Exception.Message)" 'WARN'
+                }
             }
         }
-        return $killed
-    }
-
-    # 回退到 netstat（某些低权限/特殊网络下 Get-NetTCPConnection 可能失败）
-    $lines = & netstat -ano -p tcp 2>$null | Select-String -Pattern (":{0}\b" -f $Port) | Select-String 'LISTENING'
-    foreach ($ln in $lines) {
-        $tokens = -split $ln.Line
-        $pidFromLine = $tokens[-1]
-        if ($pidFromLine -match '^\d+$') {
-            Log-Warn ("端口 {0} 占用（netstat） → PID={1}，正在终止" -f $Port, $pidFromLine)
-            try {
-                Stop-Process -Id ([int]$pidFromLine) -Force -ErrorAction Stop
-                $killed += ([int]$pidFromLine)
-                Start-Sleep -Milliseconds 400
-            } catch {
-                Log-Warn ("taskkill 失败: {0}" -f $_.Exception.Message)
+    } catch {
+        # 回退到 netstat
+        try {
+            $lines = & netstat -ano -p tcp 2>$null | Select-String -Pattern (":{0}\b" -f $Port) | Select-String 'LISTENING'
+            foreach ($ln in $lines) {
+                $tokens = -split $ln.Line
+                $pidFromLine = $tokens[-1]
+                if ($pidFromLine -match '^\d+$') {
+                    try {
+                        Stop-Process -Id ([int]$pidFromLine) -Force -ErrorAction Stop
+                        Write-Log "结束进程 PID=$pidFromLine (netstat)" 'PORT'
+                        $count++
+                    } catch {}
+                }
             }
-        }
+        } catch {}
     }
-    return $killed
-}
-
-$killedPids = Clear-Port -Port $VitePort
-if ($killedPids.Count -gt 0) {
-    Log-Ok ("端口 {0} 已释放（结束 {1} 个进程）" -f $VitePort, $killedPids.Count)
-} else {
-    Log-Ok ("端口 {0} 空闲" -f $VitePort)
+    return $count
 }
 
 # =====================================================================
-# 步骤 6/6 · 启动 Vite Dev Server
+# 启动 / 停止
 # =====================================================================
-Log-Step '步骤 6/6 · 启动 Vite Dev Server'
-$url = ("http://localhost:{0}/" -f $VitePort)
+function Start-Launcher {
+    if ($script:IsRunning) { return }
+    $script:IsRunning   = $true
+    $btnStart.Enabled   = $false
+    $btnStop.Enabled    = $true
+    $urlLabel.Visible   = $false
 
-Write-Host ''
-Write-Host ('  🚀 本地访问：{0}' -f $url)                    -ForegroundColor Green
-Write-Host  '  🌐 局域网访问：http://<本机 IPv4>:5174/'        -ForegroundColor DarkGreen
-Write-Host  '  🛑 停止服务：Ctrl + C（或直接关闭窗口）'        -ForegroundColor DarkGray
-Write-Host ''
+    foreach ($k in @('node','pkg','reg','deps','port','vite')) { Set-Step $k 'pending' }
+    Set-Status '启动中...' $ColWarn
 
-# 后台延时 3 秒后打开浏览器（失败静默）
-Start-Job -Name 'auto-open-browser' -ScriptBlock {
-    param($u)
-    Start-Sleep -Seconds 3
-    try { Start-Process $u } catch {}
-} -ArgumentList $url | Out-Null
+    # ---- Step 1: Node ----
+    Set-Step 'node' 'running'
+    Write-Log '========== 步骤 1/6 · 检测 Node.js / npm =========='
+    $nodeVer = $null; $npmVer = $null
+    try { $nodeVer = (& node --version) 2>$null } catch {}
+    try { $npmVer  = (& npm  --version) 2>$null } catch {}
+    if (-not $nodeVer -or -not $npmVer) {
+        Set-Step 'node' 'fail' '未安装'
+        Write-Log '[X] 未检测到 Node.js / npm。请安装 Node 18+：https://nodejs.org/' 'ERR'
+        Set-Status '启动失败：缺少 Node.js' $ColErr
+        $btnStart.Enabled = $true; $btnStop.Enabled = $false
+        $script:IsRunning = $false
+        return
+    }
+    Set-Step 'node' 'ok' $nodeVer
+    Write-Log "Node $nodeVer · npm $npmVer"
 
-# 前台阻塞运行 Vite（直接透传信号，Ctrl+C 能正常退出）
-$viteArgs = @('vite', '--host', '--port', "$VitePort")
-Log-Step ('npx {0}' -f ($viteArgs -join ' '))
-Write-Host ('  ─── vite 流式日志开始 ───') -ForegroundColor DarkGray
+    # ---- Step 2: package.json ----
+    Set-Step 'pkg' 'running'
+    Write-Log '========== 步骤 2/6 · 校验项目文件 =========='
+    if (-not (Test-Path 'package.json')) {
+        Set-Step 'pkg' 'fail' '缺失'
+        Write-Log "[X] 当前目录无 package.json: $($script:ProjectRoot)" 'ERR'
+        Set-Status '启动失败：缺少 package.json' $ColErr
+        $btnStart.Enabled = $true; $btnStop.Enabled = $false
+        $script:IsRunning = $false
+        return
+    }
+    Set-Step 'pkg' 'ok'
+    Write-Log 'package.json 有效'
 
-& npx @viteArgs
-$viteExit = $LASTEXITCODE
+    # ---- Step 3: registry ----
+    Set-Step 'reg' 'running'
+    Write-Log '========== 步骤 3/6 · 配置 npm 镜像 =========='
+    [void](Invoke-Exe -Exe 'npm.cmd' -ArgList @('config','set','registry',$script:Registry))
+    Set-Step 'reg' 'ok' 'npmmirror'
 
-Write-Host ''
-Write-Host ('  ─── vite 进程结束（exit={0}） ───' -f $viteExit) -ForegroundColor DarkGray
+    # ---- Step 4: deps ----
+    Set-Step 'deps' 'running'
+    Write-Log '========== 步骤 4/6 · 依赖完整性检查 =========='
+    $viteOk  = Test-Path (Join-Path 'node_modules' 'vite\package.json')
+    $reactOk = Test-Path (Join-Path 'node_modules' 'react\package.json')
+    if (-not $viteOk -or -not $reactOk) {
+        Write-Log 'node_modules 不完整，执行 npm install...' 'WARN'
+        Set-Step 'deps' 'running' '安装中（首次较慢）'
+        $installArgs = @(
+            'install',
+            '--registry', $script:Registry,
+            '--fetch-timeout=600000',
+            '--fetch-retries=5',
+            '--fetch-retry-maxtimeout=120000',
+            '--loglevel=info',
+            '--no-audit',
+            '--no-fund'
+        )
+        $code = Invoke-Exe -Exe 'npm.cmd' -ArgList $installArgs
+        if ($code -ne 0) {
+            Write-Log "npm install 失败 (code=$code)，深度清理后重试..." 'WARN'
+            Set-Step 'deps' 'running' '深度修复中'
+            try {
+                if (Test-Path 'node_modules') { Remove-Item 'node_modules' -Recurse -Force -ErrorAction SilentlyContinue }
+                if (Test-Path 'package-lock.json') { Remove-Item 'package-lock.json' -Force -ErrorAction SilentlyContinue }
+            } catch {}
+            [void](Invoke-Exe -Exe 'npm.cmd' -ArgList @('cache','clean','--force'))
+            $code = Invoke-Exe -Exe 'npm.cmd' -ArgList $installArgs
+        }
+        $viteOk = Test-Path (Join-Path 'node_modules' 'vite\package.json')
+        if ($code -ne 0 -or -not $viteOk) {
+            Set-Step 'deps' 'fail'
+            Write-Log '[X] 依赖安装失败。检查网络/磁盘/防火墙' 'ERR'
+            Set-Status '启动失败：依赖安装失败' $ColErr
+            $btnStart.Enabled = $true; $btnStop.Enabled = $false
+            $script:IsRunning = $false
+            return
+        }
+        Set-Step 'deps' 'ok' '已安装'
+    } else {
+        Set-Step 'deps' 'ok' '已就绪'
+        Write-Log 'node_modules 完整，跳过安装'
+    }
 
-# 清理后台 job
-Get-Job -Name 'auto-open-browser' -ErrorAction SilentlyContinue | Remove-Job -Force -ErrorAction SilentlyContinue
+    # ---- Step 5: port ----
+    Set-Step 'port' 'running'
+    Write-Log "========== 步骤 5/6 · 释放端口 $($script:VitePort) =========="
+    $killed = Clear-Port -Port $script:VitePort
+    if ($killed -gt 0) {
+        Set-Step 'port' 'ok' "释放 $killed 个进程"
+    } else {
+        Set-Step 'port' 'ok' '空闲'
+    }
 
-# Vite 正常退出（Ctrl+C）返回 0 或 130 等都视为成功
-if ($viteExit -ne 0 -and $viteExit -ne 130 -and $null -ne $viteExit) {
-    Log-Err ("Vite 异常退出（code={0}）" -f $viteExit)
-    exit $viteExit
+    # ---- Step 6: Vite ----
+    Set-Step 'vite' 'running'
+    Write-Log "========== 步骤 6/6 · 启动 Vite =========="
+
+    # 优先用 node 直接启动 vite.js 以便干净 kill
+    $viteJs = Join-Path $script:ProjectRoot 'node_modules\vite\bin\vite.js'
+    if (Test-Path $viteJs) {
+        $script:ViteProc = Invoke-Exe -Exe 'node' `
+            -ArgList @($viteJs, '--host', '--port', "$($script:VitePort)") `
+            -Background
+    } else {
+        # 兜底用 npx
+        $script:ViteProc = Invoke-Exe -Exe 'npx.cmd' `
+            -ArgList @('vite', '--host', '--port', "$($script:VitePort)") `
+            -Background
+    }
+
+    if ($script:ViteProc -is [System.Diagnostics.Process]) {
+        Set-Step 'vite' 'ok' "PID=$($script:ViteProc.Id)"
+        Set-Status '✓ Vite 服务已运行' $ColAccent
+        $urlLabel.Visible = $true
+        # 后台延时打开浏览器
+        Start-Job -ScriptBlock {
+            param($u) Start-Sleep -Seconds 3
+            try { Start-Process $u } catch {}
+        } -ArgumentList $script:Url | Out-Null
+    } else {
+        Set-Step 'vite' 'fail'
+        Set-Status 'Vite 启动失败' $ColErr
+        Write-Log '[X] Vite 进程未能启动' 'ERR'
+        $btnStart.Enabled = $true; $btnStop.Enabled = $false
+        $script:IsRunning = $false
+    }
 }
-Log-Ok '已正常关闭。再见 👋'
+
+function Stop-Launcher {
+    Write-Log '正在停止 Vite 进程...'
+    if ($script:ViteProc -is [System.Diagnostics.Process] -and -not $script:ViteProc.HasExited) {
+        try { $script:ViteProc.Kill($true) } catch {
+            try { $script:ViteProc.Kill() } catch {}
+        }
+    }
+    # 兜底再次释放端口（杀掉残余 node 进程）
+    [void](Clear-Port -Port $script:VitePort)
+
+    $script:ViteProc  = $null
+    $script:IsRunning = $false
+    Set-Step 'vite' 'pending' '已停止'
+    Set-Status '已停止。可重新点击 [启动]' $ColTextDim
+    $urlLabel.Visible = $false
+    $btnStart.Enabled = $true
+    $btnStop.Enabled  = $false
+    Write-Log 'Vite 已停止'
+}
+
+# =====================================================================
+# 日志 Timer：轮询日志文件，追加到 RichTextBox
+# =====================================================================
+$logTimer = New-Object System.Windows.Forms.Timer
+$logTimer.Interval = 250
+$logTimer.Add_Tick({
+    try {
+        if (-not (Test-Path $script:LogFile)) { return }
+        $fi = Get-Item $script:LogFile
+        if ($fi.Length -le $script:LogTail) { return }
+        $fs = [System.IO.File]::Open($script:LogFile, 'Open', 'Read', 'ReadWrite')
+        try {
+            [void]$fs.Seek($script:LogTail, 'Begin')
+            $sr = New-Object System.IO.StreamReader($fs, [System.Text.Encoding]::UTF8)
+            $new = $sr.ReadToEnd()
+            $sr.Close()
+        } finally {
+            $fs.Close()
+        }
+        $script:LogTail = $fi.Length
+        if ($new) {
+            $logBox.AppendText($new)
+            $logBox.SelectionStart = $logBox.Text.Length
+            $logBox.ScrollToCaret()
+        }
+    } catch {}
+})
+$logTimer.Start()
+
+# =====================================================================
+# 按钮事件
+# =====================================================================
+$btnStart.Add_Click({  Start-Launcher })
+$btnStop.Add_Click({   Stop-Launcher  })
+$btnOpen.Add_Click({   try { Start-Process $script:Url } catch {} })
+$btnFolder.Add_Click({ try { Start-Process 'explorer.exe' -ArgumentList $script:ProjectRoot } catch {} })
+$btnClear.Add_Click({
+    $logBox.Clear()
+    try {
+        $script:LogTail = (Get-Item $script:LogFile).Length
+    } catch { $script:LogTail = 0 }
+})
+$btnExit.Add_Click({ $form.Close() })
+
+$form.Add_FormClosing({
+    try { Stop-Launcher } catch {}
+    try { $logTimer.Stop() } catch {}
+})
+
+$form.Add_Shown({
+    Write-Log '启动器 GUI 已就绪。'
+    Write-Log "项目目录: $($script:ProjectRoot)"
+    Write-Log '点击左下 [▶ 启动] 按钮以初始化 Vite 开发服务器。'
+})
+
+# =====================================================================
+# 启动消息循环
+# =====================================================================
+[System.Windows.Forms.Application]::Run($form)
 exit 0
