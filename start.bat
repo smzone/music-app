@@ -1,37 +1,24 @@
 @echo off
-title MySpace Music App - Dev Server
-color 0A
-
-echo.
-echo  ========================================
-echo    MySpace Music App - Dev Server
-echo  ========================================
-echo.
-
+REM =====================================================================
+REM  MySpace Music App - One-Click Launcher (Windows / PowerShell 驱动)
+REM  仅作为 PS1 主脚本的入口，所有复杂逻辑都在 start.ps1 中
+REM =====================================================================
+chcp 65001 >nul 2>&1
+title MySpace Music App - One-Click Launcher
 cd /d "%~dp0"
 
-if not exist "node_modules" (
-    echo [!] node_modules not found, installing...
-    echo.
-    call npm install --registry https://registry.npmmirror.com -v --no-input --timeout 60 --retries 5
-    if errorlevel 1 (
-        echo [x] Install failed, check network
-        exit /b 1
-    )
-    echo.
-    echo [ok] Dependencies installed
-    echo.
+REM 优先 pwsh（PowerShell 7+），回退到 Windows 自带 powershell.exe
+where pwsh >nul 2>&1
+if %errorlevel%==0 (
+    pwsh -NoProfile -ExecutionPolicy Bypass -File "%~dp0start.ps1" %*
+) else (
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0start.ps1" %*
 )
 
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":5174 " ^| findstr "LISTENING"') do (
-    echo [!] Port 5174 in use (PID: %%a), killing...
-    taskkill /PID %%a /F >nul 2>&1
-    timeout /t 1 /nobreak >nul
+REM 仅在 PowerShell 脚本以非 0 退出时延时，让用户看清错误（不交互）
+if errorlevel 1 (
+    echo.
+    echo [!] 启动流程以错误码 %errorlevel% 结束。窗口将在 20 秒后关闭。
+    timeout /t 20 /nobreak >nul 2>&1
 )
-
-echo [*] Starting dev server on http://localhost:5174/
-echo [*] Press Ctrl+C to stop
-echo.
-
-start "" http://localhost:5174/
-call npx vite --host --port 5174
+exit /b %errorlevel%
