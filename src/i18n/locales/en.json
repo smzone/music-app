@@ -282,7 +282,16 @@
     "desc": "The app encountered an unexpected error. Please try refreshing the page.",
     "desc2": "If the problem persists, please contact the administrator.",
     "reload": "Refresh Page",
-    "goHome": "Go Home"
+    "goHome": "Go Home",
+    "copy": "Copy Error",
+    "copied": "Copied",
+    "detailToggle": "Show Error Detail",
+    "stack": "Call Stack",
+    "componentStack": "Component Stack",
+    "reset": "Reset App",
+    "resetTip": "Clear local cache (theme & language preserved)",
+    "resetConfirm": "Clear local cache? Login, cart and other state will be reset (theme & language are preserved).",
+    "logsHint": "Last 20 errors are saved locally. Copy and send to the developer for debugging."
   },
   "player": {
     "nowPlaying": "NOW PLAYING",

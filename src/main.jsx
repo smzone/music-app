@@ -6,6 +6,24 @@ import './i18n';
 import useAuthStore from './store/useAuthStore';
 import useSongStore from './store/useSongStore';
 import useNotificationStore from './store/useNotificationStore';
+import { logError, isChunkLoadError } from './lib/errorLogger';
+
+// =====================================================================
+// 全局错误兜底 — 在 React 渲染层之外的错误（异步、Promise、加载失败）
+// 也会被记录到 errorLogger，方便用户复制问题给开发者
+// =====================================================================
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (e) => {
+    // chunk-load 错误由 ErrorBoundary 处理（自动 reload），此处仅记录
+    logError({ source: 'window', error: e?.error || e?.message || 'window error' });
+    if (isChunkLoadError(e?.error)) {
+      // 静默：等待 ErrorBoundary 自愈或下次刷新
+    }
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    logError({ source: 'promise', error: e?.reason || 'unhandled rejection' });
+  });
+}
 
 // 初始化 Supabase 认证监听（如已配置）
 useAuthStore.getState().initAuth();
