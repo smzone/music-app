@@ -21,6 +21,10 @@ try {
     Add-Type -AssemblyName System.Drawing       -ErrorAction Stop
     [System.Windows.Forms.Application]::EnableVisualStyles()
     [System.Windows.Forms.Application]::SetCompatibleTextRenderingDefault($false)
+    # 重要：强制将 UI 线程异常交由 ThreadException 处理，避免静默崩溃
+    [System.Windows.Forms.Application]::SetUnhandledExceptionMode(
+        [System.Windows.Forms.UnhandledExceptionMode]::CatchException
+    )
 } catch {
     Write-Host "[X] WinForms 加载失败: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "    请确认系统已安装 .NET Framework 4.6+"          -ForegroundColor Yellow
@@ -113,7 +117,7 @@ $stepsBox.Size      = New-Object System.Drawing.Size(310, 380)
 $stepsBox.Anchor    = 'Top,Bottom,Left'
 $form.Controls.Add($stepsBox)
 
-$stepDefs = @(
+$script:StepDefs = @(
     @{ key='node'; text='Node.js / npm 环境' }
     @{ key='pkg';  text='项目文件校验'      }
     @{ key='reg';  text='npm 镜像配置'      }
@@ -123,7 +127,7 @@ $stepDefs = @(
 )
 $script:StepLabels = @{}
 $yy = 30
-foreach ($s in $stepDefs) {
+foreach ($s in $script:StepDefs) {
     $l = New-Object System.Windows.Forms.Label
     $l.Text      = "  ○   $($s.text)"
     $l.Font      = $FontStep
@@ -136,25 +140,25 @@ foreach ($s in $stepDefs) {
 }
 
 # 状态栏
-$statusLabel = New-Object System.Windows.Forms.Label
-$statusLabel.Text      = '就绪。点击 [启动] 开始'
-$statusLabel.Font      = $FontUIBold
-$statusLabel.ForeColor = $ColTextDim
-$statusLabel.Location  = New-Object System.Drawing.Point(14, 240)
-$statusLabel.Size      = New-Object System.Drawing.Size(282, 24)
-$stepsBox.Controls.Add($statusLabel)
+$script:statusLabel = New-Object System.Windows.Forms.Label
+$script:statusLabel.Text      = '就绪，正在准备自动启动...'
+$script:statusLabel.Font      = $FontUIBold
+$script:statusLabel.ForeColor = $ColTextDim
+$script:statusLabel.Location  = New-Object System.Drawing.Point(14, 240)
+$script:statusLabel.Size      = New-Object System.Drawing.Size(282, 24)
+$stepsBox.Controls.Add($script:statusLabel)
 
 # URL 链接
-$urlLabel = New-Object System.Windows.Forms.LinkLabel
-$urlLabel.Text          = $script:Url
-$urlLabel.Font          = New-Object System.Drawing.Font('Consolas', 11, [System.Drawing.FontStyle]::Bold)
-$urlLabel.LinkColor     = $ColAccent
-$urlLabel.ActiveLinkColor = $ColAccentHv
-$urlLabel.Location      = New-Object System.Drawing.Point(14, 270)
-$urlLabel.Size          = New-Object System.Drawing.Size(282, 24)
-$urlLabel.Visible       = $false
-$urlLabel.Add_LinkClicked({ try { Start-Process $script:Url } catch {} })
-$stepsBox.Controls.Add($urlLabel)
+$script:urlLabel = New-Object System.Windows.Forms.LinkLabel
+$script:urlLabel.Text          = $script:Url
+$script:urlLabel.Font          = New-Object System.Drawing.Font('Consolas', 11, [System.Drawing.FontStyle]::Bold)
+$script:urlLabel.LinkColor     = $ColAccent
+$script:urlLabel.ActiveLinkColor = $ColAccentHv
+$script:urlLabel.Location      = New-Object System.Drawing.Point(14, 270)
+$script:urlLabel.Size          = New-Object System.Drawing.Size(282, 24)
+$script:urlLabel.Visible       = $false
+$script:urlLabel.Add_LinkClicked({ try { Start-Process $script:Url } catch {} })
+$stepsBox.Controls.Add($script:urlLabel)
 
 $tipLabel = New-Object System.Windows.Forms.Label
 $tipLabel.Text      = "提示：首次启动会自动安装依赖`r`n失败可点击 [重试]，会自动深度清理重装"
@@ -165,19 +169,19 @@ $tipLabel.Size      = New-Object System.Drawing.Size(282, 50)
 $stepsBox.Controls.Add($tipLabel)
 
 # ---- 日志面板（右） ----
-$logBox = New-Object System.Windows.Forms.RichTextBox
-$logBox.Location    = New-Object System.Drawing.Point(338, 86)
-$logBox.Size        = New-Object System.Drawing.Size(466, 380)
-$logBox.BackColor   = $ColLogBg
-$logBox.ForeColor   = [System.Drawing.Color]::FromArgb(220,220,220)
-$logBox.Font        = $FontMono
-$logBox.ReadOnly    = $true
-$logBox.DetectUrls  = $false
-$logBox.BorderStyle = 'FixedSingle'
-$logBox.WordWrap    = $false
-$logBox.ScrollBars  = 'Both'
-$logBox.Anchor      = 'Top,Bottom,Left,Right'
-$form.Controls.Add($logBox)
+$script:logBox = New-Object System.Windows.Forms.RichTextBox
+$script:logBox.Location    = New-Object System.Drawing.Point(338, 86)
+$script:logBox.Size        = New-Object System.Drawing.Size(466, 380)
+$script:logBox.BackColor   = $ColLogBg
+$script:logBox.ForeColor   = [System.Drawing.Color]::FromArgb(220,220,220)
+$script:logBox.Font        = $FontMono
+$script:logBox.ReadOnly    = $true
+$script:logBox.DetectUrls  = $false
+$script:logBox.BorderStyle = 'FixedSingle'
+$script:logBox.WordWrap    = $false
+$script:logBox.ScrollBars  = 'Both'
+$script:logBox.Anchor      = 'Top,Bottom,Left,Right'
+$form.Controls.Add($script:logBox)
 
 # ---- 按钮栏 ----
 $btnY = 484
@@ -202,22 +206,22 @@ function New-FlatButton {
     return $b
 }
 
-$btnStart   = New-FlatButton '▶ 启动'      16  120 $ColAccent  ([System.Drawing.Color]::Black) $true
-$btnStop    = New-FlatButton '■ 停止'      144 100 $ColBtnGray ([System.Drawing.Color]::White) $false
-$btnOpen    = New-FlatButton '🌐 浏览器'    254 110 $ColBtnGray ([System.Drawing.Color]::White) $false
-$btnFolder  = New-FlatButton '📂 项目目录'  374 110 $ColBtnGray ([System.Drawing.Color]::White) $false
-$btnClear   = New-FlatButton '🗑 清空日志'  494 110 $ColBtnGray ([System.Drawing.Color]::White) $false
-$btnExit    = New-FlatButton '✕ 退出'      688 116 $ColBtnRed  ([System.Drawing.Color]::White) $true
+$script:btnStart   = New-FlatButton '> 启动'      16  120 $ColAccent  ([System.Drawing.Color]::Black) $true
+$script:btnStop    = New-FlatButton '■ 停止'      144 100 $ColBtnGray ([System.Drawing.Color]::White) $false
+$script:btnOpen    = New-FlatButton '🌐 浏览器'    254 110 $ColBtnGray ([System.Drawing.Color]::White) $false
+$script:btnFolder  = New-FlatButton '📂 项目目录'  374 110 $ColBtnGray ([System.Drawing.Color]::White) $false
+$script:btnClear   = New-FlatButton '🗑 清空日志'  494 110 $ColBtnGray ([System.Drawing.Color]::White) $false
+$script:btnExit    = New-FlatButton '✕ 退出'      688 116 $ColBtnRed  ([System.Drawing.Color]::White) $true
 
-$btnStop.Enabled = $false
-$btnStart.Anchor  = 'Bottom,Left'
-$btnStop.Anchor   = 'Bottom,Left'
-$btnOpen.Anchor   = 'Bottom,Left'
-$btnFolder.Anchor = 'Bottom,Left'
-$btnClear.Anchor  = 'Bottom,Left'
-$btnExit.Anchor   = 'Bottom,Right'
+$script:btnStop.Enabled = $false
+$script:btnStart.Anchor  = 'Bottom,Left'
+$script:btnStop.Anchor   = 'Bottom,Left'
+$script:btnOpen.Anchor   = 'Bottom,Left'
+$script:btnFolder.Anchor = 'Bottom,Left'
+$script:btnClear.Anchor  = 'Bottom,Left'
+$script:btnExit.Anchor   = 'Bottom,Right'
 
-$form.Controls.AddRange(@($btnStart,$btnStop,$btnOpen,$btnFolder,$btnClear,$btnExit))
+$form.Controls.AddRange(@($script:btnStart,$script:btnStop,$script:btnOpen,$script:btnFolder,$script:btnClear,$script:btnExit))
 
 # =====================================================================
 # 辅助函数
@@ -245,17 +249,19 @@ function Set-Step {
         'fail'    { $ColErr }
         default   { [System.Drawing.Color]::White }
     }
-    $def  = $stepDefs | Where-Object { $_.key -eq $Key } | Select-Object -First 1
+    $def  = $script:StepDefs | Where-Object { $_.key -eq $Key } | Select-Object -First 1
     $text = "$prefix$($def.text)"
     if ($Detail) { $text += "  ·  $Detail" }
     $script:StepLabels[$Key].Text      = $text
     $script:StepLabels[$Key].ForeColor = $color
+    $script:StepLabels[$Key].Refresh()
 }
 
 function Set-Status {
     param([string]$Text, [System.Drawing.Color]$Color = $ColTextDim)
-    $statusLabel.Text      = $Text
-    $statusLabel.ForeColor = $Color
+    $script:statusLabel.Text      = $Text
+    $script:statusLabel.ForeColor = $Color
+    $script:statusLabel.Refresh()
 }
 
 # 子进程执行器（异步事件 + DoEvents 防 UI 卡死）
@@ -314,41 +320,34 @@ function Invoke-Exe {
     return $p.ExitCode
 }
 
-# 端口释放
+# 端口释放（统一走 netstat，避免 Get-NetTCPConnection 在某些环境慢/卡）
 function Clear-Port {
     param([int]$Port)
     $count = 0
+    Write-Log "扫描端口 $Port ..." 'PORT'
     try {
-        $conns = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
-        foreach ($c in $conns) {
-            $procPid = $c.OwningProcess
-            if ($procPid -and $procPid -gt 0) {
-                try {
-                    Stop-Process -Id $procPid -Force -ErrorAction Stop
-                    Write-Log "结束进程 PID=$procPid" 'PORT'
-                    $count++
-                } catch {
-                    Write-Log "结束 PID=$procPid 失败: $($_.Exception.Message)" 'WARN'
-                }
+        $raw  = & netstat -ano 2>$null
+        $pat  = ":{0}\b" -f $Port
+        $hits = $raw | Where-Object { $_ -match $pat -and $_ -match 'LISTENING' }
+        $pids = @{}
+        foreach ($ln in $hits) {
+            $tokens = -split $ln
+            $pidStr = $tokens[-1]
+            if ($pidStr -match '^\d+$') { $pids[$pidStr] = $true }
+        }
+        foreach ($pidStr in $pids.Keys) {
+            try {
+                Stop-Process -Id ([int]$pidStr) -Force -ErrorAction Stop
+                Write-Log "结束进程 PID=$pidStr" 'PORT'
+                $count++
+            } catch {
+                Write-Log "结束 PID=$pidStr 失败: $($_.Exception.Message)" 'WARN'
             }
         }
     } catch {
-        # 回退到 netstat
-        try {
-            $lines = & netstat -ano -p tcp 2>$null | Select-String -Pattern (":{0}\b" -f $Port) | Select-String 'LISTENING'
-            foreach ($ln in $lines) {
-                $tokens = -split $ln.Line
-                $pidFromLine = $tokens[-1]
-                if ($pidFromLine -match '^\d+$') {
-                    try {
-                        Stop-Process -Id ([int]$pidFromLine) -Force -ErrorAction Stop
-                        Write-Log "结束进程 PID=$pidFromLine (netstat)" 'PORT'
-                        $count++
-                    } catch {}
-                }
-            }
-        } catch {}
+        Write-Log "扫描端口异常: $($_.Exception.Message)" 'WARN'
     }
+    Write-Log "端口扫描完成，已释放 $count 个" 'PORT'
     return $count
 }
 
@@ -357,10 +356,10 @@ function Clear-Port {
 # =====================================================================
 function Start-Launcher {
     if ($script:IsRunning) { return }
-    $script:IsRunning   = $true
-    $btnStart.Enabled   = $false
-    $btnStop.Enabled    = $true
-    $urlLabel.Visible   = $false
+    $script:IsRunning          = $true
+    $script:btnStart.Enabled   = $false
+    $script:btnStop.Enabled    = $true
+    $script:urlLabel.Visible   = $false
 
     foreach ($k in @('node','pkg','reg','deps','port','vite')) { Set-Step $k 'pending' }
     Set-Status '启动中...' $ColWarn
@@ -375,7 +374,7 @@ function Start-Launcher {
         Set-Step 'node' 'fail' '未安装'
         Write-Log '[X] 未检测到 Node.js / npm。请安装 Node 18+：https://nodejs.org/' 'ERR'
         Set-Status '启动失败：缺少 Node.js' $ColErr
-        $btnStart.Enabled = $true; $btnStop.Enabled = $false
+        $script:btnStart.Enabled = $true; $script:btnStop.Enabled = $false
         $script:IsRunning = $false
         return
     }
@@ -389,7 +388,7 @@ function Start-Launcher {
         Set-Step 'pkg' 'fail' '缺失'
         Write-Log "[X] 当前目录无 package.json: $($script:ProjectRoot)" 'ERR'
         Set-Status '启动失败：缺少 package.json' $ColErr
-        $btnStart.Enabled = $true; $btnStop.Enabled = $false
+        $script:btnStart.Enabled = $true; $script:btnStop.Enabled = $false
         $script:IsRunning = $false
         return
     }
@@ -436,7 +435,7 @@ function Start-Launcher {
             Set-Step 'deps' 'fail'
             Write-Log '[X] 依赖安装失败。检查网络/磁盘/防火墙' 'ERR'
             Set-Status '启动失败：依赖安装失败' $ColErr
-            $btnStart.Enabled = $true; $btnStop.Enabled = $false
+            $script:btnStart.Enabled = $true; $script:btnStop.Enabled = $false
             $script:IsRunning = $false
             return
         }
@@ -476,17 +475,21 @@ function Start-Launcher {
     if ($script:ViteProc -is [System.Diagnostics.Process]) {
         Set-Step 'vite' 'ok' "PID=$($script:ViteProc.Id)"
         Set-Status '✓ Vite 服务已运行' $ColAccent
-        $urlLabel.Visible = $true
-        # 后台延时打开浏览器
-        Start-Job -ScriptBlock {
-            param($u) Start-Sleep -Seconds 3
-            try { Start-Process $u } catch {}
-        } -ArgumentList $script:Url | Out-Null
+        $script:urlLabel.Visible = $true
+        # 后台延时打开浏览器（用 Timer，避免 Start-Job 在 STA 下不稳定）
+        $browserTimer = New-Object System.Windows.Forms.Timer
+        $browserTimer.Interval = 3000
+        $browserTimer.add_Tick({
+            param($s,$e)
+            try { $s.Stop(); $s.Dispose() } catch {}
+            try { Start-Process $script:Url } catch {}
+        })
+        $browserTimer.Start()
     } else {
         Set-Step 'vite' 'fail'
         Set-Status 'Vite 启动失败' $ColErr
         Write-Log '[X] Vite 进程未能启动' 'ERR'
-        $btnStart.Enabled = $true; $btnStop.Enabled = $false
+        $script:btnStart.Enabled = $true; $script:btnStop.Enabled = $false
         $script:IsRunning = $false
     }
 }
@@ -505,18 +508,18 @@ function Stop-Launcher {
     $script:IsRunning = $false
     Set-Step 'vite' 'pending' '已停止'
     Set-Status '已停止。可重新点击 [启动]' $ColTextDim
-    $urlLabel.Visible = $false
-    $btnStart.Enabled = $true
-    $btnStop.Enabled  = $false
+    $script:urlLabel.Visible = $false
+    $script:btnStart.Enabled = $true
+    $script:btnStop.Enabled  = $false
     Write-Log 'Vite 已停止'
 }
 
 # =====================================================================
 # 日志 Timer：轮询日志文件，追加到 RichTextBox
 # =====================================================================
-$logTimer = New-Object System.Windows.Forms.Timer
-$logTimer.Interval = 250
-$logTimer.Add_Tick({
+$script:logTimer = New-Object System.Windows.Forms.Timer
+$script:logTimer.Interval = 250
+$script:logTimer.Add_Tick({
     try {
         if (-not (Test-Path $script:LogFile)) { return }
         $fi = Get-Item $script:LogFile
@@ -531,43 +534,94 @@ $logTimer.Add_Tick({
             $fs.Close()
         }
         $script:LogTail = $fi.Length
-        if ($new) {
-            $logBox.AppendText($new)
-            $logBox.SelectionStart = $logBox.Text.Length
-            $logBox.ScrollToCaret()
+        if ($new -and $script:logBox) {
+            $script:logBox.AppendText($new)
+            $script:logBox.SelectionStart = $script:logBox.Text.Length
+            $script:logBox.ScrollToCaret()
         }
     } catch {}
 })
-$logTimer.Start()
+$script:logTimer.Start()
 
 # =====================================================================
 # 按钮事件
 # =====================================================================
-$btnStart.Add_Click({  Start-Launcher })
-$btnStop.Add_Click({   Stop-Launcher  })
-$btnOpen.Add_Click({   try { Start-Process $script:Url } catch {} })
-$btnFolder.Add_Click({ try { Start-Process 'explorer.exe' -ArgumentList $script:ProjectRoot } catch {} })
-$btnClear.Add_Click({
-    $logBox.Clear()
+$script:btnStart.Add_Click({
+    try { Start-Launcher } catch {
+        Write-Log "[CRASH] $($_.Exception.Message)" 'ERR'
+        Write-Log $_.ScriptStackTrace 'ERR'
+    }
+})
+$script:btnStop.Add_Click({
+    try { Stop-Launcher } catch {
+        Write-Log "[CRASH-STOP] $($_.Exception.Message)" 'ERR'
+    }
+})
+$script:btnOpen.Add_Click({   try { Start-Process $script:Url } catch {} })
+$script:btnFolder.Add_Click({ try { Start-Process 'explorer.exe' -ArgumentList $script:ProjectRoot } catch {} })
+$script:btnClear.Add_Click({
+    try { $script:logBox.Clear() } catch {}
     try {
         $script:LogTail = (Get-Item $script:LogFile).Length
     } catch { $script:LogTail = 0 }
 })
-$btnExit.Add_Click({ $form.Close() })
+$script:btnExit.Add_Click({ $script:form.Close() })
 
+$script:form = $form
 $form.Add_FormClosing({
     try { Stop-Launcher } catch {}
-    try { $logTimer.Stop() } catch {}
+    try { $script:logTimer.Stop() } catch {}
 })
 
 $form.Add_Shown({
     Write-Log '启动器 GUI 已就绪。'
     Write-Log "项目目录: $($script:ProjectRoot)"
-    Write-Log '点击左下 [▶ 启动] 按钮以初始化 Vite 开发服务器。'
+    Write-Log "PowerShell 版本: $($PSVersionTable.PSVersion)"
+    Write-Log '即将自动开始启动流程（也可点击 [启动] 重新执行）...'
+    # 用 Timer 延时调度，避开 Shown 回调内长时间阻塞
+    $script:autoStartTimer = New-Object System.Windows.Forms.Timer
+    $script:autoStartTimer.Interval = 600
+    $script:autoStartTimer.Add_Tick({
+        param($s,$e)
+        try { $s.Stop(); $s.Dispose() } catch {}
+        try { Start-Launcher } catch {
+            Write-Log "[CRASH] Start-Launcher 异常: $($_.Exception.Message)" 'ERR'
+            Write-Log $_.ScriptStackTrace 'ERR'
+        }
+    })
+    $script:autoStartTimer.Start()
+})
+
+# 全局未处理异常兜底，写入日志
+try {
+    [System.Windows.Forms.Application]::add_ThreadException({
+        param($s, $e)
+        try {
+            Add-Content -Path $script:LogFile -Value "[FATAL][UI] $($e.Exception.GetType().FullName): $($e.Exception.Message)" -Encoding UTF8
+            Add-Content -Path $script:LogFile -Value $e.Exception.StackTrace -Encoding UTF8
+        } catch {}
+    })
+} catch {}
+
+[AppDomain]::CurrentDomain.add_UnhandledException({
+    param($s, $e)
+    try {
+        $ex = $e.ExceptionObject
+        Add-Content -Path $script:LogFile -Value "[FATAL][AppDomain] $($ex.GetType().FullName): $($ex.Message)" -Encoding UTF8
+        Add-Content -Path $script:LogFile -Value $ex.StackTrace -Encoding UTF8
+    } catch {}
 })
 
 # =====================================================================
-# 启动消息循环
+# 启动消息循环（顶层 try-catch 捕获并写入日志，绝不静默崩溃）
 # =====================================================================
-[System.Windows.Forms.Application]::Run($form)
-exit 0
+try {
+    [System.Windows.Forms.Application]::Run($form)
+    exit 0
+} catch {
+    try {
+        Add-Content -Path $script:LogFile -Value "[FATAL][Run] $($_.Exception.GetType().FullName): $($_.Exception.Message)" -Encoding UTF8
+        Add-Content -Path $script:LogFile -Value $_.ScriptStackTrace -Encoding UTF8
+    } catch {}
+    exit 99
+}
